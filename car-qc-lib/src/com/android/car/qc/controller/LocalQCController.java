@@ -45,6 +45,11 @@ public class LocalQCController extends BaseQCController {
     }
 
     @Override
+    public void bind() {
+        onQCItemUpdated(mProvider.getQCItem());
+    }
+
+    @Override
     protected void updateListening() {
         boolean listen = mShouldListen && !mObservers.isEmpty();
         if (mWasListening != listen) {
