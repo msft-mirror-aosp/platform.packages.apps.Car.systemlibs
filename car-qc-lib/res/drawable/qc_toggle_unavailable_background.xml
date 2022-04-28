@@ -16,16 +16,18 @@
   -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@android:id/background"
-          android:width="@dimen/qc_toggle_size"
-          android:height="@dimen/qc_toggle_size">
+        android:width="@dimen/qc_toggle_size"
+        android:height="@dimen/qc_toggle_size"
+        android:start="@dimen/qc_toggle_background_padding"
+        android:top="@dimen/qc_toggle_background_padding">
         <shape android:shape="rectangle">
             <solid android:color="@color/qc_toggle_unavailable_background_color" />
             <stroke android:color="@color/qc_toggle_unavailable_color"
-                    android:width="@dimen/qc_toggle_unavailable_outline_width" />
+                android:width="@dimen/qc_toggle_unavailable_outline_width" />
             <corners android:radius="@dimen/qc_toggle_background_radius" />
         </shape>
     </item>
-    <item android:width="@dimen/qc_toggle_size"
-          android:height="@dimen/qc_toggle_size"
-          android:drawable="@drawable/qc_toggle_rotary_background"/>
+    <item android:width="@dimen/qc_toggle_rotary_highlight_size"
+        android:height="@dimen/qc_toggle_rotary_highlight_size"
+        android:drawable="@drawable/qc_toggle_rotary_background"/>
 </layer-list>
