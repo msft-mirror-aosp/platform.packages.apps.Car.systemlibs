@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2022 The Android Open Source Project
   ~
@@ -13,9 +14,12 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <size
-        android:height="0dp"
-        android:width="@dimen/qc_row_horizontal_margin"/>
-</shape>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true" android:state_pressed="false">
+        <shape android:shape="rectangle">
+            <stroke android:width="@dimen/qc_toggle_rotary_shadow_width"
+                android:color="@color/qc_toggle_rotary_shadow_color"/>
+            <corners android:radius="@dimen/qc_toggle_rotary_shadow_radius" />
+        </shape>
+    </item>
+</selector>
