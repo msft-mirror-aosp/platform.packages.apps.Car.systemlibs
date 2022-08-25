@@ -53,6 +53,17 @@ public class LocalQCControllerTest extends BaseQCControllerTestCase<LocalQCContr
     }
 
     @Test
+    public void onBind_updatesQCItem() {
+        Observer<QCItem> observer = mock(Observer.class);
+        LocalQCController spiedController = spy(getController());
+        spiedController.addObserver(observer);
+        Mockito.reset(mProvider);
+        spiedController.bind();
+        verify(mProvider).getQCItem();
+        verify(spiedController).onQCItemUpdated(any());
+    }
+
+    @Test
     public void updateListening_updatesProviderListening() {
         Observer<QCItem> observer = mock(Observer.class);
         getController().addObserver(observer);
