@@ -193,7 +193,7 @@ public class QCRowView extends FrameLayout {
         mStartItemsContainer = findViewById(R.id.qc_row_start_items);
         mEndItemsContainer = findViewById(R.id.qc_row_end_items);
         mSeekBarContainer = findViewById(R.id.qc_seekbar_wrapper);
-        mSeekBar = findViewById(R.id.seekbar);
+        mSeekBar = findViewById(R.id.qc_seekbar);
     }
 
     void setActionListener(QCActionListener listener) {
