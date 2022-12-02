@@ -203,7 +203,7 @@ public class QCRowViewTest {
                 .addSlider(new QCSlider.Builder().setInputAction(action).build())
                 .build();
         mView.setRow(row);
-        SeekBar seekBar = mView.findViewById(R.id.seekbar);
+        SeekBar seekBar = mView.findViewById(R.id.qc_seekbar);
         seekBar.setProgress(50);
         MotionEvent motionEvent = ExtendedMockito.mock(MotionEvent.class);
         ExtendedMockito.when(motionEvent.getAction()).thenReturn(MotionEvent.ACTION_UP);
