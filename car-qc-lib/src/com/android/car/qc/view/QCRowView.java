@@ -397,7 +397,7 @@ public class QCRowView extends FrameLayout {
             // remove current action view
             root.removeView(actionView);
         }
-        actionView = mLayoutInflater.inflate(resId, /* root= */ null);
+        actionView = mLayoutInflater.inflate(resId, root, /* attachToRoot= */ false);
         root.addView(actionView);
         return actionView;
     }
