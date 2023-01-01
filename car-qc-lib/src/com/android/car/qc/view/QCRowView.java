@@ -302,7 +302,7 @@ public class QCRowView extends FrameLayout {
         Switch switchView = actionView == null ? null : actionView.findViewById(
                 android.R.id.switch_widget);
         if (switchView == null) {
-            actionView = createActionView(root, actionView, R.layout.qc_action_switch, false);
+            actionView = createActionView(root, actionView, R.layout.qc_action_switch);
             switchView = actionView.requireViewById(android.R.id.switch_widget);
         }
         CarUiUtils.makeAllViewsEnabled(switchView, action.isEnabled());
@@ -333,7 +333,7 @@ public class QCRowView extends FrameLayout {
         DrawableStateToggleButton tmpToggleButton =
                 actionView == null ? null : actionView.findViewById(R.id.qc_toggle_button);
         if (tmpToggleButton == null) {
-            actionView = createActionView(root, actionView, R.layout.qc_action_toggle, true);
+            actionView = createActionView(root, actionView, R.layout.qc_action_toggle);
             tmpToggleButton = actionView.requireViewById(R.id.qc_toggle_button);
         }
         DrawableStateToggleButton toggleButton = tmpToggleButton; // must be effectively final
@@ -392,26 +392,13 @@ public class QCRowView extends FrameLayout {
 
     @NonNull
     private View createActionView(@NonNull ViewGroup root, @Nullable View actionView,
-            @LayoutRes int resId, boolean isToggle) {
+            @LayoutRes int resId) {
         if (actionView != null) {
             // remove current action view
             root.removeView(actionView);
         }
         actionView = mLayoutInflater.inflate(resId, /* root= */ null);
-
-        // TODO(b/263904268): Toggle view might be stretched when added with ViewGroup#addView
-        //  (View v) with default LayoutParams. So specify width and height here. Ideally, this
-        //  is not needed.
-        if (isToggle) {
-            int size = getResources().getDimensionPixelSize(R.dimen.qc_toggle_size);
-            float density = getResources().getDisplayMetrics().density;
-            int realSize = (int) (size / density);
-            root.addView(actionView, realSize, realSize);
-        } else {
-            root.addView(actionView);
-        }
-
-
+        root.addView(actionView);
         return actionView;
     }
 
