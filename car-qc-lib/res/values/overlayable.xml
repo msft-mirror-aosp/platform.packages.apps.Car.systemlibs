@@ -49,6 +49,7 @@ REGENERATE USING packages/apps/Car/tests/tools/rro/generate-overlayable.py
             <item type="dimen" name="qc_toggle_rotary_shadow_radius"/>
             <item type="dimen" name="qc_toggle_rotary_shadow_size"/>
             <item type="dimen" name="qc_toggle_rotary_shadow_width"/>
+            <item type="dimen" name="qc_toggle_background_size"/>
             <item type="dimen" name="qc_toggle_size"/>
             <item type="dimen" name="qc_toggle_unavailable_outline_width"/>
             <item type="drawable" name="qc_row_action_divider"/>
