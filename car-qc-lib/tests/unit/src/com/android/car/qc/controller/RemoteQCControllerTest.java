@@ -66,6 +66,16 @@ public class RemoteQCControllerTest extends BaseQCControllerTestCase<RemoteQCCon
     }
 
     @Test
+    public void onBind_updatesQCItem() {
+        Observer<QCItem> observer = mock(Observer.class);
+        RemoteQCController spiedController = spy(getController());
+        spiedController.addObserver(observer);
+        spiedController.bind();
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+        verify(spiedController).onQCItemUpdated(notNull());
+    }
+
+    @Test
     public void updateListening_listen_updatesQCItem() {
         Observer<QCItem> observer = mock(Observer.class);
         RemoteQCController spiedController = spy(getController());

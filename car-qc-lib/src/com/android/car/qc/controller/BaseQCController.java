@@ -85,6 +85,11 @@ public abstract class BaseQCController implements QCItemCallback {
     }
 
     /**
+     * Perform a single retrieval from the provider (without subscribing to live updates).
+     */
+    public abstract void bind();
+
+    /**
      * Subclasses must override this method to handle a listening update.
      */
     protected abstract void updateListening();

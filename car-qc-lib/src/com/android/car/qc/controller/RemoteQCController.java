@@ -77,6 +77,11 @@ public class RemoteQCController extends BaseQCController {
     }
 
     @Override
+    public void bind() {
+        mBackgroundExecutor.execute(this::updateQCItem);
+    }
+
+    @Override
     protected void updateListening() {
         boolean listen = mShouldListen && !mObservers.isEmpty();
         mBackgroundExecutor.execute(() -> updateListeningBg(listen));
@@ -119,14 +124,14 @@ public class RemoteQCController extends BaseQCController {
     @WorkerThread
     private void updateQCItem() {
         try {
-            QCItem item = bind();
+            QCItem item = getQCItem();
             mContext.getMainExecutor().execute(() -> onQCItemUpdated(item));
         } catch (Exception e) {
             Log.d(TAG, "Error fetching QCItem", e);
         }
     }
 
-    private QCItem bind() {
+    private QCItem getQCItem() {
         try (ContentProviderClient provider = getClient()) {
             if (provider == null) {
                 return null;
@@ -225,7 +230,7 @@ public class RemoteQCController extends BaseQCController {
             @Override
             public void run() {
                 trySubscribe();
-                QCItem item = bind();
+                QCItem item = getQCItem();
                 mExecutor.execute(() -> mCallback.onQCItemUpdated(item));
             }
         };
