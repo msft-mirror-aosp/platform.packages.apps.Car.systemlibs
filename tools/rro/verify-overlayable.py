@@ -30,11 +30,13 @@ def main():
     optional_args.add_argument('-e', '--excludeFiles', nargs='*', help='File paths (absolute or relative to cwd) that should be excluded when generating overlayable.xml')
     optional_args.add_argument('-m', '--errorMessage', nargs='*', help='Custom error message if resources are added or removed.')
     required_args = parser.add_argument_group('required arguments')
-    required_args.add_argument('-r', '--resourcePath', help='Path to resource directory (absolute or relative to cwd)', required=True)
+    required_args.add_argument('-r', '--resourcePath', help='Path to resource directory (absolute or relative to cwd)', required=True, action='append')
     required_args.add_argument('-o', '--overlayableFilePath', help='Filepath to overlayable.xml (absolute or relative to cwd).', required=True)
     args = parser.parse_args()
 
-    resources = get_all_resources(args.resourcePath, args.excludeFiles)
+    resources = set()
+    for path in args.resourcePath:
+        resources |= get_all_resources(path, args.excludeFiles)
     old_mapping = get_resources_from_single_file(args.overlayableFilePath)
     compare_resources(old_mapping, resources, args.overlayableFilePath, args.errorMessage)
 
