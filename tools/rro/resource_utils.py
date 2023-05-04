@@ -15,6 +15,7 @@
 
 import os
 import re
+import sys
 try:
     import lxml.etree as etree
 except ImportError:
