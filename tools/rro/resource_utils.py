@@ -19,7 +19,8 @@ import sys
 try:
     import lxml.etree as etree
 except ImportError:
-    print("Please install 'lxml' python package and retry.")
+    print("Please install 'lxml' python package and retry. \n"
+        + "E.g., you can use 'sudo apt-get install python3-lxml'.")
     sys.exit(1)
 
 class ResourceLocation:
