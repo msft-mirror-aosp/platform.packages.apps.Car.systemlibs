@@ -314,6 +314,7 @@ public class QCRowView extends FrameLayout {
         switchView.setThumbTintList(getContext().getColorStateList(
                 R.color.qc_switch_thumb_selector));
         switchView.setChecked(action.isChecked());
+        switchView.setContentDescription(action.getContentDescription());
         switchView.setOnTouchListener((v, event) -> {
             if (!action.isEnabled()) {
                 if (event.getActionMasked() == MotionEvent.ACTION_UP) {
@@ -347,6 +348,7 @@ public class QCRowView extends FrameLayout {
         toggleButton.setOnCheckedChangeListener(null);
         Drawable icon = QCViewUtils.getInstance(mContext).getToggleIcon(
                 action.getIcon(), action.isAvailable());
+        toggleButton.setContentDescription(action.getContentDescription());
         toggleButton.setButtonDrawable(icon);
         toggleButton.setChecked(action.isChecked());
         toggleButton.setEnabled(shouldEnableView);
