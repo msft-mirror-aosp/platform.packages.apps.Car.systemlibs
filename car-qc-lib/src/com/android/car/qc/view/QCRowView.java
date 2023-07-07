@@ -346,8 +346,7 @@ public class QCRowView extends FrameLayout {
         toggleButton.setTextOn(null);
         toggleButton.setTextOff(null);
         toggleButton.setOnCheckedChangeListener(null);
-        Drawable icon = QCViewUtils.getInstance(mContext).getToggleIcon(
-                action.getIcon(), action.isAvailable());
+        Drawable icon = QCViewUtils.getToggleIcon(mContext, action.getIcon(), action.isAvailable());
         toggleButton.setContentDescription(action.getContentDescription());
         toggleButton.setButtonDrawable(icon);
         toggleButton.setChecked(action.isChecked());
