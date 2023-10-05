@@ -119,7 +119,7 @@
             app:layout_constraintTop_toBottomOf="@+id/barrier2"
             app:layout_constraintBottom_toBottomOf="parent">
             <com.android.car.qc.view.QCSeekBarView
-                android:id="@+id/seekbar"
+                android:id="@+id/qc_seekbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.QC.SeekBar"/>
