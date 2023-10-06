@@ -311,8 +311,6 @@ public class QCRowView extends FrameLayout {
                 (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable();
         switchView.setOnCheckedChangeListener(null);
         switchView.setEnabled(shouldEnableView);
-        switchView.setThumbTintList(getContext().getColorStateList(
-                R.color.qc_switch_thumb_selector));
         switchView.setChecked(action.isChecked());
         switchView.setContentDescription(action.getContentDescription());
         switchView.setOnTouchListener((v, event) -> {
@@ -416,8 +414,6 @@ public class QCRowView extends FrameLayout {
         mSeekBar.setEnabled(slider.isEnabled());
         mSeekBar.setClickableWhileDisabled(slider.isClickableWhileDisabled());
         mSeekBar.setDisabledClickListener(seekBar -> fireAction(slider, new Intent()));
-        mSeekBar.setThumbTintList(getContext().getColorStateList(
-                R.color.qc_seekbar_thumb_selector));
         if (!slider.isEnabled() && mInDirectManipulationMode) {
             setInDirectManipulationMode(mSeekBarContainer, mSeekBar, false);
         }
