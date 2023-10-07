@@ -39,9 +39,12 @@ android_test {
         "androidx.test.ext.truth",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
-        "truth-prebuilt",
+        "truth",
         "testng",
     ],
 
-    jni_libs: ["libdexmakerjvmtiagent", "libstaticjvmtiagent"],
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
 }
