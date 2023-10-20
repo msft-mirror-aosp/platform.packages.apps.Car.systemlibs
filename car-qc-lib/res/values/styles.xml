@@ -16,16 +16,15 @@
 
 <resources>
     <style name="TextAppearance.QC" parent="android:TextAppearance.DeviceDefault">
-        <item name="android:textColor">@color/car_ui_text_color_primary</item>
+        <item name="android:textColor">@color/car_on_surface</item>
     </style>
 
-    <style name="TextAppearance.QC.Title">
-        <item name="android:textSize">@dimen/car_ui_body1_size</item>
+    <style name="TextAppearance.QC.Title" parent="android:TextAppearance.DeviceDefault.Large">
+        <item name="android:textColor">@color/car_on_surface</item>
     </style>
 
-    <style name="TextAppearance.QC.Subtitle">
-        <item name="android:textColor">@color/car_ui_text_color_secondary</item>
-        <item name="android:textSize">@dimen/car_ui_body3_size</item>
+    <style name="TextAppearance.QC.Subtitle" parent="android:TextAppearance.DeviceDefault.Small">
+        <item name="android:textColor">@color/car_on_surface_variant</item>
     </style>
 
     <style name="Widget.QC" parent="android:Widget.DeviceDefault"/>
