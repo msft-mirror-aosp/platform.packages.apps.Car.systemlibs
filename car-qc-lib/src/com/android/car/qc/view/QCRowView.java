@@ -308,7 +308,8 @@ public class QCRowView extends FrameLayout {
         CarUiUtils.makeAllViewsEnabled(switchView, action.isEnabled());
 
         boolean shouldEnableView =
-                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable();
+                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable()
+                && action.isClickable();
         switchView.setOnCheckedChangeListener(null);
         switchView.setEnabled(shouldEnableView);
         switchView.setChecked(action.isChecked());
@@ -339,7 +340,8 @@ public class QCRowView extends FrameLayout {
         }
         DrawableStateToggleButton toggleButton = tmpToggleButton; // must be effectively final
         boolean shouldEnableView =
-                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable();
+                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable()
+                && action.isClickable();
         toggleButton.setText(null);
         toggleButton.setTextOn(null);
         toggleButton.setTextOff(null);

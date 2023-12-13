@@ -31,18 +31,20 @@ import androidx.annotation.StringRes;
 public class QCActionItem extends QCItem {
     private final boolean mIsChecked;
     private final boolean mIsAvailable;
+    private final boolean mIsClickable;
     private Icon mIcon;
     private PendingIntent mAction;
     private PendingIntent mDisabledClickAction;
     private String mContentDescription;
 
     public QCActionItem(@NonNull @QCItemType String type, boolean isChecked, boolean isEnabled,
-            boolean isAvailable, boolean isClickableWhileDisabled, @Nullable Icon icon,
-            @Nullable String contentDescription, @Nullable PendingIntent action,
-            @Nullable PendingIntent disabledClickAction) {
+            boolean isAvailable, boolean isClickable, boolean isClickableWhileDisabled,
+            @Nullable Icon icon, @Nullable String contentDescription,
+            @Nullable PendingIntent action, @Nullable PendingIntent disabledClickAction) {
         super(type, isEnabled, isClickableWhileDisabled);
         mIsChecked = isChecked;
         mIsAvailable = isAvailable;
+        mIsClickable = isClickable;
         mIcon = icon;
         mContentDescription = contentDescription;
         mAction = action;
@@ -53,6 +55,7 @@ public class QCActionItem extends QCItem {
         super(in);
         mIsChecked = in.readBoolean();
         mIsAvailable = in.readBoolean();
+        mIsClickable = in.readBoolean();
         boolean hasIcon = in.readBoolean();
         if (hasIcon) {
             mIcon = Icon.CREATOR.createFromParcel(in);
@@ -76,6 +79,7 @@ public class QCActionItem extends QCItem {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mIsChecked);
         dest.writeBoolean(mIsAvailable);
+        dest.writeBoolean(mIsClickable);
         boolean includeIcon = getType().equals(QC_TYPE_ACTION_TOGGLE) && mIcon != null;
         dest.writeBoolean(includeIcon);
         if (includeIcon) {
@@ -116,6 +120,10 @@ public class QCActionItem extends QCItem {
         return mIsAvailable;
     }
 
+    public boolean isClickable() {
+        return mIsClickable;
+    }
+
     @Nullable
     public Icon getIcon() {
         return mIcon;
@@ -146,6 +154,7 @@ public class QCActionItem extends QCItem {
         private boolean mIsChecked;
         private boolean mIsEnabled = true;
         private boolean mIsAvailable = true;
+        private boolean mIsClickable = true;
         private boolean mIsClickableWhileDisabled = false;
         private Icon mIcon;
         private PendingIntent mAction;
@@ -180,6 +189,15 @@ public class QCActionItem extends QCItem {
          */
         public Builder setAvailable(boolean available) {
             mIsAvailable = available;
+            return this;
+        }
+
+        /**
+         * Sets whether the action is clickable. This differs from available in that the style will
+         * remain as if it's enabled/available but click actions will not be processed.
+         */
+        public Builder setClickable(boolean clickable) {
+            mIsClickable = clickable;
             return this;
         }
 
@@ -236,7 +254,7 @@ public class QCActionItem extends QCItem {
          * Builds the final {@link QCActionItem}.
          */
         public QCActionItem build() {
-            return new QCActionItem(mType, mIsChecked, mIsEnabled, mIsAvailable,
+            return new QCActionItem(mType, mIsChecked, mIsEnabled, mIsAvailable, mIsClickable,
                     mIsClickableWhileDisabled, mIcon, mContentDescription, mAction,
                     mDisabledClickAction);
         }
