@@ -26,6 +26,19 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "car-resource-common",
+        "data_subscription_flags_java_lib",
     ],
     sdk_version: "current",
+}
+
+aconfig_declarations {
+    name: "data_subscription_flags",
+    container: "system",
+    package: "com.android.car.datasubscription",
+    srcs: ["data_subscription_flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "data_subscription_flags_java_lib",
+    aconfig_declarations: "data_subscription_flags",
 }
