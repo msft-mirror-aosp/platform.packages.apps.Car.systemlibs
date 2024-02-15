@@ -308,11 +308,10 @@ public class QCRowView extends FrameLayout {
         CarUiUtils.makeAllViewsEnabled(switchView, action.isEnabled());
 
         boolean shouldEnableView =
-                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable();
+                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable()
+                && action.isClickable();
         switchView.setOnCheckedChangeListener(null);
         switchView.setEnabled(shouldEnableView);
-        switchView.setThumbTintList(getContext().getColorStateList(
-                R.color.qc_switch_thumb_selector));
         switchView.setChecked(action.isChecked());
         switchView.setContentDescription(action.getContentDescription());
         switchView.setOnTouchListener((v, event) -> {
@@ -341,13 +340,13 @@ public class QCRowView extends FrameLayout {
         }
         DrawableStateToggleButton toggleButton = tmpToggleButton; // must be effectively final
         boolean shouldEnableView =
-                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable();
+                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable()
+                && action.isClickable();
         toggleButton.setText(null);
         toggleButton.setTextOn(null);
         toggleButton.setTextOff(null);
         toggleButton.setOnCheckedChangeListener(null);
-        Drawable icon = QCViewUtils.getInstance(mContext).getToggleIcon(
-                action.getIcon(), action.isAvailable());
+        Drawable icon = QCViewUtils.getToggleIcon(mContext, action.getIcon(), action.isAvailable());
         toggleButton.setContentDescription(action.getContentDescription());
         toggleButton.setButtonDrawable(icon);
         toggleButton.setChecked(action.isChecked());
@@ -417,8 +416,6 @@ public class QCRowView extends FrameLayout {
         mSeekBar.setEnabled(slider.isEnabled());
         mSeekBar.setClickableWhileDisabled(slider.isClickableWhileDisabled());
         mSeekBar.setDisabledClickListener(seekBar -> fireAction(slider, new Intent()));
-        mSeekBar.setThumbTintList(getContext().getColorStateList(
-                R.color.qc_seekbar_thumb_selector));
         if (!slider.isEnabled() && mInDirectManipulationMode) {
             setInDirectManipulationMode(mSeekBarContainer, mSeekBar, false);
         }

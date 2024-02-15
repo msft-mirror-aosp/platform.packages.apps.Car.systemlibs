@@ -26,6 +26,7 @@ android_library {
     },
     static_libs: [
         "androidx.annotation_annotation",
-        "car-ui-lib"
+        "car-ui-lib-no-overlayable",
+        "car-resource-common",
     ],
 }
