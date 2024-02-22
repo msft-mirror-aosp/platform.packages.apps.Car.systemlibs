@@ -19,7 +19,6 @@ package {
 
 android_library {
     name: "car-qc-lib",
-    platform_apis: true,
     srcs: ["src/**/*.java"],
     optimize: {
         enabled: false,
