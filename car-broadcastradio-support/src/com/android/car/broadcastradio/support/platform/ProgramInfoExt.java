@@ -30,6 +30,7 @@ import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -171,8 +172,14 @@ public class ProgramInfoExt {
 
         MediaMetadata.Builder bld = new MediaMetadata.Builder();
 
-        ProgramSelector selector =
-                ProgramSelectorExt.createAmFmSelector(info.getLogicallyTunedTo().getValue());
+        ProgramSelector selector;
+        ProgramSelector.Identifier logicallyTunedTo = info.getLogicallyTunedTo();
+        if (logicallyTunedTo != null && logicallyTunedTo.getType()
+                == ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY) {
+            selector = ProgramSelectorExt.createAmFmSelector(logicallyTunedTo.getValue());
+        } else {
+            selector = info.getSelector();
+        }
         String displayTitle = ProgramSelectorExt.getDisplayName(selector, info.getChannel());
         bld.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, displayTitle);
         String subtitle = getProgramName(info, /* flags= */ 0, programNameOrder);
@@ -255,5 +262,13 @@ public class ProgramInfoExt {
             return imageResolver.resolve(albumArtId);
         }
         return null;
+    }
+    public static class ProgramInfoComparator implements Comparator<RadioManager.ProgramInfo> {
+        @Override
+        public int compare(RadioManager.ProgramInfo info1, RadioManager.ProgramInfo info2) {
+            Comparator<ProgramSelector> selectorComparator =
+                    new ProgramSelectorExt.ProgramSelectorComparator();
+            return selectorComparator.compare(info1.getSelector(), info2.getSelector());
+        }
     }
 }
