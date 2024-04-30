@@ -29,15 +29,19 @@ import java.util.List;
 
 /**
  * Quick Control Row Element
- * ------------------------------------
- * |            | Title    |          |
- * | StartItems | Subtitle | EndItems |
- * |            | Sliders  |          |
- * ------------------------------------
+ * ---------------------------------------
+ * |            | Title       |          |
+ * | StartItems | Subtitle    | EndItems |
+ * |            | ActionText  |          |
+ * |            | Sliders     |          |
+ * ---------------------------------------
  */
 public class QCRow extends QCItem {
     private final String mTitle;
     private final String mSubtitle;
+    private final String mActionText;
+    @QCCategory
+    private final int mCategory;
     private final Icon mStartIcon;
     private final boolean mIsStartIconTintable;
     private final QCSlider mSlider;
@@ -45,15 +49,18 @@ public class QCRow extends QCItem {
     private final List<QCActionItem> mEndItems;
     private final PendingIntent mPrimaryAction;
     private PendingIntent mDisabledClickAction;
-
-    public QCRow(@Nullable String title, @Nullable String subtitle, boolean isEnabled,
-            boolean isClickableWhileDisabled, @Nullable PendingIntent primaryAction,
+    public QCRow(@Nullable String title, @Nullable String subtitle,
+            @Nullable String actionText, @QCCategory int category,
+            boolean isEnabled, boolean isClickableWhileDisabled,
+            @Nullable PendingIntent primaryAction,
             @Nullable PendingIntent disabledClickAction, @Nullable Icon startIcon,
             boolean isIconTintable, @Nullable QCSlider slider,
             @NonNull List<QCActionItem> startItems, @NonNull List<QCActionItem> endItems) {
         super(QC_TYPE_ROW, isEnabled, isClickableWhileDisabled);
         mTitle = title;
         mSubtitle = subtitle;
+        mActionText = actionText;
+        mCategory = category;
         mPrimaryAction = primaryAction;
         mDisabledClickAction = disabledClickAction;
         mStartIcon = startIcon;
@@ -67,6 +74,8 @@ public class QCRow extends QCItem {
         super(in);
         mTitle = in.readString();
         mSubtitle = in.readString();
+        mActionText = in.readString();
+        mCategory = in.readInt();
         boolean hasIcon = in.readBoolean();
         if (hasIcon) {
             mStartIcon = Icon.CREATOR.createFromParcel(in);
@@ -111,6 +120,8 @@ public class QCRow extends QCItem {
         super.writeToParcel(dest, flags);
         dest.writeString(mTitle);
         dest.writeString(mSubtitle);
+        dest.writeString(mActionText);
+        dest.writeInt(mCategory);
         boolean hasStartIcon = mStartIcon != null;
         dest.writeBoolean(hasStartIcon);
         if (hasStartIcon) {
@@ -163,6 +174,16 @@ public class QCRow extends QCItem {
     }
 
     @Nullable
+    public String getActionText() {
+        return mActionText;
+    }
+
+    @QCCategory
+    public int getCategory() {
+        return mCategory;
+    }
+
+    @Nullable
     public Icon getStartIcon() {
         return mStartIcon;
     }
@@ -208,6 +229,8 @@ public class QCRow extends QCItem {
         private boolean mIsStartIconTintable = true;
         private String mTitle;
         private String mSubtitle;
+        private String mActionText;
+        private int mCategory = QCCategory.NORMAL;
         private boolean mIsEnabled = true;
         private boolean mIsClickableWhileDisabled = false;
         private QCSlider mSlider;
@@ -227,6 +250,22 @@ public class QCRow extends QCItem {
          */
         public Builder setSubtitle(@Nullable String subtitle) {
             mSubtitle = subtitle;
+            return this;
+        }
+
+        /**
+         * Sets the row action text.
+         */
+        public Builder setActionText(@Nullable String actionText) {
+            mActionText = actionText;
+            return this;
+        }
+
+        /**
+         * Sets the row category.
+         */
+        public Builder setCategory(@QCCategory int category) {
+            mCategory = category;
             return this;
         }
 
@@ -307,9 +346,9 @@ public class QCRow extends QCItem {
          * Builds the final {@link QCRow}.
          */
         public QCRow build() {
-            return new QCRow(mTitle, mSubtitle, mIsEnabled, mIsClickableWhileDisabled,
-                    mPrimaryAction, mDisabledClickAction, mStartIcon, mIsStartIconTintable,
-                    mSlider, mStartItems, mEndItems);
+            return new QCRow(mTitle, mSubtitle, mActionText, mCategory, mIsEnabled,
+                    mIsClickableWhileDisabled, mPrimaryAction, mDisabledClickAction, mStartIcon,
+                    mIsStartIconTintable, mSlider, mStartItems, mEndItems);
         }
     }
 }
