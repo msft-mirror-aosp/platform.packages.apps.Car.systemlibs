@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2018 The Android Open Source Project
+// Copyright (C) 2024 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,29 +19,24 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-android_library {
-    name: "car-broadcastradio-support",
-
+android_test {
+    name: "CarBroadcastRadioSupportTests",
+    platform_apis: true,
     srcs: ["src/**/*.java"],
-    aidl: {
-        export_include_dirs: ["src"],
-    },
-    resource_dirs: ["res"],
-
-    optimize: {
-        enabled: false,
-    },
-
-    dist: {
-        targets: ["dist_files"],
-    },
-
     static_libs: [
-        "androidx.legacy_legacy-support-v4",
+        "car-broadcastradio-support",
+        "androidx.test.rules",
+        "truth",
+        "mockito-target-extended",
     ],
-
-    libs: ["android.car-system-stubs"],
-    min_sdk_version: "33",
-    target_sdk_version: "33",
-    sdk_version: "system_current",
+    libs: ["android.test.base"],
+    test_suites: [
+        "general-tests",
+        "automotive-general-tests",
+    ],
+    // mockito-target-inline dependency
+    jni_libs: [
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
 }
