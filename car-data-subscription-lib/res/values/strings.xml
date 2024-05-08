@@ -15,5 +15,5 @@
   -->
 
 <resources>
-    <string name="connectivity_flow_app" translatable="false">android.intent.action.DATA_SUBSCRIPTION</string>
+    <string name="connectivity_flow_app" translatable="false">com.android.car.datasubscription</string>
 </resources>
