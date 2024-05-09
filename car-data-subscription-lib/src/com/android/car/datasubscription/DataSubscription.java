@@ -29,7 +29,8 @@ import androidx.annotation.GuardedBy;
  * This class provides a mechanism to indicate if a data plan is provided on a trial vs paid basis.
  */
 public class DataSubscription {
-
+    public static final String DATA_SUBSCRIPTION_ACTION =
+            "android.intent.action.DATA_SUBSCRIPTION";
     private static final String SETTING = "car_data_subscription_status";
     private static final int MIN_VALUE = 1;
     private static final int MAX_VALUE = 3;
