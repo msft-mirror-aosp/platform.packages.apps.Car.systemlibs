@@ -193,7 +193,7 @@ public class QCRowView extends FrameLayout {
         mStartItemsContainer = findViewById(R.id.qc_row_start_items);
         mEndItemsContainer = findViewById(R.id.qc_row_end_items);
         mSeekBarContainer = findViewById(R.id.qc_seekbar_wrapper);
-        mSeekBar = findViewById(R.id.seekbar);
+        mSeekBar = findViewById(R.id.qc_seekbar);
     }
 
     void setActionListener(QCActionListener listener) {
@@ -308,10 +308,12 @@ public class QCRowView extends FrameLayout {
         CarUiUtils.makeAllViewsEnabled(switchView, action.isEnabled());
 
         boolean shouldEnableView =
-                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable();
+                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable()
+                && action.isClickable();
         switchView.setOnCheckedChangeListener(null);
         switchView.setEnabled(shouldEnableView);
         switchView.setChecked(action.isChecked());
+        switchView.setContentDescription(action.getContentDescription());
         switchView.setOnTouchListener((v, event) -> {
             if (!action.isEnabled()) {
                 if (event.getActionMasked() == MotionEvent.ACTION_UP) {
@@ -338,13 +340,14 @@ public class QCRowView extends FrameLayout {
         }
         DrawableStateToggleButton toggleButton = tmpToggleButton; // must be effectively final
         boolean shouldEnableView =
-                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable();
+                (action.isEnabled() || action.isClickableWhileDisabled()) && action.isAvailable()
+                && action.isClickable();
         toggleButton.setText(null);
         toggleButton.setTextOn(null);
         toggleButton.setTextOff(null);
         toggleButton.setOnCheckedChangeListener(null);
-        Drawable icon = QCViewUtils.getInstance(mContext).getToggleIcon(
-                action.getIcon(), action.isAvailable());
+        Drawable icon = QCViewUtils.getToggleIcon(mContext, action.getIcon(), action.isAvailable());
+        toggleButton.setContentDescription(action.getContentDescription());
         toggleButton.setButtonDrawable(icon);
         toggleButton.setChecked(action.isChecked());
         toggleButton.setEnabled(shouldEnableView);
@@ -397,13 +400,15 @@ public class QCRowView extends FrameLayout {
             // remove current action view
             root.removeView(actionView);
         }
-        actionView = mLayoutInflater.inflate(resId, /* root= */ null);
+        actionView = mLayoutInflater.inflate(resId, root, /* attachToRoot= */ false);
         root.addView(actionView);
         return actionView;
     }
 
     private void initSlider(QCSlider slider) {
         mQCSlider = slider;
+        CarUiUtils.makeAllViewsEnabled(mSeekBar, slider.isEnabled());
+
         mSeekBar.setOnSeekBarChangeListener(null);
         mSeekBar.setMin(slider.getMin());
         mSeekBar.setMax(slider.getMax());

@@ -17,11 +17,13 @@
 package com.android.car.qc;
 
 import android.app.PendingIntent;
+import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.os.Parcel;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 /**
  * Quick Control Action that are includes as either start or end actions in {@link QCRow}
@@ -29,17 +31,22 @@ import androidx.annotation.Nullable;
 public class QCActionItem extends QCItem {
     private final boolean mIsChecked;
     private final boolean mIsAvailable;
+    private final boolean mIsClickable;
     private Icon mIcon;
     private PendingIntent mAction;
     private PendingIntent mDisabledClickAction;
+    private String mContentDescription;
 
     public QCActionItem(@NonNull @QCItemType String type, boolean isChecked, boolean isEnabled,
-            boolean isAvailable, boolean isClickableWhileDisabled, @Nullable Icon icon,
+            boolean isAvailable, boolean isClickable, boolean isClickableWhileDisabled,
+            @Nullable Icon icon, @Nullable String contentDescription,
             @Nullable PendingIntent action, @Nullable PendingIntent disabledClickAction) {
         super(type, isEnabled, isClickableWhileDisabled);
         mIsChecked = isChecked;
         mIsAvailable = isAvailable;
+        mIsClickable = isClickable;
         mIcon = icon;
+        mContentDescription = contentDescription;
         mAction = action;
         mDisabledClickAction = disabledClickAction;
     }
@@ -48,9 +55,14 @@ public class QCActionItem extends QCItem {
         super(in);
         mIsChecked = in.readBoolean();
         mIsAvailable = in.readBoolean();
+        mIsClickable = in.readBoolean();
         boolean hasIcon = in.readBoolean();
         if (hasIcon) {
             mIcon = Icon.CREATOR.createFromParcel(in);
+        }
+        boolean hasContentDescription = in.readBoolean();
+        if (hasContentDescription) {
+            mContentDescription = in.readString();
         }
         boolean hasAction = in.readBoolean();
         if (hasAction) {
@@ -67,10 +79,16 @@ public class QCActionItem extends QCItem {
         super.writeToParcel(dest, flags);
         dest.writeBoolean(mIsChecked);
         dest.writeBoolean(mIsAvailable);
+        dest.writeBoolean(mIsClickable);
         boolean includeIcon = getType().equals(QC_TYPE_ACTION_TOGGLE) && mIcon != null;
         dest.writeBoolean(includeIcon);
         if (includeIcon) {
             mIcon.writeToParcel(dest, flags);
+        }
+        boolean hasContentDescription = mContentDescription != null;
+        dest.writeBoolean(hasContentDescription);
+        if (hasContentDescription) {
+            dest.writeString(mContentDescription);
         }
         boolean hasAction = mAction != null;
         dest.writeBoolean(hasAction);
@@ -102,9 +120,18 @@ public class QCActionItem extends QCItem {
         return mIsAvailable;
     }
 
+    public boolean isClickable() {
+        return mIsClickable;
+    }
+
     @Nullable
     public Icon getIcon() {
         return mIcon;
+    }
+
+    @Nullable
+    public String getContentDescription() {
+        return mContentDescription;
     }
 
     public static Creator<QCActionItem> CREATOR = new Creator<QCActionItem>() {
@@ -127,10 +154,12 @@ public class QCActionItem extends QCItem {
         private boolean mIsChecked;
         private boolean mIsEnabled = true;
         private boolean mIsAvailable = true;
+        private boolean mIsClickable = true;
         private boolean mIsClickableWhileDisabled = false;
         private Icon mIcon;
         private PendingIntent mAction;
         private PendingIntent mDisabledClickAction;
+        private String mContentDescription;
 
         public Builder(@NonNull @QCItemType String type) {
             if (!isValidType(type)) {
@@ -164,6 +193,15 @@ public class QCActionItem extends QCItem {
         }
 
         /**
+         * Sets whether the action is clickable. This differs from available in that the style will
+         * remain as if it's enabled/available but click actions will not be processed.
+         */
+        public Builder setClickable(boolean clickable) {
+            mIsClickable = clickable;
+            return this;
+        }
+
+        /**
          * Sets whether or not an action item should be clickable while disabled.
          */
         public Builder setClickableWhileDisabled(boolean clickable) {
@@ -176,6 +214,23 @@ public class QCActionItem extends QCItem {
          */
         public Builder setIcon(@Nullable Icon icon) {
             mIcon = icon;
+            return this;
+        }
+
+        /**
+         * Sets the content description
+         */
+        public Builder setContentDescription(@Nullable String contentDescription) {
+            mContentDescription = contentDescription;
+            return this;
+        }
+
+        /**
+         * Sets the string resource to use for content description
+         */
+        public Builder setContentDescription(@NonNull Context context,
+                @StringRes int contentDescriptionResId) {
+            mContentDescription = context.getString(contentDescriptionResId);
             return this;
         }
 
@@ -199,8 +254,9 @@ public class QCActionItem extends QCItem {
          * Builds the final {@link QCActionItem}.
          */
         public QCActionItem build() {
-            return new QCActionItem(mType, mIsChecked, mIsEnabled, mIsAvailable,
-                    mIsClickableWhileDisabled, mIcon, mAction, mDisabledClickAction);
+            return new QCActionItem(mType, mIsChecked, mIsEnabled, mIsAvailable, mIsClickable,
+                    mIsClickableWhileDisabled, mIcon, mContentDescription, mAction,
+                    mDisabledClickAction);
         }
 
         private boolean isValidType(String type) {
