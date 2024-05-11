@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2021 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,15 +18,14 @@ package {
 }
 
 android_library {
-    name: "car-qc-lib",
-    platform_apis: true,
+    name: "car-data-subscription-lib",
     srcs: ["src/**/*.java"],
     optimize: {
         enabled: false,
     },
     static_libs: [
         "androidx.annotation_annotation",
-        "car-ui-lib-no-overlayable",
         "car-resource-common",
     ],
+    sdk_version: "current",
 }
