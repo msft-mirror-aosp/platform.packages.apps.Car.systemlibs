@@ -250,7 +250,8 @@ public class QCRowView extends FrameLayout {
                         getResources().getColor(R.color.qc_warning_text_color));
             } else {
                 mActionText.setTextColor(
-                        getResources().getColor(R.color.car_on_surface_variant));
+                        getResources().getColor(
+                                com.android.car.resource.common.R.color.car_on_surface_variant));
             }
         } else {
             mActionText.setVisibility(GONE);
