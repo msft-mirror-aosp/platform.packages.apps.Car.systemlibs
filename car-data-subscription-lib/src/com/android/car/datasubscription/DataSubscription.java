@@ -99,6 +99,15 @@ public class DataSubscription {
     }
 
     /**
+     * Checks if the data subscription status is inactive or trial.
+     */
+    public boolean isDataSubscriptionInactiveOrTrial() {
+        int subscriptionStatus = getDataSubscriptionStatus();
+        return subscriptionStatus == DataSubscriptionStatus.INACTIVE
+                || subscriptionStatus == DataSubscriptionStatus.TRIAL;
+    }
+
+    /**
      * Interface to implement for listening to Data Subscription status changes.
      */
     public interface DataSubscriptionChangeListener {
