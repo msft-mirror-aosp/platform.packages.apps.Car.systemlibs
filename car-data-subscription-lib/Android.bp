@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2021 The Android Open Source Project
+// Copyright (C) 2023 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,38 +14,31 @@
 // limitations under the License.
 
 package {
-    default_team: "trendy_team_system_experience",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-android_test {
-    name: "CarQCLibUnitTests",
-
-    certificate: "platform",
-    privileged: true,
-
+android_library {
+    name: "car-data-subscription-lib",
     srcs: ["src/**/*.java"],
-
-    libs: [
-        "android.test.runner",
-        "android.test.base",
-        "android.test.mock",
-    ],
-
+    optimize: {
+        enabled: false,
+    },
     static_libs: [
-        "car-qc-lib",
-        "androidx.test.core",
-        "androidx.test.rules",
-        "androidx.test.ext.junit",
-        "androidx.test.ext.truth",
-        "mockito-target-extended-minus-junit4",
-        "platform-test-annotations",
-        "truth",
-        "testng",
+        "androidx.annotation_annotation",
+        "car-resource-common",
+        "data_subscription_flags_java_lib",
     ],
+    sdk_version: "current",
+}
 
-    jni_libs: [
-        "libdexmakerjvmtiagent",
-        "libstaticjvmtiagent",
-    ],
+aconfig_declarations {
+    name: "data_subscription_flags",
+    container: "system",
+    package: "com.android.car.datasubscription",
+    srcs: ["data_subscription_flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "data_subscription_flags_java_lib",
+    aconfig_declarations: "data_subscription_flags",
 }
