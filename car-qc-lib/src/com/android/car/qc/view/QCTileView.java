@@ -125,8 +125,7 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
             }
             mToggleButton.toggle();
         });
-        Drawable icon = QCViewUtils.getInstance(mContext).getToggleIcon(
-                qcTile.getIcon(), qcTile.isAvailable());
+        Drawable icon = QCViewUtils.getToggleIcon(mContext, qcTile.getIcon(), qcTile.isAvailable());
         mToggleButton.setButtonDrawable(icon);
         mToggleButton.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> {
