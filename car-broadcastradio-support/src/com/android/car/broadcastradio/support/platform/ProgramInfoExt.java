@@ -16,17 +16,19 @@
 
 package com.android.car.broadcastradio.support.platform;
 
-import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioManager.ProgramInfo;
 import android.hardware.radio.RadioMetadata;
-import android.media.MediaMetadata;
-import android.media.Rating;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.RatingCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
+
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -50,9 +52,9 @@ public class ProgramInfoExt {
     /**
      * Flags to control how to fetch program name with {@link #getProgramName}.
      *
-     * Lower 16 bits are reserved for {@link ProgramSelectorExt#NameFlag}.
+     * Lower 16 bits are reserved for {@link ProgramSelectorExt.NameFlag}.
      */
-    @IntDef(prefix = { "NAME_" }, flag = true, value = {
+    @IntDef(flag = true, value = {
         ProgramSelectorExt.NAME_NO_MODULATION,
         ProgramSelectorExt.NAME_MODULATION_ONLY,
         NAME_NO_CHANNEL_FALLBACK,
@@ -128,7 +130,7 @@ public class ProgramInfoExt {
     }
 
     /**
-     * Proposed reimplementation of {@link RadioManager#ProgramInfo#getMetadata}.
+     * Proposed reimplementation of {@link RadioManager.ProgramInfo#getMetadata}.
      *
      * As opposed to the original implementation, it never returns null.
      */
@@ -142,35 +144,35 @@ public class ProgramInfoExt {
     }
 
     /**
-     * Converts {@link ProgramInfo} to {@link MediaMetadata} for displaying.
+     * Converts {@link ProgramInfo} to {@link MediaMetadataCompat} for displaying.
      *
      * <p>This method is meant to be used for displaying the currently playing station in
-     *  {@link MediaSession}, only a subset of keys populated in {@link ProgramInfo#toMediaMetadata}
+     *  {@link MediaSessionCompat}, only a subset of keys populated in {@link #toMediaMetadata}
      *  will be populated in this method.
      *
      * <ul>
-     * The following keys will be populated in the {@link MediaMetadata}:
-     *  <li>{@link MediaMetadata#METADATA_KEY_DISPLAY_TITLE}</li>
-     *  <li>{@link MediaMetadata#METADATA_KEY_DISPLAY_SUBTITLE}</li>
-     *  <li>{@link MediaMetadata#METADATA_KEY_ALBUM_ART}</li>
-     *  <li>{@link MediaMetadata#METADATA_KEY_USER_RATING}</li>
+     * The following keys will be populated in the {@link MediaMetadataCompat}:
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_DISPLAY_TITLE}</li>
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_DISPLAY_SUBTITLE}</li>
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_ALBUM_ART}</li>
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_USER_RATING}</li>
      * <ul/>
      *
      * @param info {@link ProgramInfo} to convert
      * @param isFavorite {@code true}, if a given program is a favorite
      * @param imageResolver metadata images resolver/cache
      * @param programNameOrder order of keys to look for program name in {@link ProgramInfo}
-     * @return {@link MediaMetadata} object
+     * @return {@link MediaMetadataCompat} object
      */
     @NonNull
-    public static MediaMetadata toMediaDisplayMetadata(@NonNull ProgramInfo info,
+    public static MediaMetadataCompat toMediaDisplayMetadata(@NonNull ProgramInfo info,
             boolean isFavorite, @NonNull ImageResolver imageResolver,
             @NonNull String[] programNameOrder) {
         Objects.requireNonNull(info, "info can not be null.");
         Objects.requireNonNull(imageResolver, "imageResolver can not be null.");
         Objects.requireNonNull(programNameOrder, "programNameOrder can not be null.");
 
-        MediaMetadata.Builder bld = new MediaMetadata.Builder();
+        MediaMetadataCompat.Builder bld = new MediaMetadataCompat.Builder();
 
         ProgramSelector selector;
         ProgramSelector.Identifier logicallyTunedTo = info.getLogicallyTunedTo();
@@ -181,58 +183,60 @@ public class ProgramInfoExt {
             selector = info.getSelector();
         }
         String displayTitle = ProgramSelectorExt.getDisplayName(selector, info.getChannel());
-        bld.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, displayTitle);
+        bld.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, displayTitle);
         String subtitle = getProgramName(info, /* flags= */ 0, programNameOrder);
-        bld.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, subtitle);
+        bld.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, subtitle);
 
         Bitmap bm = resolveAlbumArtBitmap(info.getMetadata(), imageResolver);
-        if (bm != null) bld.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bm);
+        if (bm != null) bld.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bm);
 
-        bld.putRating(MediaMetadata.METADATA_KEY_USER_RATING, Rating.newHeartRating(isFavorite));
+        bld.putRating(MediaMetadataCompat.METADATA_KEY_USER_RATING,
+                RatingCompat.newHeartRating(isFavorite));
 
         return bld.build();
     }
 
     /**
-     * Converts {@link ProgramInfo} to {@link MediaMetadata}.
+     * Converts {@link ProgramInfo} to {@link MediaMetadataCompat}.
      *
-     * <p>This method is meant to be used for currently playing station in {@link MediaSession}.
+     * <p>This method is meant to be used for currently playing station in
+     * {@link MediaSessionCompat}.
      *
      * <ul>
-     * The following keys will be populated in the {@link MediaMetadata}:
-     *  <li>{@link MediaMetadata#METADATA_KEY_DISPLAY_TITLE}</li>
-     *  <li>{@link MediaMetadata#METADATA_KEY_TITLE}</li>
-     *  <li>{@link MediaMetadata#METADATA_KEY_ARTIST}</li>
-     *  <li>{@link MediaMetadata#METADATA_KEY_ALBUM}</li>
-     *  <li>{@link MediaMetadata#METADATA_KEY_DISPLAY_SUBTITLE}</li>
-     *  <li>{@link MediaMetadata#METADATA_KEY_ALBUM_ART}</li>
-     *  <li>{@link MediaMetadata#METADATA_KEY_USER_RATING}</li>
+     * The following keys will be populated in the {@link MediaMetadataCompat}:
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_DISPLAY_TITLE}</li>
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_TITLE}</li>
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_ARTIST}</li>
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_ALBUM}</li>
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_DISPLAY_SUBTITLE}</li>
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_ALBUM_ART}</li>
+     *  <li>{@link MediaMetadataCompat#METADATA_KEY_USER_RATING}</li>
      * <ul/>
      *
      * @param info {@link ProgramInfo} to convert
      * @param isFavorite {@code true}, if a given program is a favorite
      * @param imageResolver metadata images resolver/cache
-     * @return {@link MediaMetadata} object
+     * @return {@link MediaMetadataCompat} object
      */
-    public static @NonNull MediaMetadata toMediaMetadata(@NonNull ProgramInfo info,
+    public static @NonNull MediaMetadataCompat toMediaMetadata(@NonNull ProgramInfo info,
             boolean isFavorite, @Nullable ImageResolver imageResolver) {
-        MediaMetadata.Builder bld = new MediaMetadata.Builder();
+        MediaMetadataCompat.Builder bld = new MediaMetadataCompat.Builder();
 
-        bld.putString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, getProgramName(info, 0));
+        bld.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, getProgramName(info, 0));
 
         RadioMetadata meta = info.getMetadata();
         if (meta != null) {
             String title = meta.getString(RadioMetadata.METADATA_KEY_TITLE);
             if (title != null) {
-                bld.putString(MediaMetadata.METADATA_KEY_TITLE, title);
+                bld.putString(MediaMetadataCompat.METADATA_KEY_TITLE, title);
             }
             String artist = meta.getString(RadioMetadata.METADATA_KEY_ARTIST);
             if (artist != null) {
-                bld.putString(MediaMetadata.METADATA_KEY_ARTIST, artist);
+                bld.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist);
             }
             String album = meta.getString(RadioMetadata.METADATA_KEY_ALBUM);
             if (album != null) {
-                bld.putString(MediaMetadata.METADATA_KEY_ALBUM, album);
+                bld.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album);
             }
             if (title != null || artist != null) {
                 String subtitle;
@@ -243,14 +247,15 @@ public class ProgramInfoExt {
                 } else {
                     subtitle = title + TITLE_SEPARATOR + artist;
                 }
-                bld.putString(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, subtitle);
+                bld.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, subtitle);
             }
 
             Bitmap bm = resolveAlbumArtBitmap(meta, imageResolver);
-            if (bm != null) bld.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bm);
+            if (bm != null) bld.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bm);
         }
 
-        bld.putRating(MediaMetadata.METADATA_KEY_USER_RATING, Rating.newHeartRating(isFavorite));
+        bld.putRating(MediaMetadataCompat.METADATA_KEY_USER_RATING,
+                RatingCompat.newHeartRating(isFavorite));
 
         return bld.build();
     }
