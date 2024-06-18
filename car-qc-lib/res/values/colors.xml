@@ -28,4 +28,6 @@
     <color name="qc_switch_thumb_color">#FFFFFF</color>
     <!-- The Switch thumb color when disabled. Use for the dark theme. -->
     <color name="qc_switch_thumb_color_disabled_on_dark">#757575</color>
+    <!-- The color for warning text in QC. -->
+    <color name="qc_warning_text_color">@color/car_yellow_color</color>
 </resources>
