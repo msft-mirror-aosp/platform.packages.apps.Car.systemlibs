@@ -16,19 +16,21 @@
 
 package com.android.car.broadcastradio.support.platform;
 
-import android.annotation.IntDef;
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.ProgramSelector.Identifier;
 import android.hardware.radio.RadioManager;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,14 +74,19 @@ public class ProgramSelectorExt {
     /**
      * Flags to control how channel values are converted to string with {@link #getDisplayName}.
      *
-     * Upper 16 bits are reserved for {@link ProgramInfoExt#NameFlag}.
+     * Upper 16 bits are reserved for {@link ProgramInfoExt.NameFlag}.
      */
-    @IntDef(prefix = { "NAME_" }, flag = true, value = {
+    @IntDef(flag = true, value = {
         NAME_NO_MODULATION,
         NAME_MODULATION_ONLY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NameFlag {}
+
+    /**
+     * Invalid value for a {@link ProgramSelector.Identifier}
+     */
+    public static int INVALID_IDENTIFIER_VALUE = 0;
 
     private static final String URI_SCHEME_BROADCASTRADIO = "broadcastradio";
     private static final String URI_AUTHORITY_PROGRAM = "program";
@@ -107,7 +114,7 @@ public class ProgramSelectorExt {
     }
 
     // when pushed to the framework, remove similar code from HAL 2.0 service
-    private static @ProgramSelector.ProgramType int identifierToProgramType(
+    private static int identifierToProgramType(
             @NonNull Identifier primaryId) {
         int idType = primaryId.getType();
         switch (idType) {
@@ -224,8 +231,7 @@ public class ProgramSelectorExt {
      * @param type identifier type to check for
      * @return true, if sel contains any identifier of a given type
      */
-    public static boolean hasId(@NonNull ProgramSelector sel,
-            @ProgramSelector.IdentifierType int type) {
+    public static boolean hasId(@NonNull ProgramSelector sel, int type) {
         try {
             sel.getFirstId(type);
             return true;
@@ -251,26 +257,81 @@ public class ProgramSelectorExt {
     }
 
     /**
+     * Get frequency from a {@link ProgramSelector}.
+     *
+     * @param selector Program selector
+     * @return frequency of the first {@link ProgramSelector#IDENTIFIER_TYPE_AMFM_FREQUENCY} id in
+     * program selector if it exists, otherwise the AM/FM frequency in
+     * {@link ProgramSelector#IDENTIFIER_TYPE_HD_STATION_ID_EXT} id if it is the primary id,
+     * {@link #INVALID_IDENTIFIER_VALUE} otherwise.
+     */
+    public static int getFrequency(@NonNull ProgramSelector selector) {
+        if (ProgramSelectorExt.hasId(selector, ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY)) {
+            return (int) selector.getFirstId(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY);
+        } else if (selector.getPrimaryId().getType()
+                == ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT) {
+            return IdentifierExt.asHdPrimary(selector.getPrimaryId()).getFrequency();
+        } else if (selector.getPrimaryId().getType()
+                == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT
+                || selector.getPrimaryId().getType()
+                == ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT) {
+            try {
+                return (int) selector.getFirstId(ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY);
+            } catch (IllegalArgumentException e) {
+                return INVALID_IDENTIFIER_VALUE;
+            }
+        }
+        return INVALID_IDENTIFIER_VALUE;
+    }
+
+    /**
+     * Get ensemble value from a DAB-type {@link ProgramSelector}.
+     *
+     * @param selector Program selector
+     * @return Value of the first {@link ProgramSelector#IDENTIFIER_TYPE_DAB_ENSEMBLE} identifier,
+     * 0 otherwise
+     */
+    public static int getDabEnsemble(@NonNull ProgramSelector selector) {
+        try {
+            return (int) selector.getFirstId(ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE);
+        } catch (IllegalArgumentException e) {
+            return INVALID_IDENTIFIER_VALUE;
+        }
+    }
+
+    /**
      * Returns a channel name that can be displayed to the user.
      *
-     * It's implemented only for radio technologies where the channel is meant
-     * to be presented to the user.
+     * <p>It's implemented only for radio technologies where the channel is meant
+     * to be presented to the user, such as FM/AM and HD radio.
+     *
+     * <p>For HD radio, the display name is prefix with "-HD[NUMBER]" where the number is the
+     * sub channel.
      *
      * @param sel the program selector
-     * @return Channel name or null, if radio technology doesn't present channel names to the user.
+     * @return Channel name or {@code null}, if radio technology doesn't present channel names to
+     * the user.
      */
     public static @Nullable String getDisplayName(@NonNull ProgramSelector sel,
             @NameFlag int flags) {
         boolean noProgramTypeFallback = (flags & NAME_NO_PROGRAM_TYPE_FALLBACK) != 0;
 
         if (isAmFmProgram(sel)) {
-            if (!hasId(sel, ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY)) {
+            long freq;
+            String hdSuffix = "";
+            if (sel.getPrimaryId().getType()
+                    == ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT) {
+                IdentifierExt.HdPrimary hdIdExt = IdentifierExt.asHdPrimary(sel.getPrimaryId());
+                freq = hdIdExt.getFrequency();
+                hdSuffix = "-HD" + (hdIdExt.getSubchannel() + 1);
+            } else if (hasId(sel, ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY)) {
+                freq = sel.getFirstId(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY);
+            } else {
                 if (noProgramTypeFallback) return null;
                 // if there is no frequency assigned, let's assume it's a malformed RDS selector
                 return "FM";
             }
-            long freq = sel.getFirstId(ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY);
-            return formatAmFmFrequency(freq, flags);
+            return formatAmFmFrequency(freq, flags) + hdSuffix;
         }
 
         if ((flags & NAME_MODULATION_ONLY) != 0) return null;
@@ -285,7 +346,8 @@ public class ProgramSelectorExt {
         switch (sel.getPrimaryId().getType()) {
             case ProgramSelector.IDENTIFIER_TYPE_SXM_SERVICE_ID:
                 return "SXM";
-            case ProgramSelector.IDENTIFIER_TYPE_DAB_SIDECC:
+            case ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT:
+            case ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT:
                 return "DAB";
             case ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID:
                 return "DRMO";
@@ -442,10 +504,10 @@ public class ProgramSelectorExt {
      */
     public static class IdentifierExt {
         /**
-         * Decode {@link ProgramSelector#IDENTIFIER_TYPE_HD_STATION_ID_EXT} value.
+         * Decoder of {@link ProgramSelector#IDENTIFIER_TYPE_HD_STATION_ID_EXT} value.
          *
-         * @param id identifier to decode
-         * @return value decoder
+         * When pushed to the framework, it will be non-static class referring
+         * to the original value.
          */
         public static @Nullable HdPrimary asHdPrimary(@NonNull Identifier id) {
             if (id.getType() == ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT) {
@@ -471,7 +533,7 @@ public class ProgramSelectorExt {
             }
 
             public long getStationId() {
-                return mValue & 0xFFFFFFFF;
+                return mValue & 0xFFFFFFFFL;
             }
 
             public int getSubchannel() {
@@ -481,6 +543,111 @@ public class ProgramSelectorExt {
             public int getFrequency() {
                 return (int) ((mValue >>> (32 + 4)) & 0x3FFFF);
             }
+        }
+
+        /**
+         * Decoder of {@link ProgramSelector#IDENTIFIER_TYPE_DAB_DMB_SID_EXT} value.
+         *
+         * <p>When pushed to the framework, it will be non-static class referring
+         * to the original value.
+         * @param id Identifier to be decoded
+         * @return {@link DabPrimary} object if the identifier is DAB-type, {@code null} otherwise
+         */
+        public static @Nullable DabPrimary asDabPrimary(@NonNull Identifier id) {
+            if (id.getType() == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT) {
+                return new DabPrimary(id.getValue());
+            }
+            return null;
+        }
+
+        /**
+         * Decoder of {@link ProgramSelector#IDENTIFIER_TYPE_DAB_DMB_SID_EXT} value.
+         *
+         * <p>When pushed to the framework, it will be non-static class referring
+         * to the original value.
+         */
+        public static class DabPrimary {
+            private final long mValue;
+
+            private DabPrimary(long value) {
+                mValue = value;
+            }
+
+            /**
+             * Get Service Identifier (SId).
+             * @return SId value
+             */
+            public int getSId() {
+                return (int) (mValue & 0xFFFFFFFF);
+            }
+
+            /**
+             * Get Extended Country Code (ECC)
+             * @return Extended Country Code
+             */
+            public int getEcc() {
+                return (int) ((mValue >>> 32) & 0xFF);
+            }
+
+            /**
+             * Get SCIdS (Service Component Identifier within the Service) value
+             * @return SCIdS value
+             */
+            public int getSCIdS() {
+                return (int) ((mValue >>> (32 + 8)) & 0xF);
+            }
+        }
+    }
+
+    public static class ProgramSelectorComparator implements Comparator<ProgramSelector> {
+        @Override
+        public int compare(ProgramSelector selector1, ProgramSelector selector2) {
+            int type1 = selector1.getPrimaryId().getType();
+            int type2 = selector2.getPrimaryId().getType();
+            int frequency1 = getFrequency(selector1);
+            int frequency2 = getFrequency(selector2);
+            if (isAmFmProgram(selector1) && isAmFmProgram(selector2)) {
+                if (frequency1 != frequency2) {
+                    return frequency1 > frequency2 ? 1 : -1;
+                }
+                int subchannel1 = selector1.getPrimaryId().getType()
+                        == ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT
+                        ? IdentifierExt.asHdPrimary(selector1.getPrimaryId()).getSubchannel() : 0;
+                int subchannel2 = selector2.getPrimaryId().getType()
+                        == ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT
+                        ? IdentifierExt.asHdPrimary(selector2.getPrimaryId()).getSubchannel() : 0;
+                if (subchannel1 != subchannel2) {
+                    return subchannel1 > subchannel2 ? 1 : -1;
+                }
+                return selector1.getPrimaryId().getType() - selector2.getPrimaryId().getType();
+            } else if (type1 == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT
+                    && type2 == ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT) {
+                if (frequency1 != frequency2) {
+                    return frequency1 > frequency2 ? 1 : -1;
+                }
+                IdentifierExt.DabPrimary dabPrimary1 = IdentifierExt.asDabPrimary(
+                        selector1.getPrimaryId());
+                IdentifierExt.DabPrimary dabPrimary2 = IdentifierExt.asDabPrimary(
+                        selector2.getPrimaryId());
+                int ecc1 = dabPrimary1.getEcc();
+                int ecc2 = dabPrimary2.getEcc();
+                if (ecc1 != ecc2) {
+                    return ecc1 > ecc2 ? 1 : -1;
+                }
+                int sId1 = dabPrimary1.getSId();
+                int sId2 = dabPrimary2.getSId();
+                if (sId1 != sId2) {
+                    return sId1 > sId2 ? 1 : -1;
+                }
+                int sCIds1 = dabPrimary1.getSCIdS();
+                int sCIds2 = dabPrimary2.getSCIdS();
+                if (sCIds1 != sCIds2) {
+                    return sCIds1 > sCIds2 ? 1 : -1;
+                }
+                return getDabEnsemble(selector1) > getDabEnsemble(selector2) ? 1 : -1;
+            }
+            return type1 > type2 || (type1 == type2 && selector1.getPrimaryId().getValue()
+                    > selector2.getPrimaryId().getValue()) ? 1 : -1;
         }
     }
 }
