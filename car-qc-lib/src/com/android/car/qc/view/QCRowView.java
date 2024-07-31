@@ -67,10 +67,13 @@ public class QCRowView extends FrameLayout {
     private LayoutInflater mLayoutInflater;
     private BidiFormatter mBidiFormatter;
     private View mContentView;
+    private View mTopDivider;
+    private View mBottomDivider;
     private TextView mTitle;
     private TextView mSubtitle;
     private TextView mActionText;
     private ImageView mStartIcon;
+    private ImageView mEndChevron;
     @ColorInt
     private int mStartIconTint;
     private LinearLayout mStartItemsContainer;
@@ -197,6 +200,9 @@ public class QCRowView extends FrameLayout {
         mEndItemsContainer = findViewById(R.id.qc_row_end_items);
         mSeekBarContainer = findViewById(R.id.qc_seekbar_wrapper);
         mSeekBar = findViewById(R.id.qc_seekbar);
+        mTopDivider = findViewById(R.id.top_divider);
+        mBottomDivider = findViewById(R.id.bottom_divider);
+        mEndChevron = findViewById(R.id.chevron_end);
     }
 
     void setActionListener(QCActionListener listener) {
@@ -309,6 +315,16 @@ public class QCRowView extends FrameLayout {
             mEndItemsContainer.setVisibility(View.GONE);
         } else {
             mEndItemsContainer.setVisibility(View.VISIBLE);
+        }
+
+        if (mTopDivider != null) {
+            mTopDivider.setVisibility(row.showTopDivider() ? VISIBLE : GONE);
+        }
+        if (mBottomDivider != null) {
+            mBottomDivider.setVisibility(row.showBottomDivider() ? VISIBLE : GONE);
+        }
+        if (mEndChevron != null) {
+            mEndChevron.setVisibility(row.showChevron() ? VISIBLE : GONE);
         }
     }
 
