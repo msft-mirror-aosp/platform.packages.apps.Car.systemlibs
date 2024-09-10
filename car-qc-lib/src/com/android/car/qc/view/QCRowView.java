@@ -49,6 +49,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.qc.QCActionItem;
+import com.android.car.qc.QCCategory;
 import com.android.car.qc.QCItem;
 import com.android.car.qc.QCRow;
 import com.android.car.qc.QCSlider;
@@ -68,6 +69,7 @@ public class QCRowView extends FrameLayout {
     private View mContentView;
     private TextView mTitle;
     private TextView mSubtitle;
+    private TextView mActionText;
     private ImageView mStartIcon;
     @ColorInt
     private int mStartIconTint;
@@ -189,6 +191,7 @@ public class QCRowView extends FrameLayout {
         mContentView = findViewById(R.id.qc_row_content);
         mTitle = findViewById(R.id.qc_title);
         mSubtitle = findViewById(R.id.qc_summary);
+        mActionText = findViewById(R.id.qc_action_text);
         mStartIcon = findViewById(R.id.qc_icon);
         mStartItemsContainer = findViewById(R.id.qc_row_start_items);
         mEndItemsContainer = findViewById(R.id.qc_row_end_items);
@@ -213,11 +216,15 @@ public class QCRowView extends FrameLayout {
                 mContentView.setOnClickListener(v -> {
                     fireAction(row, /* intent= */ null);
                 });
+            } else {
+                mContentView.setOnClickListener(null);
             }
         } else if (row.getPrimaryAction() != null || row.getActionHandler() != null) {
             mContentView.setOnClickListener(v -> {
                 fireAction(row, /* intent= */ null);
             });
+        } else {
+            mContentView.setOnClickListener(null);
         }
         if (!TextUtils.isEmpty(row.getTitle())) {
             mTitle.setVisibility(VISIBLE);
@@ -232,6 +239,22 @@ public class QCRowView extends FrameLayout {
                     mBidiFormatter.unicodeWrap(row.getSubtitle(), TextDirectionHeuristics.LOCALE));
         } else {
             mSubtitle.setVisibility(GONE);
+        }
+        if (!TextUtils.isEmpty(row.getActionText())) {
+            mActionText.setVisibility(VISIBLE);
+            mActionText.setText(
+                    mBidiFormatter.unicodeWrap(row.getActionText(),
+                            TextDirectionHeuristics.LOCALE));
+            if (row.getCategory() == QCCategory.WARNING) {
+                mActionText.setTextColor(
+                        getResources().getColor(R.color.qc_warning_text_color));
+            } else {
+                mActionText.setTextColor(
+                        getResources().getColor(
+                                com.android.car.resource.common.R.color.car_on_surface_variant));
+            }
+        } else {
+            mActionText.setVisibility(GONE);
         }
         if (row.getStartIcon() != null) {
             mStartIcon.setVisibility(VISIBLE);
