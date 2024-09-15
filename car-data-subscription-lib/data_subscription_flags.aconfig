@@ -1,0 +1,9 @@
+package: "com.android.car.datasubscription"
+container: "system"
+
+flag {
+  name: "data_subscription_pop_up"
+  namespace: "car_sys_exp"
+  description: "This flag enables Data Subscription pop-up in Car"
+  bug: "322687755"
+}
