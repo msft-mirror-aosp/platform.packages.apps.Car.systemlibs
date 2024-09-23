@@ -61,6 +61,8 @@ public abstract class QCItem implements Parcelable {
     private final boolean mIsClickableWhileDisabled;
     private ActionHandler mActionHandler;
     private ActionHandler mDisabledClickActionHandler;
+    private int mPackageUid;
+    private int mTag;
 
     public QCItem(@NonNull @QCItemType String type) {
         this(type, /* isEnabled= */true, /* isClickableWhileDisabled= */ false);
@@ -77,6 +79,8 @@ public abstract class QCItem implements Parcelable {
         mType = in.readString();
         mIsEnabled = in.readBoolean();
         mIsClickableWhileDisabled = in.readBoolean();
+        mPackageUid = in.readInt();
+        mTag = in.readInt();
     }
 
     @NonNull
@@ -93,6 +97,14 @@ public abstract class QCItem implements Parcelable {
         return mIsClickableWhileDisabled;
     }
 
+    public int getPackageUid() {
+        return mPackageUid;
+    }
+
+    public int getTag() {
+        return mTag;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -103,6 +115,8 @@ public abstract class QCItem implements Parcelable {
         dest.writeString(mType);
         dest.writeBoolean(mIsEnabled);
         dest.writeBoolean(mIsClickableWhileDisabled);
+        dest.writeInt(mPackageUid);
+        dest.writeInt(mTag);
     }
 
     public void setActionHandler(@Nullable ActionHandler handler) {
@@ -111,6 +125,14 @@ public abstract class QCItem implements Parcelable {
 
     public void setDisabledClickActionHandler(@Nullable ActionHandler handler) {
         mDisabledClickActionHandler = handler;
+    }
+
+    public void setPackageUid(int packageUid) {
+        mPackageUid = packageUid;
+    }
+
+    public void setTag(int tag) {
+        mTag = tag;
     }
 
     @Nullable
