@@ -19,6 +19,7 @@ package com.android.car.qc.view;
 import static com.android.car.qc.QCItem.QC_ACTION_TOGGLE_STATE;
 import static com.android.car.qc.view.QCView.QCActionListener;
 
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -107,7 +108,14 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
             if (!qcTile.isEnabled()) {
                 if (qcTile.getDisabledClickAction() != null) {
                     try {
-                        qcTile.getDisabledClickAction().send(getContext(), 0, new Intent());
+                        qcTile.getDisabledClickAction().send(getContext(), 0, new Intent(),
+                            /* requestCode= */ null,
+                            /* fillInIntent= */ null,
+                            /* options= */ null,
+                                ActivityOptions.makeBasic()
+                                    .setPendingIntentBackgroundActivityStartMode(
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                    .toBundle());
                         if (mActionListener != null) {
                             mActionListener.onQCAction(qcTile, qcTile.getDisabledClickAction());
                         }
@@ -133,7 +141,14 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
                     intent.putExtra(QC_ACTION_TOGGLE_STATE, isChecked);
                     if (qcTile.getPrimaryAction() != null) {
                         try {
-                            qcTile.getPrimaryAction().send(getContext(), 0, intent);
+                            qcTile.getPrimaryAction().send(getContext(), 0, intent,
+                                /* requestCode= */ null,
+                                /* fillInIntent= */ null,
+                                /* options= */ null,
+                                    ActivityOptions.makeBasic()
+                                        .setPendingIntentBackgroundActivityStartMode(
+                                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                        .toBundle());
                             if (mActionListener != null) {
                                 mActionListener.onQCAction(qcTile, qcTile.getPrimaryAction());
                             }
