@@ -21,6 +21,7 @@ import static com.android.car.qc.QCItem.QC_ACTION_TOGGLE_STATE;
 import static com.android.car.qc.QCItem.QC_TYPE_ACTION_SWITCH;
 import static com.android.car.qc.view.QCView.QCActionListener;
 
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -465,7 +466,14 @@ public class QCRowView extends FrameLayout {
         if (!item.isEnabled()) {
             if (item.getDisabledClickAction() != null) {
                 try {
-                    item.getDisabledClickAction().send(getContext(), 0, intent);
+                    item.getDisabledClickAction().send(getContext(), 0, intent,
+                            /* requestCode= */ null,
+                            /* fillInIntent= */ null,
+                            /* options= */ null,
+                            ActivityOptions.makeBasic()
+                                .setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                .toBundle());
                     if (mActionListener != null) {
                         mActionListener.onQCAction(item, item.getDisabledClickAction());
                     }
@@ -483,7 +491,14 @@ public class QCRowView extends FrameLayout {
 
         if (item.getPrimaryAction() != null) {
             try {
-                item.getPrimaryAction().send(getContext(), 0, intent);
+                item.getPrimaryAction().send(getContext(), 0, intent,
+                        /* requestCode= */ null,
+                        /* fillInIntent= */ null,
+                        /* options= */ null,
+                        ActivityOptions.makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .toBundle());
                 if (mActionListener != null) {
                     mActionListener.onQCAction(item, item.getPrimaryAction());
                 }
