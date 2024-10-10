@@ -186,4 +186,8 @@ public class QCSlider extends QCItem {
                     mInputAction, mDisabledClickAction);
         }
     }
+
+    int getSliderValueInPercentage(int value) {
+        return (int) (value * 1.0 / (getMax() - getMin()) * 100);
+    }
 }
