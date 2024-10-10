@@ -55,6 +55,7 @@ import com.android.car.qc.QCItem;
 import com.android.car.qc.QCRow;
 import com.android.car.qc.QCSlider;
 import com.android.car.qc.R;
+import com.android.car.qc.StatsLogHelper;
 import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.DirectManipulationHelper;
 import com.android.car.ui.uxr.DrawableStateToggleButton;
@@ -476,6 +477,7 @@ public class QCRowView extends FrameLayout {
                     if (mActionListener != null) {
                         mActionListener.onQCAction(item, item.getDisabledClickAction());
                     }
+                    StatsLogHelper.getInstance().logMetrics(item, intent);
                 } catch (PendingIntent.CanceledException e) {
                     Log.d(TAG, "Error sending intent", e);
                 }
@@ -484,6 +486,7 @@ public class QCRowView extends FrameLayout {
                 if (mActionListener != null) {
                     mActionListener.onQCAction(item, item.getDisabledClickActionHandler());
                 }
+                StatsLogHelper.getInstance().logMetrics(item, intent);
             }
             return;
         }
@@ -501,6 +504,7 @@ public class QCRowView extends FrameLayout {
                 if (mActionListener != null) {
                     mActionListener.onQCAction(item, item.getPrimaryAction());
                 }
+                StatsLogHelper.getInstance().logMetrics(item, intent);
             } catch (PendingIntent.CanceledException e) {
                 Log.d(TAG, "Error sending intent", e);
             }
@@ -509,6 +513,7 @@ public class QCRowView extends FrameLayout {
             if (mActionListener != null) {
                 mActionListener.onQCAction(item, item.getActionHandler());
             }
+            StatsLogHelper.getInstance().logMetrics(item, intent);
         }
     }
 
