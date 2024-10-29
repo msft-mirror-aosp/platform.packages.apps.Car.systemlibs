@@ -29,6 +29,8 @@ import androidx.annotation.StringDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Base class for all quick controls elements.
@@ -62,7 +64,7 @@ public abstract class QCItem implements Parcelable {
     private ActionHandler mActionHandler;
     private ActionHandler mDisabledClickActionHandler;
     private int mPackageUid;
-    private int mTag;
+    private String mTag = "";
 
     public QCItem(@NonNull @QCItemType String type) {
         this(type, /* isEnabled= */true, /* isClickableWhileDisabled= */ false);
@@ -80,7 +82,7 @@ public abstract class QCItem implements Parcelable {
         mIsEnabled = in.readBoolean();
         mIsClickableWhileDisabled = in.readBoolean();
         mPackageUid = in.readInt();
-        mTag = in.readInt();
+        mTag = in.readString();
     }
 
     @NonNull
@@ -101,7 +103,7 @@ public abstract class QCItem implements Parcelable {
         return mPackageUid;
     }
 
-    public int getTag() {
+    public String getTag() {
         return mTag;
     }
 
@@ -116,7 +118,7 @@ public abstract class QCItem implements Parcelable {
         dest.writeBoolean(mIsEnabled);
         dest.writeBoolean(mIsClickableWhileDisabled);
         dest.writeInt(mPackageUid);
-        dest.writeInt(mTag);
+        dest.writeString(mTag);
     }
 
     public void setActionHandler(@Nullable ActionHandler handler) {
@@ -131,8 +133,16 @@ public abstract class QCItem implements Parcelable {
         mPackageUid = packageUid;
     }
 
-    public void setTag(int tag) {
-        mTag = tag;
+    public void setTag(String tag) {
+        //for privacy concerns, these tags should be hashed before they are
+        //recorded for metrics
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(tag.getBytes());
+            mTag = new String(hash);
+        } catch (NoSuchAlgorithmException e) {
+            mTag = "";
+        }
     }
 
     @Nullable
