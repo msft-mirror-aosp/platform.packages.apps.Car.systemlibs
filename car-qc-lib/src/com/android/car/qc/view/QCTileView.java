@@ -19,6 +19,7 @@ package com.android.car.qc.view;
 import static com.android.car.qc.QCItem.QC_ACTION_TOGGLE_STATE;
 import static com.android.car.qc.view.QCView.QCActionListener;
 
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +35,7 @@ import androidx.lifecycle.Observer;
 import com.android.car.qc.QCItem;
 import com.android.car.qc.QCTile;
 import com.android.car.qc.R;
+import com.android.car.qc.StatsLogHelper;
 import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.uxr.DrawableStateToggleButton;
 
@@ -107,19 +109,30 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
             if (!qcTile.isEnabled()) {
                 if (qcTile.getDisabledClickAction() != null) {
                     try {
-                        qcTile.getDisabledClickAction().send(getContext(), 0, new Intent());
+                        Intent intent = new Intent();
+                        qcTile.getDisabledClickAction().send(getContext(), 0, intent,
+                            /* requestCode= */ null,
+                            /* fillInIntent= */ null,
+                            /* options= */ null,
+                                ActivityOptions.makeBasic()
+                                    .setPendingIntentBackgroundActivityStartMode(
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                    .toBundle());
                         if (mActionListener != null) {
                             mActionListener.onQCAction(qcTile, qcTile.getDisabledClickAction());
                         }
+                        StatsLogHelper.getInstance().logMetrics(qcTile, intent);
                     } catch (PendingIntent.CanceledException e) {
                         Log.d(TAG, "Error sending intent", e);
                     }
                 } else if (qcTile.getDisabledClickActionHandler() != null) {
+                    Intent intent = new Intent();
                     qcTile.getDisabledClickActionHandler().onAction(qcTile, getContext(),
-                            new Intent());
+                            intent);
                     if (mActionListener != null) {
                         mActionListener.onQCAction(qcTile, qcTile.getDisabledClickActionHandler());
                     }
+                    StatsLogHelper.getInstance().logMetrics(qcTile, intent);
                 }
                 return;
             }
@@ -133,10 +146,18 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
                     intent.putExtra(QC_ACTION_TOGGLE_STATE, isChecked);
                     if (qcTile.getPrimaryAction() != null) {
                         try {
-                            qcTile.getPrimaryAction().send(getContext(), 0, intent);
+                            qcTile.getPrimaryAction().send(getContext(), 0, intent,
+                                /* requestCode= */ null,
+                                /* fillInIntent= */ null,
+                                /* options= */ null,
+                                    ActivityOptions.makeBasic()
+                                        .setPendingIntentBackgroundActivityStartMode(
+                                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                        .toBundle());
                             if (mActionListener != null) {
                                 mActionListener.onQCAction(qcTile, qcTile.getPrimaryAction());
                             }
+                            StatsLogHelper.getInstance().logMetrics(qcTile, intent);
                         } catch (PendingIntent.CanceledException e) {
                             Log.d(TAG, "Error sending intent", e);
                         }
@@ -145,6 +166,7 @@ public class QCTileView extends FrameLayout implements Observer<QCItem> {
                         if (mActionListener != null) {
                             mActionListener.onQCAction(qcTile, qcTile.getActionHandler());
                         }
+                        StatsLogHelper.getInstance().logMetrics(qcTile, intent);
                     }
                 });
     }
