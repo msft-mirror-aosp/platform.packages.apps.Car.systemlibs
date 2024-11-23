@@ -29,6 +29,8 @@ import androidx.annotation.StringDef;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Base class for all quick controls elements.
@@ -61,6 +63,8 @@ public abstract class QCItem implements Parcelable {
     private final boolean mIsClickableWhileDisabled;
     private ActionHandler mActionHandler;
     private ActionHandler mDisabledClickActionHandler;
+    private int mPackageUid;
+    private String mTag = "";
 
     public QCItem(@NonNull @QCItemType String type) {
         this(type, /* isEnabled= */true, /* isClickableWhileDisabled= */ false);
@@ -77,6 +81,8 @@ public abstract class QCItem implements Parcelable {
         mType = in.readString();
         mIsEnabled = in.readBoolean();
         mIsClickableWhileDisabled = in.readBoolean();
+        mPackageUid = in.readInt();
+        mTag = in.readString();
     }
 
     @NonNull
@@ -93,6 +99,14 @@ public abstract class QCItem implements Parcelable {
         return mIsClickableWhileDisabled;
     }
 
+    public int getPackageUid() {
+        return mPackageUid;
+    }
+
+    public String getTag() {
+        return mTag;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -103,6 +117,8 @@ public abstract class QCItem implements Parcelable {
         dest.writeString(mType);
         dest.writeBoolean(mIsEnabled);
         dest.writeBoolean(mIsClickableWhileDisabled);
+        dest.writeInt(mPackageUid);
+        dest.writeString(mTag);
     }
 
     public void setActionHandler(@Nullable ActionHandler handler) {
@@ -111,6 +127,22 @@ public abstract class QCItem implements Parcelable {
 
     public void setDisabledClickActionHandler(@Nullable ActionHandler handler) {
         mDisabledClickActionHandler = handler;
+    }
+
+    public void setPackageUid(int packageUid) {
+        mPackageUid = packageUid;
+    }
+
+    public void setTag(String tag) {
+        //for privacy concerns, these tags should be hashed before they are
+        //recorded for metrics
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(tag.getBytes());
+            mTag = new String(hash);
+        } catch (NoSuchAlgorithmException e) {
+            mTag = "";
+        }
     }
 
     @Nullable
