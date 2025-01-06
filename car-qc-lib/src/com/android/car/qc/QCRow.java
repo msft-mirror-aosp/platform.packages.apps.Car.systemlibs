@@ -44,18 +44,22 @@ public class QCRow extends QCItem {
     private final int mCategory;
     private final Icon mStartIcon;
     private final boolean mIsStartIconTintable;
+    private final boolean mShowChevron;
+    private final boolean mShowBottomDivider;
+    private final boolean mShowTopDivider;
     private final QCSlider mSlider;
     private final List<QCActionItem> mStartItems;
     private final List<QCActionItem> mEndItems;
     private final PendingIntent mPrimaryAction;
     private PendingIntent mDisabledClickAction;
+
     public QCRow(@Nullable String title, @Nullable String subtitle,
             @Nullable String actionText, @QCCategory int category,
             boolean isEnabled, boolean isClickableWhileDisabled,
-            @Nullable PendingIntent primaryAction,
-            @Nullable PendingIntent disabledClickAction, @Nullable Icon startIcon,
-            boolean isIconTintable, @Nullable QCSlider slider,
-            @NonNull List<QCActionItem> startItems, @NonNull List<QCActionItem> endItems) {
+            @Nullable PendingIntent primaryAction, @Nullable PendingIntent disabledClickAction,
+            @Nullable Icon startIcon, boolean isIconTintable, @Nullable QCSlider slider,
+            @NonNull List<QCActionItem> startItems, @NonNull List<QCActionItem> endItems,
+            boolean showChevron, boolean showTopDivider, boolean showBottomDivider) {
         super(QC_TYPE_ROW, isEnabled, isClickableWhileDisabled);
         mTitle = title;
         mSubtitle = subtitle;
@@ -68,6 +72,9 @@ public class QCRow extends QCItem {
         mSlider = slider;
         mStartItems = Collections.unmodifiableList(startItems);
         mEndItems = Collections.unmodifiableList(endItems);
+        mShowChevron = showChevron;
+        mShowTopDivider = showTopDivider;
+        mShowBottomDivider = showBottomDivider;
     }
 
     public QCRow(@NonNull Parcel in) {
@@ -113,6 +120,10 @@ public class QCRow extends QCItem {
         } else {
             mDisabledClickAction = null;
         }
+
+        mShowChevron = in.readBoolean();
+        mShowTopDivider = in.readBoolean();
+        mShowBottomDivider = in.readBoolean();
     }
 
     @Override
@@ -151,6 +162,10 @@ public class QCRow extends QCItem {
         if (hasDisabledClickAction) {
             mDisabledClickAction.writeToParcel(dest, flags);
         }
+
+        dest.writeBoolean(mShowChevron);
+        dest.writeBoolean(mShowTopDivider);
+        dest.writeBoolean(mShowBottomDivider);
     }
 
     @Override
@@ -207,6 +222,18 @@ public class QCRow extends QCItem {
         return mEndItems;
     }
 
+    public boolean showTopDivider() {
+        return mShowTopDivider;
+    }
+
+    public boolean showBottomDivider() {
+        return mShowBottomDivider;
+    }
+
+    public boolean showChevron() {
+        return mShowChevron;
+    }
+
     public static Creator<QCRow> CREATOR = new Creator<QCRow>() {
         @Override
         public QCRow createFromParcel(Parcel source) {
@@ -233,6 +260,9 @@ public class QCRow extends QCItem {
         private int mCategory = QCCategory.NORMAL;
         private boolean mIsEnabled = true;
         private boolean mIsClickableWhileDisabled = false;
+        private boolean mShowChevron = false;
+        private boolean mShowTopDivider = false;
+        private boolean mShowBottomDivider = false;
         private QCSlider mSlider;
         private PendingIntent mPrimaryAction;
         private PendingIntent mDisabledClickAction;
@@ -303,6 +333,30 @@ public class QCRow extends QCItem {
         }
 
         /**
+         * Sets whether to show the chevron or not.
+         */
+        public Builder showChevron(boolean showChevron) {
+            mShowChevron = showChevron;
+            return this;
+        }
+
+        /**
+         * Sets whether to show the divider on the bottom or not.
+         */
+        public Builder showBottomDivider(boolean showBottomDivider) {
+            mShowBottomDivider = showBottomDivider;
+            return this;
+        }
+
+        /**
+         * Sets whether to show the divider on the top or not.
+         */
+        public Builder showTopDivider(boolean showTopDivider) {
+            mShowTopDivider = showTopDivider;
+            return this;
+        }
+
+        /**
          * Adds a {@link QCSlider} to the slider area.
          */
         public Builder addSlider(@Nullable QCSlider slider) {
@@ -348,7 +402,8 @@ public class QCRow extends QCItem {
         public QCRow build() {
             return new QCRow(mTitle, mSubtitle, mActionText, mCategory, mIsEnabled,
                     mIsClickableWhileDisabled, mPrimaryAction, mDisabledClickAction, mStartIcon,
-                    mIsStartIconTintable, mSlider, mStartItems, mEndItems);
+                    mIsStartIconTintable, mSlider, mStartItems, mEndItems,
+                    mShowChevron, mShowTopDivider, mShowBottomDivider);
         }
     }
 }
