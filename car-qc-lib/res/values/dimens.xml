@@ -22,6 +22,8 @@
     <dimen name="qc_row_icon_size">44dp</dimen>
     <dimen name="qc_row_icon_margin_end">32dp</dimen>
     <dimen name="qc_row_content_margin">16dp</dimen>
+    <dimen name="qc_row_horizontal_divider_height">2dp</dimen>
+    <dimen name="qc_row_bottom_divider_margin_top">20dp</dimen>
 
     <dimen name="qc_action_items_horizontal_margin">32dp</dimen>
     <dimen name="qc_toggle_size">80dp</dimen>
