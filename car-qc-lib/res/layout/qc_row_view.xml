@@ -73,7 +73,7 @@
             android:layout_height="0dp"
             android:background="?android:attr/selectableItemBackground"
             app:layout_constraintStart_toEndOf="@+id/qc_row_start_items"
-            app:layout_constraintEnd_toStartOf="@+id/chevron_end"
+            app:layout_constraintEnd_toStartOf="@+id/qc_row_end_items"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHeight_default="wrap"
@@ -107,7 +107,7 @@
                 app:layout_constraintStart_toEndOf="@+id/barrier1"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toTopOf="@+id/qc_summary"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/barrier3"
                 app:layout_constraintVertical_chainStyle="packed"/>
 
             <com.android.car.ui.uxr.DrawableStateTextView
@@ -117,7 +117,7 @@
                 android:layout_centerVertical="true"
                 style="@style/TextAppearance.QC.Subtitle"
                 app:layout_constraintStart_toEndOf="@+id/barrier1"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/barrier3"
                 app:layout_constraintTop_toBottomOf="@+id/qc_title"
                 app:layout_constraintBottom_toTopOf="@+id/qc_action_text"/>
 
@@ -128,7 +128,7 @@
                 android:layout_centerVertical="true"
                 style="@style/TextAppearance.QC.Subtitle"
                 app:layout_constraintStart_toEndOf="@+id/barrier1"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/barrier3"
                 app:layout_constraintTop_toBottomOf="@+id/qc_summary"
                 app:layout_constraintBottom_toTopOf="@+id/barrier2"/>
 
@@ -152,7 +152,7 @@
                 android:orientation="vertical"
                 android:visibility="gone"
                 app:layout_constraintStart_toEndOf="@+id/barrier1"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/barrier3"
                 app:layout_constraintTop_toBottomOf="@+id/barrier2"
                 app:layout_constraintBottom_toBottomOf="parent">
                 <com.android.car.qc.view.QCSeekBarView
@@ -162,18 +162,25 @@
                     style="@style/Widget.QC.SeekBar"/>
             </androidx.preference.UnPressableLinearLayout>
 
-        </com.android.car.ui.uxr.DrawableStateConstraintLayout>
+            <ImageView
+                android:id="@+id/chevron_end"
+                android:layout_width="@dimen/qc_row_icon_size"
+                android:layout_height="@dimen/qc_row_icon_size"
+                android:src="@drawable/qc_row_chevron"
+                android:scaleType="fitCenter"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toEndOf="@+id/barrier3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <ImageView
-            android:id="@+id/chevron_end"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:src="@drawable/qc_row_chevron"
-            android:scaleType="fitCenter"
-            app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintEnd_toStartOf="@id/qc_row_end_items"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="start"
+                app:barrierAllowsGoneWidgets="false"/>
+        </com.android.car.ui.uxr.DrawableStateConstraintLayout>
 
         <LinearLayout
             android:id="@+id/qc_row_end_items"
@@ -183,6 +190,7 @@
             android:orientation="horizontal"
             android:divider="@drawable/qc_row_action_divider"
             android:showDividers="middle"
+            app:layout_constraintStart_toEndOf="@id/qc_row_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>

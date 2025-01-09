@@ -29,12 +29,12 @@ import java.util.List;
 
 /**
  * Quick Control Row Element
- * ---------------------------------------
- * |            | Title       |          |
- * | StartItems | Subtitle    | EndItems |
- * |            | ActionText  |          |
- * |            | Sliders     |          |
- * ---------------------------------------
+ * --------------------------------------------------
+ * |            | Title       |          |          |
+ * | StartItems | Subtitle    | Chevron  | EndItems |
+ * |            | ActionText  |          |          |
+ * |            | Sliders     |          |          |
+ * --------------------------------------------------
  */
 public class QCRow extends QCItem {
     private final String mTitle;
