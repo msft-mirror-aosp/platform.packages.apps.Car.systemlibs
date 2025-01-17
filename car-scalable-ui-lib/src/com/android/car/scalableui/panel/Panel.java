@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.car.scalableui.panel;
 
 import android.graphics.Rect;
@@ -144,4 +143,26 @@ public interface Panel {
      * @param role The new role of this panel.
      */
     void setRole(int role);
+
+    /**
+     * Set the rootTask of the panel to be launch root task.
+     * TODO(b/388021504):This api should move to role
+     */
+    void setLaunchRoot(boolean isLaunchRoot);
+
+    /**
+     * Sets the display ID of the panel.
+     * TODO(b/388021504):This api should move to role
+     */
+    void setDisplayId(int displayId);
+
+    /**
+     * Initializes the panel.
+     */
+    void init();
+
+    /**
+     * Reset the panel.
+     */
+    void reset();
 }
