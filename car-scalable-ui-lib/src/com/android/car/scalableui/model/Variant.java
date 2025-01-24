@@ -26,6 +26,9 @@ import android.util.AttributeSet;
 import android.util.Xml;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.Nullable;
+
+import com.android.car.scalableui.manager.Event;
 import com.android.car.scalableui.panel.Panel;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -192,6 +195,15 @@ public class Variant {
      */
     public void setBounds(Rect bounds) {
         mBounds = bounds;
+    }
+
+    /**
+     * Update the variant with data from an event.
+     *
+     * @param event the event that was executed.
+     */
+    public void updateFromEvent(@Nullable Event event) {
+        // no-op
     }
 
     /**
