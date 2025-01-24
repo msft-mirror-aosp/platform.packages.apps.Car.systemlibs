@@ -16,7 +16,10 @@
 
 package com.android.car.scalableui.panel;
 
+import androidx.annotation.Nullable;
+
 import java.util.HashMap;
+import java.util.function.Predicate;
 
 /**
  * A pool for managing {@link Panel} instances.
@@ -27,6 +30,9 @@ import java.util.HashMap;
  */
 public class PanelPool {
     private static final PanelPool sInstance = new PanelPool();
+
+    private final HashMap<String, Panel> mPanels = new HashMap<>();
+    private PanelCreatorDelegate mDelegate;
 
     /**
      * An instance of the {@link PanelPool}.
@@ -47,8 +53,6 @@ public class PanelPool {
         Panel createPanel(String id);
     }
 
-    private final HashMap<String, Panel> mPanels = new HashMap<>();
-    private PanelCreatorDelegate mDelegate;
 
     private PanelPool() {}
 
@@ -84,5 +88,19 @@ public class PanelPool {
             mPanels.put(id, panel);
         }
         return mPanels.get(id);
+    }
+
+    /**
+     * Retrieves a panel with the given {@link Predicate}.
+     *
+     * @param predicate A predicate that defines the criteria for selecting a panel.
+     * @return The first panel matching the predicate, or null if none is found.
+     */
+    @Nullable
+    public Panel getPanel(Predicate<Panel> predicate) {
+        for (Panel panel : mPanels.values()) {
+            if (predicate.test(panel)) return panel;
+        }
+        return null;
     }
 }

@@ -103,18 +103,22 @@ public class PanelView extends FrameLayout implements Panel {
         }
     }
 
+    @Override
     public int getX1() {
         return getLeft();
     }
 
+    @Override
     public int getX2() {
         return getRight();
     }
 
+    @Override
     public int getY1() {
         return getTop();
     }
 
+    @Override
     public int getY2() {
         return getBottom();
     }
@@ -206,6 +210,26 @@ public class PanelView extends FrameLayout implements Panel {
         } else {
             throw new UnsupportedOperationException("Specified role is not supported");
         }
+    }
+
+    @Override
+    public void setLaunchRoot(boolean isLaunchRoot) {
+        // no-op
+    }
+
+    @Override
+    public void setDisplayId(int displayId) {
+        // no-op
+    }
+
+    @Override
+    public void init() {
+        // no-op
+    }
+
+    @Override
+    public void reset() {
+        // no-op
     }
 
     private boolean isDrawableRole(int role) {
