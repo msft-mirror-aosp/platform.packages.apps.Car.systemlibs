@@ -74,9 +74,10 @@ public class StateManagerTest {
         when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(
                 mockAnimator);
 
-        PanelTransaction panelTransaction = StateManager.handleEvent(new Event(TEST_EVENT));
+        Event event = new Event(TEST_EVENT);
+        PanelTransaction panelTransaction = StateManager.handleEvent(event);
 
-        verify(mockPanelState).setVariant(TO_VARIANT_ID, /* payload= */ null);
+        verify(mockPanelState).setVariant(TO_VARIANT_ID, event);
         verify(mockPanelState).onAnimationStart(mockAnimator);
         verify(mockAnimator).removeAllListeners();
         verify(mockAnimator).addListener(any(AnimatorListenerAdapter.class));
@@ -99,7 +100,7 @@ public class StateManagerTest {
         StateManager.handleEvent(new Event(TEST_EVENT));
 
         // Verify that no state changes or animations are applied
-        verify(mockPanelState, never()).setVariant(any(String.class), any());
+        verify(mockPanelState, never()).setVariant(any(String.class), any(Event.class));
         verify(mockPanel, never()).setBounds(any(Rect.class));
         verify(mockPanel, never()).setVisibility(any(Boolean.class));
         verify(mockPanel, never()).setAlpha(any(Float.class));
@@ -126,9 +127,10 @@ public class StateManagerTest {
         when(mockPanelState.getTransition(any(Event.class))).thenReturn(mockTransition);
         when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(null);
 
-        StateManager.handleEvent(new Event(TEST_EVENT));
+        Event event = new Event(TEST_EVENT);
+        StateManager.handleEvent(event);
 
-        verify(mockPanelState).setVariant(TO_VARIANT_ID, /* payload= */null);
+        verify(mockPanelState).setVariant(TO_VARIANT_ID, event);
     }
 
     @Test

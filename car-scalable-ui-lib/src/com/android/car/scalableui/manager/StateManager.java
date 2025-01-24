@@ -106,7 +106,7 @@ public class StateManager {
                 // Update the internal state to the new variant and show the transition animation
                 panelState.onAnimationStart(animator);
                 animator.removeAllListeners();
-                panelState.setVariant(transition.getToVariant().getId(), event.getPayload());
+                panelState.setVariant(toVariant.getId(), event);
                 animator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -119,7 +119,7 @@ public class StateManager {
                 panelTransaction.setAnimator(panelState.getId(), animator);
             } else if (!panelState.isAnimating()) {
                 // Force apply the new state if there is no on going animation.
-                panelState.setVariant(toVariant.getId(), event.getPayload());
+                panelState.setVariant(toVariant.getId(), event);
                 applyState(panelState);
             }
             Log.d(TAG, "add transition for " + panelState.getId());

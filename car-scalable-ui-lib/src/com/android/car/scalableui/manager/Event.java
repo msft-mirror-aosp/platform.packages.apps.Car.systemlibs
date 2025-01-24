@@ -16,56 +16,95 @@
 
 package com.android.car.scalableui.manager;
 
+import android.annotation.Nullable;
+import android.text.TextUtils;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Describes an event in the system. An event can optionally carry a payload object.
+ * Describes an event in the system. An event has an id and optionally tokens to match against
+ * transitions.
  */
 public class Event {
+    /** Id string associated with this event. */
     private final String mId;
-    private final Object mPayload;
+    /**
+     * Token map for this event to be matched against. These tokens are in the format of key:value
+     * strings.
+     */
+    private final Map<String, String> mTokens = new HashMap<>();
 
     /**
-     * Constructs an Event without a payload.
+     * Constructs an Event.
      *
      * @param id A unique identifier associated with this event.
      */
     public Event(String id) {
-        this(id, null);
-    }
-
-    /**
-     * Constructs an Event with an optional payload.
-     *
-     * @param id A unique identifier associated with this event.
-     * @param payload An optional payload associated with this event.
-     */
-    public Event(String id, Object payload) {
         mId = id;
-        mPayload = payload;
     }
 
     /**
-     * Returns the event identifier.
-     *
-     * @return The event identifier.
+     * Adds a token to this event to be matched against.
+     */
+    public final Event addToken(String tokenId, String tokenValue) {
+        mTokens.put(tokenId, tokenValue);
+        return this;
+    }
+
+    /**
+     * Returns the id associated with this event.
      */
     public String getId() {
         return mId;
     }
 
     /**
-     * Returns the payload associated with this event.
-     *
-     * @return The payload of the event, or null if no payload is associated.
+     * Return the tokens associated with this event.
      */
-    public Object getPayload() {
-        return mPayload;
+    public Map<String, String> getTokens() {
+        return mTokens;
+    }
+
+    /**
+     * Whether the passed in parameters match this event.
+     * @param transitionEvent the event from the transition to match against
+     * @return true if this event matches the passed in parameters.
+     */
+    public boolean isMatch(@Nullable Event transitionEvent) {
+        if (transitionEvent == null) {
+            return false;
+        }
+
+        if (!TextUtils.equals(mId, transitionEvent.getId())) {
+            // ids don't match
+            return false;
+        }
+
+        Map<String, String> transitionTokens = transitionEvent.getTokens();
+        if (transitionTokens == null || transitionTokens.isEmpty()) {
+            // ids match and transition doesn't specify and additional tokens to match
+            return true;
+        }
+
+        if (mTokens.isEmpty()) {
+            // transition has tokens but event does not - not a match
+            return false;
+        }
+
+        for (String key : transitionTokens.keySet()) {
+            if (!mTokens.containsKey(key) || !TextUtils.equals(mTokens.get(key),
+                    transitionTokens.get(key))) {
+                // tokens don't match - not a match
+                return false;
+            }
+        }
+        // all specified transition tokens match the event
+        return true;
     }
 
     @Override
     public String toString() {
-        return "Event{"
-                + "mId='" + mId + '\''
-                + ", mPayload=" + mPayload
-                + '}';
+        return "Event{" + "mId='" + mId + "' mTokens='" + mTokens + "'}";
     }
 }
