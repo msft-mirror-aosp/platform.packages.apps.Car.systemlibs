@@ -162,4 +162,16 @@ public class Transition {
         parser.require(XmlPullParser.END_TAG, null, TRANSITION_TAG);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Transition{"
+                + "mFromVariant=" + mFromVariant
+                + ", mToVariant=" + mToVariant
+                + ", mOnEvent='" + mOnEvent + '\''
+                + ", mAnimator=" + mAnimator
+                + ", mDefaultInterpolator=" + mDefaultInterpolator
+                + ", mDefaultDuration=" + mDefaultDuration
+                + '}';
+    }
 }

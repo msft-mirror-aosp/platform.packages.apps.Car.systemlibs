@@ -238,4 +238,15 @@ public class Variant {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Variant{"
+                + "mId='" + mId + '\''
+                + ", mAlpha=" + mAlpha
+                + ", mIsVisible=" + mIsVisible
+                + ", mLayer=" + mLayer
+                + ", mBounds=" + mBounds
+                + '}';
+    }
 }

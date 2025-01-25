@@ -60,4 +60,12 @@ public class Event {
     public Object getPayload() {
         return mPayload;
     }
+
+    @Override
+    public String toString() {
+        return "Event{"
+                + "mId='" + mId + '\''
+                + ", mPayload=" + mPayload
+                + '}';
+    }
 }
