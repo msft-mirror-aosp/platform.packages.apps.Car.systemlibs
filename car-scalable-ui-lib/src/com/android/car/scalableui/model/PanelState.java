@@ -31,6 +31,8 @@ import android.util.Xml;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.car.scalableui.manager.Event;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -310,7 +312,8 @@ public class PanelState {
      * @throws XmlPullParserException If an error occurs during XML parsing.
      * @throws IOException            If an I/O error occurs while reading the XML.
      */
-    private static PanelState create(Context context, XmlPullParser parser) throws
+    @VisibleForTesting
+    static PanelState create(Context context, XmlPullParser parser) throws
             XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, null, PANEL_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
@@ -355,7 +358,8 @@ public class PanelState {
         return result;
     }
 
-    private void setDefaultVariant(String variant) {
+    @VisibleForTesting
+    void setDefaultVariant(String variant) {
         mDefaultVariant = variant;
     }
 
