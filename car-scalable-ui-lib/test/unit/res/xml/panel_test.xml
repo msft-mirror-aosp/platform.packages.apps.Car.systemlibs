@@ -1,0 +1,50 @@
+<!--
+  ~ Copyright (C) 2025 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<!--
+  ~ Copyright (C) 2025 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+<Panel id="panel_id" defaultVariant="variant1" role="@string/default_config">
+    <Variant id="base">
+        <Layer layer="2"/>
+    </Variant>
+    <Variant id="variant1" parent="base">
+        <Visibility isVisible="true"/>
+        <Bounds left="0" top="10" width="20" height="30" />
+    </Variant>
+
+    <Variant id="variant2" parent="base">
+        <Visibility isVisible="false"/>
+        <Bounds left="0" top="0" width="20" height="30" />
+    </Variant>
+
+    <Transitions>
+        <Transition onEvent="event1" toVariant="variant1"/>
+        <Transition onEvent="event1" toVariant="variant2"/>
+    </Transitions>
+</Panel>
+

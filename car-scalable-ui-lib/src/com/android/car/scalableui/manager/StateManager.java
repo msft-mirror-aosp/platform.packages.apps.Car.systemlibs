@@ -23,6 +23,7 @@ import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.Transition;
@@ -163,5 +164,10 @@ public class StateManager {
     @Nullable
     public static PanelState getPanelState(String id) {
         return getInstance().mPanelStates.getOrDefault(id, null);
+    }
+
+    @VisibleForTesting
+    Map<String, PanelState> getPanelStates() {
+        return mPanelStates;
     }
 }
