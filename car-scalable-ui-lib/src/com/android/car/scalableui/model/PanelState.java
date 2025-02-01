@@ -174,18 +174,16 @@ public class PanelState {
     }
 
     /**
-     * Sets the current variant to the variant with the given ID and payload.
+     * Sets the current variant to the variant with the given ID and event.
      *
      * @param id      The ID of the variant.
-     * @param payload The payload to pass to the variant.
+     * @param event   The event to pass to the variant.
      */
-    public void setVariant(String id, Object payload) {
+    public void setVariant(String id, Event event) {
         for (Variant variant : mVariants) {
             if (variant.getId().equals(id)) {
                 mCurrentVariant = variant;
-                if (mCurrentVariant instanceof KeyFrameVariant) {
-                    ((KeyFrameVariant) mCurrentVariant).setPayload(payload);
-                }
+                mCurrentVariant.updateFromEvent(event);
                 return;
             }
         }
@@ -237,24 +235,24 @@ public class PanelState {
      */
     public Transition getTransition(Event event) {
         // If both onEvent and fromVariant matches
-        Transition result = getTransition(event.getId(), getCurrentVariant().getId());
+        Transition result = getTransitionInternal(event, getCurrentVariant().getId());
         if (result != null) {
             return result;
         }
         // If only onEvent matches
-        return getTransition(event.getId());
+        return getTransitionInternal(event);
     }
 
     /**
      * Returns a transition that matches the given event ID and "from" variant.
      *
-     * @param eventId     The ID of the event to find a transition for.
+     * @param event       The event to find a transition for.
      * @param fromVariant The ID of the variant the transition should start from.
      * @return The matching transition, or null if no such transition is found.
      */
-    private Transition getTransition(String eventId, String fromVariant) {
+    private Transition getTransitionInternal(Event event, String fromVariant) {
         for (Transition transition : mTransitions) {
-            if (eventId.equals(transition.getOnEvent())
+            if (event.isMatch(transition.getOnEvent())
                     && transition.getFromVariant() != null
                     && transition.getFromVariant().getId().equals(fromVariant)) {
                 return transition;
@@ -266,12 +264,12 @@ public class PanelState {
     /**
      * Returns a transition that matches the given event ID and has no "from" variant specified.
      *
-     * @param eventId The ID of the event to find a transition for.
+     * @param event The event to find a transition for.
      * @return The matching transition, or null if no such transition is found.
      */
-    private Transition getTransition(String eventId) {
+    private Transition getTransitionInternal(Event event) {
         for (Transition transition : mTransitions) {
-            if (eventId.equals(transition.getOnEvent())
+            if (event.isMatch(transition.getOnEvent())
                     && transition.getFromVariant() == null) {
                 return transition;
             }

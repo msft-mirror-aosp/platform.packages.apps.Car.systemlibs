@@ -22,6 +22,9 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Xml;
 
+import com.android.car.scalableui.manager.Event;
+import com.android.car.scalableui.manager.KeyFrameEvent;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -151,15 +154,11 @@ public class KeyFrameVariant extends Variant {
         return getAlpha(mFraction);
     }
 
-    /**
-     * Sets the payload for this variant.
-     *
-     * <p>The payload is expected to be a float value representing the fraction.
-     *
-     * @param payload The payload object.
-     */
-    public void setPayload(Object payload) {
-        setFraction((float) payload);
+    @Override
+    public void updateFromEvent(Event event) {
+        if (event instanceof KeyFrameEvent keyFrameEvent) {
+            setFraction(keyFrameEvent.getFraction());
+        }
     }
 
     /**
