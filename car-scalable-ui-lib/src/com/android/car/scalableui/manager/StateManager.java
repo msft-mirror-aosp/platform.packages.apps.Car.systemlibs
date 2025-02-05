@@ -77,7 +77,11 @@ public class StateManager {
             Log.d(TAG, "addState: stateResId " + stateResId);
         }
         PanelState panelState = PanelState.load(context, stateResId);
-        sInstance.mPanelStates.put(panelState.getId(), panelState);
+        if (sInstance.mPanelStates.put(panelState.getId(), panelState) != null) {
+            if (DEBUG) {
+                Log.w(TAG, "Previous PanelState with id=" + panelState.getId() + " got replaced");
+            }
+        }
         applyState(panelState);
         Panel panel = PanelPool.getInstance().getPanel(panelState.getId());
         panel.init();
