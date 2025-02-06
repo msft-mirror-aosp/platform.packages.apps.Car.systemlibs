@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package com.android.car.scalableui.model;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.car.scalableui.model.KeyFrameVariant.KEY_FRAME_VARIANT_TAG;
 import static com.android.car.scalableui.model.Transition.TRANSITION_TAG;
 import static com.android.car.scalableui.model.Variant.VARIANT_TAG;
@@ -24,9 +26,12 @@ import android.animation.Animator;
 import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Xml;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.car.scalableui.manager.Event;
 
@@ -45,6 +50,8 @@ import java.util.List;
  * animations.
  */
 public class PanelState {
+    private static final String TAG = PanelState.class.getSimpleName();
+
     private static final String PANEL_TAG = "Panel";
     private static final String ID_TAG = "id";
     private static final String DEFAULT_VARIANT_ATTRIBUTE = "defaultVariant";
@@ -53,6 +60,11 @@ public class PanelState {
     private static final String DEFAULT_DURATION_ATTRIBUTE = "defaultDuration";
     private static final String DEFAULT_INTERPOLATOR_ATTRIBUTE = "defaultInterpolator";
     private static final int DEFAULT_TRANSITION_DURATION = 300;
+    public static final String DEFAULT_ROLE = "DEFAULT";
+    private static final String DISPLAY_ID = "displayId";
+    private String mDefaultVariant;
+    private boolean mIsLaunchRoot;
+    private int mDisplayId;
 
     /**
      * Loads a PanelState from an XML resource.
@@ -61,7 +73,7 @@ public class PanelState {
      * @param resourceId The ID of the XML resource.
      * @return The loaded PanelState.
      * @throws XmlPullParserException If an error occurs during XML parsing.
-     * @throws IOException If an I/O error occurs while reading the XML.
+     * @throws IOException            If an I/O error occurs while reading the XML.
      */
     public static PanelState load(Context context, int resourceId) throws XmlPullParserException,
             IOException {
@@ -83,7 +95,7 @@ public class PanelState {
     /**
      * Constructor for PanelState.
      *
-     * @param id The ID of the panel.
+     * @param id   The ID of the panel.
      * @param role The role of the panel.
      */
     public PanelState(String id, Role role) {
@@ -155,18 +167,23 @@ public class PanelState {
     }
 
     /**
-     * Sets the current variant to the variant with the given ID and payload.
+     * Resets the variant to the default variant.
+     */
+    public void resetVariant() {
+        setVariant(mDefaultVariant);
+    }
+
+    /**
+     * Sets the current variant to the variant with the given ID and event.
      *
      * @param id      The ID of the variant.
-     * @param payload The payload to pass to the variant.
+     * @param event   The event to pass to the variant.
      */
-    public void setVariant(String id, Object payload) {
+    public void setVariant(String id, Event event) {
         for (Variant variant : mVariants) {
             if (variant.getId().equals(id)) {
                 mCurrentVariant = variant;
-                if (mCurrentVariant instanceof KeyFrameVariant) {
-                    ((KeyFrameVariant) mCurrentVariant).setPayload(payload);
-                }
+                mCurrentVariant.updateFromEvent(event);
                 return;
             }
         }
@@ -218,24 +235,24 @@ public class PanelState {
      */
     public Transition getTransition(Event event) {
         // If both onEvent and fromVariant matches
-        Transition result = getTransition(event.getId(), getCurrentVariant().getId());
+        Transition result = getTransitionInternal(event, getCurrentVariant().getId());
         if (result != null) {
             return result;
         }
         // If only onEvent matches
-        return getTransition(event.getId());
+        return getTransitionInternal(event);
     }
 
     /**
      * Returns a transition that matches the given event ID and "from" variant.
      *
-     * @param eventId The ID of the event to find a transition for.
+     * @param event       The event to find a transition for.
      * @param fromVariant The ID of the variant the transition should start from.
      * @return The matching transition, or null if no such transition is found.
      */
-    private Transition getTransition(String eventId, String fromVariant) {
+    private Transition getTransitionInternal(Event event, String fromVariant) {
         for (Transition transition : mTransitions) {
-            if (eventId.equals(transition.getOnEvent())
+            if (event.isMatch(transition.getOnEvent())
                     && transition.getFromVariant() != null
                     && transition.getFromVariant().getId().equals(fromVariant)) {
                 return transition;
@@ -247,17 +264,38 @@ public class PanelState {
     /**
      * Returns a transition that matches the given event ID and has no "from" variant specified.
      *
-     * @param eventId The ID of the event to find a transition for.
+     * @param event The event to find a transition for.
      * @return The matching transition, or null if no such transition is found.
      */
-    private Transition getTransition(String eventId) {
+    private Transition getTransitionInternal(Event event) {
         for (Transition transition : mTransitions) {
-            if (eventId.equals(transition.getOnEvent())
+            if (event.isMatch(transition.getOnEvent())
                     && transition.getFromVariant() == null) {
                 return transition;
             }
         }
         return null;
+    }
+
+    /**
+     * Returns true if this component is a launch root.
+     * TODO(b/388021504):This api should move to role
+     */
+    public boolean isLaunchRoot() {
+        return mIsLaunchRoot;
+    }
+
+    private void setLaunchRoot(boolean launchRoot) {
+        mIsLaunchRoot = launchRoot;
+    }
+
+    /**
+     * Returns the ID of the display the panel is associated with.
+     *
+     * @return The display ID.
+     */
+    public int getDisplayId() {
+        return mDisplayId;
     }
 
     /**
@@ -267,19 +305,29 @@ public class PanelState {
      * and child elements to create a Panel object.
      *
      * @param context The application context.
-     * @param parser The XML parser.
+     * @param parser  The XML parser.
      * @return A PanelState object with the parsed properties.
      * @throws XmlPullParserException If an error occurs during XML parsing.
-     * @throws IOException If an I/O error occurs while reading the XML.
+     * @throws IOException            If an I/O error occurs while reading the XML.
      */
-    private static PanelState create(Context context, XmlPullParser parser) throws
+    @VisibleForTesting
+    static PanelState create(Context context, XmlPullParser parser) throws
             XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, null, PANEL_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
         String id = attrs.getAttributeValue(null, ID_TAG);
+        String displayId = attrs.getAttributeValue(null, DISPLAY_ID);
         String defaultVariant = attrs.getAttributeValue(null, DEFAULT_VARIANT_ATTRIBUTE);
         int roleValue = attrs.getAttributeResourceValue(null, ROLE_ATTRIBUTE, 0);
+        String roleString = context.getResources().getString(roleValue);
+        boolean isLaunchRoot = DEFAULT_ROLE.equals(roleString);
+
+        Log.d(TAG, " reading panel data: " + defaultVariant + "  roleValue  " + roleValue
+                + " isLaunchRoot " + isLaunchRoot + ", role string" + roleString + ", displayId "
+                + displayId);
         PanelState result = new PanelState(id, new Role(roleValue));
+        result.setLaunchRoot(isLaunchRoot);
+        result.setDisplayId(displayId);
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String name = parser.getName();
@@ -304,7 +352,21 @@ public class PanelState {
             }
         }
         result.setVariant(defaultVariant);
+        result.setDefaultVariant(defaultVariant);
         return result;
+    }
+
+    @VisibleForTesting
+    void setDefaultVariant(String variant) {
+        mDefaultVariant = variant;
+    }
+
+    private void setDisplayId(String displayId) {
+        if (displayId == null) {
+            mDisplayId = DEFAULT_DISPLAY;
+        } else {
+            mDisplayId = Integer.parseInt(displayId);
+        }
     }
 
     /**
@@ -314,13 +376,13 @@ public class PanelState {
      * and child transition elements.
      *
      * @param context The application context.
-     * @param parser The XML parser.
+     * @param parser  The XML parser.
      * @return A list of Transition objects with the parsed properties.
      * @throws XmlPullParserException If an error occurs during XML parsing.
-     * @throws IOException If an I/O error occurs while reading the XML.
+     * @throws IOException            If an I/O error occurs while reading the XML.
      */
     private static List<Transition> readTransitions(Context context, PanelState panelState,
-                                                    XmlPullParser parser)
+            XmlPullParser parser)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, null, TRANSITIONS_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
@@ -342,5 +404,15 @@ public class PanelState {
             }
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "PanelState{"
+                + "mRole=" + mRole
+                + ", mId='" + mId + '\''
+                + ", mIsLaunchRoot=" + mIsLaunchRoot
+                + ", mCurrentVariant=" + mCurrentVariant
+                + '}';
     }
 }

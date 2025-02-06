@@ -19,19 +19,23 @@ package com.android.car.scalableui.model;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
+import com.android.car.scalableui.manager.Event;
 import com.android.car.scalableui.panel.Panel;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.StringTokenizer;
 
 /**
  * Represents a transition between two {@link Variant}s in the Scalable UI system.
@@ -45,13 +49,14 @@ public class Transition {
     private static final String FROM_VARIANT_ATTRIBUTE = "fromVariant";
     private static final String TO_VARIANT_ATTRIBUTE = "toVariant";
     private static final String ON_EVENT_ATTRIBUTE = "onEvent";
+    private static final String ON_EVENT_TOKENS_ATTRIBUTE = "onEventTokens";
     private static final String ANIMATOR_ATTRIBUTE = "animator";
     private static final long DEFAULT_DURATION = 300;
 
     private final Variant mFromVariant;
     @NonNull
     private final Variant mToVariant;
-    private final String mOnEvent;
+    private final Event mOnEvent;
     private final Animator mAnimator;
     private final Interpolator mDefaultInterpolator;
     private final long mDefaultDuration;
@@ -67,11 +72,12 @@ public class Transition {
      * @param defaultInterpolator The default interpolator to use for the transition.
      */
     public Transition(Variant fromVariant, @NonNull Variant toVariant, String onEvent,
-            Animator animator, long defaultDuration, Interpolator defaultInterpolator) {
+            String onEventTokens, Animator animator, long defaultDuration,
+            Interpolator defaultInterpolator) {
         mFromVariant = fromVariant;
         mToVariant = toVariant;
         mAnimator = animator;
-        mOnEvent = onEvent;
+        mOnEvent = createEventFromStrings(onEvent, onEventTokens);
         mDefaultDuration = defaultDuration >= 0 ? defaultDuration : DEFAULT_DURATION;
         mDefaultInterpolator = defaultInterpolator != null
                 ? defaultInterpolator
@@ -125,8 +131,30 @@ public class Transition {
      *
      * @return The event that triggers the transition.
      */
-    public String getOnEvent() {
+    @Nullable
+    public Event getOnEvent() {
         return mOnEvent;
+    }
+
+    private Event createEventFromStrings(@Nullable String eventId, @Nullable String eventTokens) {
+        if (eventId == null) {
+            return null;
+        }
+        Event event = new Event(eventId);
+        addTokensFromString(event, eventTokens);
+        return event;
+    }
+
+    private void addTokensFromString(@NonNull Event event, @Nullable String eventTokens) {
+        if (TextUtils.isEmpty(eventTokens)) {
+            return;
+        }
+        StringTokenizer tokenizer = new StringTokenizer(eventTokens, ";");
+        while (tokenizer.hasMoreTokens()) {
+            String pair = tokenizer.nextToken();
+            String[] keyValue = pair.split("=");
+            event.addToken(keyValue[0], keyValue[1]);
+        }
     }
 
     /**
@@ -150,16 +178,29 @@ public class Transition {
         String from = attrs.getAttributeValue(null, FROM_VARIANT_ATTRIBUTE);
         String to = attrs.getAttributeValue(null, TO_VARIANT_ATTRIBUTE);
         String onEvent = attrs.getAttributeValue(null, ON_EVENT_ATTRIBUTE);
+        String onEventTokens = attrs.getAttributeValue(null, ON_EVENT_TOKENS_ATTRIBUTE);
         int animatorId = attrs.getAttributeResourceValue(null, ANIMATOR_ATTRIBUTE, 0);
         Animator animator = animatorId == 0
                 ? null
                 : AnimatorInflater.loadAnimator(context, animatorId);
         Variant fromVariant = panelState.getVariant(from);
         Variant toVariant = panelState.getVariant(to);
-        Transition result = new Transition(fromVariant, toVariant, onEvent, animator,
-                defaultDuration, defaultInterpolator);
+        Transition result = new Transition(fromVariant, toVariant, onEvent, onEventTokens,
+                animator, defaultDuration, defaultInterpolator);
         parser.nextTag();
         parser.require(XmlPullParser.END_TAG, null, TRANSITION_TAG);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Transition{"
+                + "mFromVariant=" + mFromVariant
+                + ", mToVariant=" + mToVariant
+                + ", mOnEvent='" + mOnEvent + '\''
+                + ", mAnimator=" + mAnimator
+                + ", mDefaultInterpolator=" + mDefaultInterpolator
+                + ", mDefaultDuration=" + mDefaultDuration
+                + '}';
     }
 }

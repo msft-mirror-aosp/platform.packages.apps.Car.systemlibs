@@ -26,6 +26,9 @@ import android.util.AttributeSet;
 import android.util.Xml;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.Nullable;
+
+import com.android.car.scalableui.manager.Event;
 import com.android.car.scalableui.panel.Panel;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -195,6 +198,15 @@ public class Variant {
     }
 
     /**
+     * Update the variant with data from an event.
+     *
+     * @param event the event that was executed.
+     */
+    public void updateFromEvent(@Nullable Event event) {
+        // no-op
+    }
+
+    /**
      * Creates a Variant object from an XML parser.
      *
      * <p>This method parses an XML element with the tag "Variant" and extracts its attributes
@@ -237,5 +249,16 @@ public class Variant {
             }
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Variant{"
+                + "mId='" + mId + '\''
+                + ", mAlpha=" + mAlpha
+                + ", mIsVisible=" + mIsVisible
+                + ", mLayer=" + mLayer
+                + ", mBounds=" + mBounds
+                + '}';
     }
 }
