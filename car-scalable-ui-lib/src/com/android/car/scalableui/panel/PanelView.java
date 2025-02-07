@@ -213,11 +213,6 @@ public class PanelView extends FrameLayout implements Panel {
     }
 
     @Override
-    public void setLaunchRoot(boolean isLaunchRoot) {
-        // no-op
-    }
-
-    @Override
     public void setDisplayId(int displayId) {
         // no-op
     }

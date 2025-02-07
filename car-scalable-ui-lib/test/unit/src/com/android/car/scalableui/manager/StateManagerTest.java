@@ -157,7 +157,6 @@ public class StateManagerTest {
         verify(mockPanel).setVisibility(mockVariant.isVisible());
         verify(mockPanel).setAlpha(mockVariant.getAlpha());
         verify(mockPanel).setLayer(mockVariant.getLayer());
-        verify(mockPanel).setLaunchRoot(false);
         verify(mockPanel).setDisplayId(0);
     }
 
