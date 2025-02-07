@@ -145,12 +145,6 @@ public interface Panel {
     void setRole(int role);
 
     /**
-     * Set the rootTask of the panel to be launch root task.
-     * TODO(b/388021504):This api should move to role
-     */
-    void setLaunchRoot(boolean isLaunchRoot);
-
-    /**
      * Sets the display ID of the panel.
      * TODO(b/388021504):This api should move to role
      */

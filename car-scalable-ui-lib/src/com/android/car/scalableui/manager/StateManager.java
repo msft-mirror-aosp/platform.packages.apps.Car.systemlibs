@@ -143,7 +143,6 @@ public class StateManager {
         panel.setVisibility(variant.isVisible());
         panel.setAlpha(variant.getAlpha());
         panel.setLayer(variant.getLayer());
-        panel.setLaunchRoot(panelState.isLaunchRoot());
         panel.setDisplayId(panelState.getDisplayId());
     }
 
