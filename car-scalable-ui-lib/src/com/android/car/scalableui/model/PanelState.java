@@ -176,8 +176,8 @@ public class PanelState {
     /**
      * Sets the current variant to the variant with the given ID and event.
      *
-     * @param id      The ID of the variant.
-     * @param event   The event to pass to the variant.
+     * @param id    The ID of the variant.
+     * @param event The event to pass to the variant.
      */
     public void setVariant(String id, Event event) {
         for (Variant variant : mVariants) {
@@ -285,10 +285,6 @@ public class PanelState {
         return mIsLaunchRoot;
     }
 
-    private void setLaunchRoot(boolean launchRoot) {
-        mIsLaunchRoot = launchRoot;
-    }
-
     /**
      * Returns the ID of the display the panel is associated with.
      *
@@ -319,14 +315,12 @@ public class PanelState {
         String displayId = attrs.getAttributeValue(null, DISPLAY_ID);
         String defaultVariant = attrs.getAttributeValue(null, DEFAULT_VARIANT_ATTRIBUTE);
         int roleValue = attrs.getAttributeResourceValue(null, ROLE_ATTRIBUTE, 0);
-        String roleString = context.getResources().getString(roleValue);
-        boolean isLaunchRoot = DEFAULT_ROLE.equals(roleString);
-
-        Log.d(TAG, " reading panel data: " + defaultVariant + "  roleValue  " + roleValue
-                + " isLaunchRoot " + isLaunchRoot + ", role string" + roleString + ", displayId "
-                + displayId);
+        Log.d(TAG, "Reading panel - "
+                + ", id: " + id
+                + ", defaultVariant: " + defaultVariant
+                + ", roleValue: " + roleValue
+                + ", displayId: " + displayId);
         PanelState result = new PanelState(id, new Role(roleValue));
-        result.setLaunchRoot(isLaunchRoot);
         result.setDisplayId(displayId);
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
