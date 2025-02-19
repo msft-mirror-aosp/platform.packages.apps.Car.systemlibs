@@ -79,4 +79,19 @@ public class PanelTransactionTest {
         // Check if the correct number of animators are returned
         assertThat(transaction.getAnimators()).hasSize(/* expectedSize= */ 2);
     }
+
+    @Test
+    public void testGetPanelTransactionState_existingId() {
+        PanelTransaction transaction = new PanelTransaction();
+        Transition mockTransition = mock(Transition.class);
+        transaction.setPanelTransaction(TEST_PANEL_ID, mockTransition);
+
+        assertThat(transaction.getPanelTransactionState(TEST_PANEL_ID)).isEqualTo(mockTransition);
+    }
+
+    @Test
+    public void testGetPanelTransactionState_nonExistingId() {
+        PanelTransaction transaction = new PanelTransaction();
+        assertThat(transaction.getPanelTransactionState("NON_EXISTING_ID")).isNull();
+    }
 }
