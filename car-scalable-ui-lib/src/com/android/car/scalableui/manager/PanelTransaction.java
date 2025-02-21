@@ -17,6 +17,8 @@ package com.android.car.scalableui.manager;
 
 import android.animation.Animator;
 
+import androidx.annotation.Nullable;
+
 import com.android.car.scalableui.model.Transition;
 
 import java.util.HashMap;
@@ -74,5 +76,15 @@ public class PanelTransaction {
      */
     public Set<Map.Entry<String, Animator>> getAnimators() {
         return mAnimatorMap.entrySet();
+    }
+
+    /**
+     * Retrieves the {@link Transition} state associated with the given panel ID.
+     *
+     * @param id                        The ID of the panel.
+     */
+    @Nullable
+    public Transition getPanelTransactionState(String id) {
+        return mTransactionMap.get(id);
     }
 }
