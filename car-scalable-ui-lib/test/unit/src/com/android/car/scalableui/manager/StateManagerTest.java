@@ -158,6 +158,7 @@ public class StateManagerTest {
         verify(mockPanel).setAlpha(mockVariant.getAlpha());
         verify(mockPanel).setLayer(mockVariant.getLayer());
         verify(mockPanel).setDisplayId(0);
+        verify(mockPanel).setCornerRadius(mockVariant.getCornerRadius());
     }
 
     @Test
