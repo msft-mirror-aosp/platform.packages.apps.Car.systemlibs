@@ -144,6 +144,7 @@ public class StateManager {
         panel.setAlpha(variant.getAlpha());
         panel.setLayer(variant.getLayer());
         panel.setDisplayId(panelState.getDisplayId());
+        panel.setCornerRadius(variant.getCornerRadius());
     }
 
     //TODO(b/390006880): make this part of configuration.
