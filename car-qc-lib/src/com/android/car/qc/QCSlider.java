@@ -21,7 +21,6 @@ import android.os.Parcel;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 /**
  * Quick Control Slider included in {@link QCRow}
  */
@@ -185,5 +184,9 @@ public class QCSlider extends QCItem {
             return new QCSlider(mMin, mMax, mValue, mIsEnabled, mIsClickableWhileDisabled,
                     mInputAction, mDisabledClickAction);
         }
+    }
+
+    int getSliderValueInPercentage(int value) {
+        return (int) (value * 1.0 / (getMax() - getMin()) * 100);
     }
 }

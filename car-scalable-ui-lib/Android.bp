@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2021 The Android Open Source Project
+// Copyright (C) 2024 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,28 +17,13 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-genrule {
-    name: "statslog-carqclib-java-gen",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out) --module carqclib" +
-        " --javaPackage com.android.car.qc --javaClass CarQcLibStatsLog",
-    out: ["com/android/car/qc/CarQcLibStatsLog.java"],
-}
-
-carqclib_srcs = [
-    "src/**/*.java",
-    ":statslog-carqclib-java-gen",
-]
-
 android_library {
-    name: "car-qc-lib",
-    srcs: carqclib_srcs,
+    name: "car-scalable-ui-lib",
+    srcs: ["src/**/*.java"],
     optimize: {
-        enabled: false,
+        enabled: true,
     },
     static_libs: [
         "androidx.annotation_annotation",
-        "car-ui-lib-no-overlayable",
-        "car-resource-common",
     ],
 }
