@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.scalableui.manager;
+package com.android.car.scalableui.model;
 
 import static com.google.common.truth.Truth.assertThat;
 

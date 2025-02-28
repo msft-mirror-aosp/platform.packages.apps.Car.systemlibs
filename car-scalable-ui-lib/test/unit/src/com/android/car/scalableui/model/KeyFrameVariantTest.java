@@ -60,13 +60,13 @@ public class KeyFrameVariantTest {
         final String variantId1 = "variantId1";
         final String variantId2 = "variantId2";
 
-        KeyFrameVariant variant = new KeyFrameVariant(keyFrameVariantId, null);
-        Variant variant1 = new Variant(variantId1, null);
+        KeyFrameVariant variant = new KeyFrameVariant(keyFrameVariantId);
+        Variant variant1 = new Variant(variantId1);
         variant1.setBounds(new Rect(0, 0, 10, 10));
         variant1.setVisibility(false);
         variant1.setAlpha(0.0f);
 
-        Variant variant2 = new Variant(variantId2, null);
+        Variant variant2 = new Variant(variantId2);
         variant2.setBounds(new Rect(10, 20, 20, 30));
         variant2.setVisibility(true);
         variant2.setAlpha(1.0f);
