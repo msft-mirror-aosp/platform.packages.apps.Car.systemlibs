@@ -46,6 +46,7 @@ public class Variant {
     private int mLayer;
     private int mCornerRadius;
     @NonNull private Rect mBounds;
+    @NonNull private Rect mInsets;
 
     /**
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
@@ -238,6 +239,22 @@ public class Variant {
         // no-op
     }
 
+    /**
+     * @return {@link Insets}.
+     */
+    @Nullable
+    public Rect getInsets() {
+        return mInsets;
+    }
+
+    /**
+     * Sets insets.
+     * This is essentially the panle's safe rectangle.
+     */
+    protected void setInsets(@NonNull Rect insets) {
+        mInsets = insets;
+    }
+
     @Override
     @NonNull
     public String toString() {
@@ -255,6 +272,8 @@ public class Variant {
                 + mBounds
                 + ", mCornerRadius="
                 + mCornerRadius
+                + ", mInsets="
+                + mInsets
                 + '}';
     }
 
@@ -266,6 +285,7 @@ public class Variant {
         @Nullable private Integer mLayer;
         @Nullable private Rect mBounds;
         @Nullable private Integer mCornerRadius;
+        @Nullable private Rect mInsets;
         @Nullable private Variant mParent;
 
         public Builder(@NonNull String id) {
@@ -302,6 +322,12 @@ public class Variant {
             return this;
         }
 
+        /** Sets insets */
+        public Builder setInsets(@NonNull Rect insets) {
+            mInsets = insets;
+            return this;
+        }
+
         /** Sets parent */
         public Builder setParent(@Nullable Variant parent) {
             mParent = parent;
@@ -333,6 +359,10 @@ public class Variant {
             if (mCornerRadius != null) {
                 variant.setCornerRadius(mCornerRadius);
             }
+            if (mInsets != null) {
+                variant.setInsets(new Rect(mInsets)); // Defensive copy
+            }
+
             return variant;
         }
     }

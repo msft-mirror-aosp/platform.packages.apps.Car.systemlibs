@@ -65,6 +65,7 @@ public class PanelStateTest {
         Variant variant2 = panelState.getVariant(VARIANT2);
         assertThat(variant2.getLayer()).isEqualTo(100);
         assertThat(variant2.getAlpha()).isEqualTo(0.8f);
+        assertThat(variant2.getInsets()).isNotNull();
     }
 
     @Test

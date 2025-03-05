@@ -38,6 +38,7 @@ import androidx.annotation.Nullable;
 import com.android.car.scalableui.model.Alpha;
 import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.Corner;
+import com.android.car.scalableui.model.Insets;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.Role;
@@ -110,6 +111,9 @@ public class PanelStateXmlParser {
     // --- Corner Tags ---
     public static final String CORNER_TAG = "Corner";
     public static final String RADIUS_ATTRIBUTE = "radius";
+
+    // --- Insets Tags ---
+    public static final String INSETS_TAG = "Insets";
 
     public static final String DIP = "dip";
     public static final String DP = "dp";
@@ -203,6 +207,9 @@ public class PanelStateXmlParser {
                     break;
                 case CORNER_TAG:
                     variantBuilder.setCornerRadius(parseCorner(context, parser).getRadius());
+                    break;
+                case INSETS_TAG:
+                    variantBuilder.setInsets(parseInsets(context, parser).getRect());
                     break;
                 default:
                     XmlPullParserHelper.skip(parser); // Skip other nested tags
@@ -309,6 +316,34 @@ public class PanelStateXmlParser {
 
         return new Corner.Builder()
                 .setRadius(radius)
+                .build();
+    }
+
+    private static Insets parseInsets(@NonNull Context context, @NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+
+        parser.require(XmlPullParser.START_TAG, null, BOUNDS_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+
+        Integer left = getDimensionPixelSize(context, attrs, LEFT_ATTRIBUTE, true);
+        Integer top = getDimensionPixelSize(context, attrs, TOP_ATTRIBUTE, false);
+        Integer right = getDimensionPixelSize(context, attrs, RIGHT_ATTRIBUTE, true);
+        Integer bottom = getDimensionPixelSize(context, attrs, BOTTOM_ATTRIBUTE, false);
+
+        Integer width = getDimensionPixelSize(context, attrs, WIDTH_ATTRIBUTE, true);
+        Integer height = getDimensionPixelSize(context, attrs, HEIGHT_ATTRIBUTE, false);
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.skip(parser); // Skip any nested tags
+        }
+
+        return new Insets.Builder()
+                .setLeft(left)
+                .setTop(top)
+                .setRight(right)
+                .setBottom(bottom)
+                .setWidth(width)
+                .setHeight(height)
                 .build();
     }
 
