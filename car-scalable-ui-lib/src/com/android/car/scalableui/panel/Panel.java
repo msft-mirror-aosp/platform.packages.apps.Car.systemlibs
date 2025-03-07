@@ -159,4 +159,18 @@ public interface Panel {
      * Reset the panel.
      */
     void reset();
+
+    /**
+     * Sets the radius for all four corners of this panel.
+     *
+     * @param radius The corner radius
+     */
+    void setCornerRadius(int radius);
+
+    /**
+     * Gets the radius for all four corners of this panel.
+     *
+     * @return The corner radius
+     */
+    int getCornerRadius();
 }
