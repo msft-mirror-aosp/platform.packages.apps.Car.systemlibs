@@ -27,6 +27,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Locale;
 
 
 /**
@@ -144,15 +145,15 @@ class Bounds {
         if (dimenStr == null) {
             return 0;
         }
-        if (dimenStr.toLowerCase().endsWith(DP)) {
+        if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DP)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - DP.length());
             float value = Float.parseFloat(valueStr);
             return (int) (value * Resources.getSystem().getDisplayMetrics().density);
-        } else if (dimenStr.toLowerCase().endsWith(DIP)) {
+        } else if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DIP)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - DIP.length());
             float value = Float.parseFloat(valueStr);
             return (int) (value * Resources.getSystem().getDisplayMetrics().density);
-        } else if (dimenStr.toLowerCase().endsWith(PERCENT)) {
+        } else if (dimenStr.toLowerCase(Locale.ROOT).endsWith(PERCENT)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - PERCENT.length());
             float value = Float.parseFloat(valueStr);
             DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
