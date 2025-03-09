@@ -21,6 +21,7 @@ import static com.android.car.qc.QCItem.QC_ACTION_TOGGLE_STATE;
 import static com.android.car.qc.QCItem.QC_TYPE_ACTION_SWITCH;
 import static com.android.car.qc.view.QCView.QCActionListener;
 
+import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -54,6 +55,7 @@ import com.android.car.qc.QCItem;
 import com.android.car.qc.QCRow;
 import com.android.car.qc.QCSlider;
 import com.android.car.qc.R;
+import com.android.car.qc.StatsLogHelper;
 import com.android.car.ui.utils.CarUiUtils;
 import com.android.car.ui.utils.DirectManipulationHelper;
 import com.android.car.ui.uxr.DrawableStateToggleButton;
@@ -464,10 +466,18 @@ public class QCRowView extends FrameLayout {
         if (!item.isEnabled()) {
             if (item.getDisabledClickAction() != null) {
                 try {
-                    item.getDisabledClickAction().send(getContext(), 0, intent);
+                    item.getDisabledClickAction().send(getContext(), 0, intent,
+                            /* requestCode= */ null,
+                            /* fillInIntent= */ null,
+                            /* options= */ null,
+                            ActivityOptions.makeBasic()
+                                .setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                .toBundle());
                     if (mActionListener != null) {
                         mActionListener.onQCAction(item, item.getDisabledClickAction());
                     }
+                    StatsLogHelper.getInstance().logMetrics(item, intent);
                 } catch (PendingIntent.CanceledException e) {
                     Log.d(TAG, "Error sending intent", e);
                 }
@@ -476,16 +486,25 @@ public class QCRowView extends FrameLayout {
                 if (mActionListener != null) {
                     mActionListener.onQCAction(item, item.getDisabledClickActionHandler());
                 }
+                StatsLogHelper.getInstance().logMetrics(item, intent);
             }
             return;
         }
 
         if (item.getPrimaryAction() != null) {
             try {
-                item.getPrimaryAction().send(getContext(), 0, intent);
+                item.getPrimaryAction().send(getContext(), 0, intent,
+                        /* requestCode= */ null,
+                        /* fillInIntent= */ null,
+                        /* options= */ null,
+                        ActivityOptions.makeBasic()
+                            .setPendingIntentBackgroundActivityStartMode(
+                                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                            .toBundle());
                 if (mActionListener != null) {
                     mActionListener.onQCAction(item, item.getPrimaryAction());
                 }
+                StatsLogHelper.getInstance().logMetrics(item, intent);
             } catch (PendingIntent.CanceledException e) {
                 Log.d(TAG, "Error sending intent", e);
             }
@@ -494,6 +513,7 @@ public class QCRowView extends FrameLayout {
             if (mActionListener != null) {
                 mActionListener.onQCAction(item, item.getActionHandler());
             }
+            StatsLogHelper.getInstance().logMetrics(item, intent);
         }
     }
 
