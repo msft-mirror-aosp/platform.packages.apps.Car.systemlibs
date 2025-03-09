@@ -41,6 +41,7 @@ public class VariantTest {
         base.setVisibility(false);
         base.setLayer(5);
         base.setAlpha(0.5f);
+        base.setCornerRadius(2);
 
         Variant variant = new Variant(VARIANT_ID, base);
 
@@ -49,6 +50,7 @@ public class VariantTest {
         assertThat(variant.isVisible()).isFalse();
         assertThat(variant.getLayer()).isEqualTo(5);
         assertThat(variant.getAlpha()).isEqualTo(0.5f);
+        assertThat(variant.getCornerRadius()).isEqualTo(2);
     }
 
     @Test
@@ -60,6 +62,7 @@ public class VariantTest {
         assertThat(variant.isVisible()).isTrue(); // Default Visibility
         assertThat(variant.getLayer()).isEqualTo(0); // Default Layer
         assertThat(variant.getAlpha()).isEqualTo(1.0f); // Default Alpha
+        assertThat(variant.getCornerRadius()).isEqualTo(0); // Default Alpha
     }
 
     @Test

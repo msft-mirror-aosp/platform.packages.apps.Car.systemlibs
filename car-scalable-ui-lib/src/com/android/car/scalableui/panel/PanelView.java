@@ -227,6 +227,16 @@ public class PanelView extends FrameLayout implements Panel {
         // no-op
     }
 
+    @Override
+    public void setCornerRadius(int radius) {
+        // no-op
+    }
+
+    @Override
+    public int getCornerRadius() {
+        return 0;
+    }
+
     private boolean isDrawableRole(int role) {
         String resourceTypeName = getContext().getResources().getResourceTypeName(role);
         return DRAWABLE_RESOURCE_TYPE.equals(resourceTypeName);

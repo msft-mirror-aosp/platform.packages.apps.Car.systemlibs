@@ -18,6 +18,7 @@ package com.android.car.scalableui.model;
 
 import android.animation.Animator;
 import android.animation.FloatEvaluator;
+import android.animation.IntEvaluator;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -50,12 +51,14 @@ public class Variant {
 
     private final FloatEvaluator mFloatEvaluator = new FloatEvaluator();
     private final RectEvaluator mRectEvaluator = new RectEvaluator();
+    private final IntEvaluator mIntEvaluator = new IntEvaluator();
 
     private final String mId;
     private float mAlpha;
     private boolean mIsVisible;
     private int mLayer;
     private Rect mBounds;
+    private int mCornerRadius;
 
     /**
      * Constructs a Variant object with the specified ID and optional base variant.
@@ -72,11 +75,13 @@ public class Variant {
             mIsVisible = base.isVisible();
             mLayer = base.getLayer();
             mAlpha = base.getAlpha();
+            mCornerRadius = base.getCornerRadius();
         } else {
             mBounds = new Rect();
             mIsVisible = Visibility.DEFAULT_VISIBILITY;
             mLayer = Layer.DEFAULT_LAYER;
             mAlpha = Alpha.DEFAULT_ALPHA;
+            mCornerRadius = Corner.DEFAULT_RADIUS;
         }
     }
 
@@ -105,6 +110,8 @@ public class Variant {
         } else {
             float fromAlpha = panel.getAlpha();
             float toAlpha = toVariant.getAlpha();
+            int fromCornerRadius = panel.getCornerRadius();
+            int toCornerRadius = toVariant.getCornerRadius();
             Rect fromBounds = panel.getBounds();
             Rect toBounds = toVariant.getBounds();
             boolean isVisible = panel.isVisible() || toVariant.isVisible();
@@ -120,6 +127,8 @@ public class Variant {
                 panel.setBounds(bounds);
                 float alpha = mFloatEvaluator.evaluate(fraction, fromAlpha, toAlpha);
                 panel.setAlpha(alpha);
+                int radius = mIntEvaluator.evaluate(fraction, fromCornerRadius, toCornerRadius);
+                panel.setCornerRadius(radius);
             });
             return valueAnimator;
         }
@@ -198,6 +207,24 @@ public class Variant {
     }
 
     /**
+     * Returns the corner radius of the variant.
+     *
+     * @return The corner radius of the variant.
+     */
+    public int getCornerRadius() {
+        return mCornerRadius;
+    }
+
+    /**
+     * Sets the corner radius of the variant.
+     *
+     * @param radius The corner radius to set.
+     */
+    public void setCornerRadius(int radius) {
+        mCornerRadius = radius;
+    }
+
+    /**
      * Update the variant with data from an event.
      *
      * @param event the event that was executed.
@@ -243,6 +270,9 @@ public class Variant {
                 case Bounds.BOUNDS_TAG:
                     result.setBounds(Bounds.create(context, parser).getRect());
                     break;
+                case Corner.CORNER_TAG:
+                    result.setCornerRadius(Corner.create(context, parser).getRadius());
+                    break;
                 default:
                     XmlPullParserHelper.skip(parser);
                     break;
@@ -259,6 +289,7 @@ public class Variant {
                 + ", mIsVisible=" + mIsVisible
                 + ", mLayer=" + mLayer
                 + ", mBounds=" + mBounds
+                + ", mCornerRadius=" + mCornerRadius
                 + '}';
     }
 }
