@@ -26,6 +26,7 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Xml;
@@ -38,7 +39,6 @@ import androidx.annotation.Nullable;
 import com.android.car.scalableui.model.Alpha;
 import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.Corner;
-import com.android.car.scalableui.model.Insets;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.Role;
@@ -209,7 +209,7 @@ public class PanelStateXmlParser {
                     variantBuilder.setCornerRadius(parseCorner(context, parser).getRadius());
                     break;
                 case INSETS_TAG:
-                    variantBuilder.setInsets(parseInsets(context, parser).getRect());
+                    variantBuilder.setInsets(parseInsets(context, parser));
                     break;
                 default:
                     XmlPullParserHelper.skip(parser); // Skip other nested tags
@@ -330,21 +330,11 @@ public class PanelStateXmlParser {
         Integer right = getDimensionPixelSize(context, attrs, RIGHT_ATTRIBUTE, true);
         Integer bottom = getDimensionPixelSize(context, attrs, BOTTOM_ATTRIBUTE, false);
 
-        Integer width = getDimensionPixelSize(context, attrs, WIDTH_ATTRIBUTE, true);
-        Integer height = getDimensionPixelSize(context, attrs, HEIGHT_ATTRIBUTE, false);
-
         while (parser.next() != XmlPullParser.END_TAG) {
             XmlPullParserHelper.skip(parser); // Skip any nested tags
         }
 
-        return new Insets.Builder()
-                .setLeft(left)
-                .setTop(top)
-                .setRight(right)
-                .setBottom(bottom)
-                .setWidth(width)
-                .setHeight(height)
-                .build();
+        return Insets.of(left, top, right, bottom);
     }
 
     @NonNull
