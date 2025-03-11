@@ -20,6 +20,7 @@ import android.animation.FloatEvaluator;
 import android.animation.IntEvaluator;
 import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.view.animation.Interpolator;
 
@@ -46,7 +47,7 @@ public class Variant {
     private int mLayer;
     private int mCornerRadius;
     @NonNull private Rect mBounds;
-    @NonNull private Rect mInsets;
+    @NonNull private Insets mInsets;
 
     /**
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
@@ -63,6 +64,7 @@ public class Variant {
         mLayer = Layer.DEFAULT_LAYER;
         mAlpha = Alpha.DEFAULT_ALPHA;
         mCornerRadius = Corner.DEFAULT_RADIUS;
+        mInsets = Insets.NONE;
     }
 
     /**
@@ -81,6 +83,7 @@ public class Variant {
         mLayer = base.getLayer();
         mAlpha = base.getAlpha();
         mCornerRadius = base.getCornerRadius();
+        mInsets = base.getInsets();
     }
 
     /**
@@ -243,7 +246,7 @@ public class Variant {
      * @return {@link Insets}.
      */
     @Nullable
-    public Rect getInsets() {
+    public Insets getInsets() {
         return mInsets;
     }
 
@@ -251,7 +254,7 @@ public class Variant {
      * Sets insets.
      * This is essentially the panle's safe rectangle.
      */
-    protected void setInsets(@NonNull Rect insets) {
+    protected void setInsets(@NonNull Insets insets) {
         mInsets = insets;
     }
 
@@ -285,7 +288,7 @@ public class Variant {
         @Nullable private Integer mLayer;
         @Nullable private Rect mBounds;
         @Nullable private Integer mCornerRadius;
-        @Nullable private Rect mInsets;
+        @Nullable private Insets mInsets;
         @Nullable private Variant mParent;
 
         public Builder(@NonNull String id) {
@@ -323,7 +326,7 @@ public class Variant {
         }
 
         /** Sets insets */
-        public Builder setInsets(@NonNull Rect insets) {
+        public Builder setInsets(@NonNull Insets insets) {
             mInsets = insets;
             return this;
         }
@@ -360,7 +363,8 @@ public class Variant {
                 variant.setCornerRadius(mCornerRadius);
             }
             if (mInsets != null) {
-                variant.setInsets(new Rect(mInsets)); // Defensive copy
+                variant.setInsets(
+                        Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
             }
 
             return variant;
