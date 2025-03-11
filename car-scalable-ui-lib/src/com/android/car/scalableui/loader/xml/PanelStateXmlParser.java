@@ -141,8 +141,17 @@ public class PanelStateXmlParser {
         int displayId = (displayIdStr == null) ? DEFAULT_DISPLAY : Integer.parseInt(displayIdStr);
         String defaultVariant = attrs.getAttributeValue(null, DEFAULT_VARIANT_ATTRIBUTE);
         int roleValue = attrs.getAttributeResourceValue(null, ROLE_ATTRIBUTE, 0);
-        int defaultLayer =
-                attrs.getAttributeIntValue(null, DEFAULT_LAYER_ATTRIBUTE, DEFAULT_LAYER);
+
+        Integer defaultLayer = null;
+        if (attrs.getAttributeValue(null, DEFAULT_LAYER_ATTRIBUTE) != null) {
+            int resId = attrs.getAttributeResourceValue(null, DEFAULT_LAYER_ATTRIBUTE, 0);
+            if (resId != 0) {
+                defaultLayer = context.getResources().getInteger(resId);
+            } else {
+                defaultLayer =
+                        attrs.getAttributeIntValue(null, DEFAULT_LAYER_ATTRIBUTE, DEFAULT_LAYER);
+            }
+        }
 
         PanelState.Builder builder = new PanelState.Builder(id, new Role(roleValue));
         builder.setDisplayId(displayId);
@@ -175,20 +184,19 @@ public class PanelStateXmlParser {
     private static Variant parseVariant(
             @NonNull Context context,
             @NonNull PanelState panelState,
-            int defaultLayer,
+            @Nullable Integer defaultLayer,
             @NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, VARIANT_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
+
         String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
         String parentVariantId = attrs.getAttributeValue(null, PARENT_ATTRIBUTE);
         Variant parentVariant = panelState.getVariant(parentVariantId);
 
         Variant.Builder variantBuilder = new Variant.Builder(id);
         variantBuilder.setLayer(defaultLayer);
-        if (parentVariant != null) {
-            variantBuilder.setParent(parentVariant);
-        }
+        variantBuilder.setParent(parentVariant);
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String name = parser.getName();
