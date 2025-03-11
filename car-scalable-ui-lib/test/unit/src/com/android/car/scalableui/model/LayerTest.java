@@ -19,6 +19,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.android.car.scalableui.loader.xml.PanelStateXmlParser;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -34,7 +36,8 @@ public class LayerTest {
 
     @Test
     public void testLayerConstants() {
-        assertThat(Layer.LAYER_TAG).isEqualTo("Layer");
+        assertThat(PanelStateXmlParser.LAYER_TAG).isEqualTo("Layer");
+        assertThat(PanelStateXmlParser.LAYER_VALUE_ATTRIBUTE).isEqualTo("layer");
         assertThat(Layer.DEFAULT_LAYER).isEqualTo(0);
     }
 }

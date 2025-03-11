@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.android.car.scalableui.model;
 
 import android.graphics.Rect;
@@ -22,37 +21,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 /**
- * Represents the bounds of a UI element. This class provides methods for creating a Bounds object
- * from an XML definition and retrieving the bounds as a {@link Rect}.
- *
- * <p>The Bounds class supports defining dimensions in the following formats:
- *
- * <ul>
- *   <li><b>Absolute pixels:</b> e.g., <code>left="100"</code></li>
- *   <li><b>Density-independent pixels (dp):</b> e.g., <code>top="50dip"</code></li>
- *   <li><b>Percentage of screen width/height:</b> e.g., <code>right="80%"</code></li>
- *   <li><b>Resource references:</b> e.g., <code>bottom="@dimen/my_bottom_margin"</code></li>
- * </ul>
- *
- * <p>It also allows defining either the left and right positions, or the left position and width.
- * Similarly, it allows defining either the top and bottom positions, or the top position and
- * height.
+ * Represents the insets for a panel.
+ * This is essentially the panle's safe rectangle.
  */
-public class Bounds {
+public class Insets {
     private final int mLeft;
     private final int mTop;
     private final int mRight;
     private final int mBottom;
 
     /**
-     * Constructs a Bounds object. Package-private constructor; use the Builder.
+     * Constructs a {@link Insets} object. Package-private constructor; use the Builder.
      *
      * @param left   The left position in pixels.
      * @param top    The top position in pixels.
      * @param right  The right position in pixels.
      * @param bottom The bottom position in pixels.
      */
-    Bounds(int left, int top, int right, int bottom) {
+    Insets(int left, int top, int right, int bottom) {
         mLeft = left;
         mTop = top;
         mRight = right;
@@ -60,16 +46,16 @@ public class Bounds {
     }
 
     /**
-     * Returns the bounds as a {@link Rect} object.
+     * Returns the insets as a {@link Rect} object.
      *
-     * @return A Rect object representing the bounds.
+     * @return A Rect object representing the insets.
      */
     @NonNull
     public Rect getRect() {
         return new Rect(mLeft, mTop, mRight, mBottom);
     }
 
-    /** Builder for {@link Bounds} objects. */
+    /** Builder for {@link Insets} objects. */
     public static class Builder {
         @Nullable private Integer mLeft;
         @Nullable private Integer mTop;
@@ -125,9 +111,9 @@ public class Bounds {
             return this;
         }
 
-        /** Returns the {@link Bounds} instance */
+        /** Returns the {@link Insets} instance */
         @NonNull
-        public Bounds build() {
+        public Insets build() {
             // Default values and logic to ensure a valid Rect.
             int left = (mLeft != null) ? mLeft : 0;
             int top = (mTop != null) ? mTop : 0;
@@ -148,7 +134,7 @@ public class Bounds {
                 top = bottom - height;
             }
 
-            return new Bounds(left, top, right, bottom);
+            return new Insets(left, top, right, bottom);
         }
     }
 }

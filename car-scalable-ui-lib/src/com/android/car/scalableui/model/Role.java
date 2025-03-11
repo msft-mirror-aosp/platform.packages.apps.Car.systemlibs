@@ -19,8 +19,8 @@ package com.android.car.scalableui.model;
 /**
  * Represents the role of a {@code Panel} within the system.
  *
- * <p>This class encapsulates an integer value that signifies the role of a UI element.
- * The specific meaning of the role value is determined by the system using it.
+ * <p>This class encapsulates an integer value that signifies the role of a UI element. The
+ * specific meaning of the role value is determined by the system using it.
  */
 public class Role {
     private final int mValue;

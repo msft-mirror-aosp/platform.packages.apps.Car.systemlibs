@@ -22,7 +22,7 @@ import android.content.Context;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.scalableui.manager.Event;
+import com.android.car.scalableui.loader.xml.XmlModelLoader;
 import com.android.car.scalableui.unit.R;
 
 import org.junit.Before;
@@ -37,7 +37,7 @@ public class PanelStateTest {
     private static final String TEST_PANEL_ID = "TEST_PANEL_ID";
     private static final String VARIANT1 = "variant1";
     private static final String VARIANT2 = "variant2";
-    private static final String TEST_EVENT = "TEST_EVENT";
+    private static final Event TEST_EVENT = new Event("TEST_EVENT");
 
     private Context mContext;
 
@@ -53,22 +53,25 @@ public class PanelStateTest {
         assertThat(panelState.getRole().getValue()).isEqualTo(1);
     }
 
-
     @Test
     public void testLoadFromXmlResource() throws XmlPullParserException, IOException {
-        PanelState panelState = PanelState.load(mContext, R.xml.panel_test);
+        XmlModelLoader loader = new XmlModelLoader(mContext);
+        PanelState panelState = loader.createPanelState(R.xml.panel_test);
 
         assertThat(panelState.getId()).isEqualTo("panel_id");
         assertThat(panelState.getRole().getValue()).isEqualTo(
                 R.string.default_config);
         assertThat(panelState.getCurrentVariant().getId()).isEqualTo(VARIANT1);
+        Variant variant2 = panelState.getVariant(VARIANT2);
+        assertThat(variant2.getLayer()).isEqualTo(100);
+        assertThat(variant2.getAlpha()).isEqualTo(0.8f);
+        assertThat(variant2.getInsets()).isNotNull();
     }
-
 
     @Test
     public void testAddVariant() {
         PanelState panelState = new PanelState(TEST_PANEL_ID, new Role(1));
-        Variant variant = new Variant(VARIANT1, null);
+        Variant variant = new Variant(VARIANT1);
         panelState.addVariant(variant);
         assertThat(panelState.getVariant(VARIANT1)).isEqualTo(variant);
     }
@@ -76,24 +79,23 @@ public class PanelStateTest {
     @Test
     public void testAddTransition() {
         PanelState panelState = new PanelState(TEST_PANEL_ID, new Role(1));
-        Variant variant1 = new Variant(VARIANT1, null);
-        Variant variant2 = new Variant(VARIANT2, null);
-        Transition transition = new Transition(variant1, variant2, TEST_EVENT, null, null, 0,
+        Variant variant1 = new Variant(VARIANT1);
+        Variant variant2 = new Variant(VARIANT2);
+        Transition transition = new Transition(variant1, variant2, TEST_EVENT, null, 0,
                 null);
         panelState.addTransition(transition);
         panelState.addVariant(variant1);
         panelState.addVariant(variant2);
         panelState.setVariant(variant1.getId());
 
-        assertThat(panelState.getTransition(new Event(TEST_EVENT))).isEqualTo(transition);
+        assertThat(panelState.getTransition(TEST_EVENT)).isEqualTo(transition);
     }
-
 
     @Test
     public void testSetVariant() {
         PanelState panelState = new PanelState(TEST_PANEL_ID, new Role(1));
-        Variant variant1 = new Variant(VARIANT1, null);
-        Variant variant2 = new Variant(VARIANT2, null);
+        Variant variant1 = new Variant(VARIANT1);
+        Variant variant2 = new Variant(VARIANT2);
         panelState.addVariant(variant1);
         panelState.addVariant(variant2);
 
@@ -104,8 +106,8 @@ public class PanelStateTest {
     @Test
     public void testResetVariant() {
         PanelState panelState = new PanelState(TEST_PANEL_ID, new Role(1));
-        Variant variant1 = new Variant(VARIANT1, null);
-        Variant variant2 = new Variant(VARIANT2, null);
+        Variant variant1 = new Variant(VARIANT1);
+        Variant variant2 = new Variant(VARIANT2);
         panelState.addVariant(variant1);
         panelState.addVariant(variant2);
         panelState.setDefaultVariant(VARIANT1);
