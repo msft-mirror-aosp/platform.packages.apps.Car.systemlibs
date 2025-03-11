@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.scalableui.manager;
+package com.android.car.scalableui.model;
+
+import androidx.annotation.NonNull;
 
 /**
  * Describes a KeyframeEvent in the system. This is the same as a standard {@link Event} but
@@ -28,7 +30,7 @@ public class KeyFrameEvent extends Event {
      * @param id       A unique identifier associated with this event.
      * @param fraction A fraction value (between 0 and 1).
      */
-    public KeyFrameEvent(String id, float fraction) {
+    public KeyFrameEvent(@NonNull String id, float fraction) {
         super(id);
         mFraction = fraction;
     }

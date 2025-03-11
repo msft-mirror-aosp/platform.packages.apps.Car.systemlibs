@@ -17,25 +17,13 @@
 package com.android.car.scalableui.model;
 
 import android.animation.Animator;
-import android.animation.AnimatorInflater;
-import android.content.Context;
-import android.text.TextUtils;
-import android.util.AttributeSet;
-import android.util.Xml;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.car.scalableui.manager.Event;
 import com.android.car.scalableui.panel.Panel;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
-import java.util.StringTokenizer;
 
 /**
  * Represents a transition between two {@link Variant}s in the Scalable UI system.
@@ -45,24 +33,17 @@ import java.util.StringTokenizer;
  * variant, an event trigger, and a custom animator.
  */
 public class Transition {
-    public static final String TRANSITION_TAG = "Transition";
-    private static final String FROM_VARIANT_ATTRIBUTE = "fromVariant";
-    private static final String TO_VARIANT_ATTRIBUTE = "toVariant";
-    private static final String ON_EVENT_ATTRIBUTE = "onEvent";
-    private static final String ON_EVENT_TOKENS_ATTRIBUTE = "onEventTokens";
-    private static final String ANIMATOR_ATTRIBUTE = "animator";
-    private static final long DEFAULT_DURATION = 300;
+    public static final long DEFAULT_DURATION = 300;
 
-    private final Variant mFromVariant;
-    @NonNull
-    private final Variant mToVariant;
-    private final Event mOnEvent;
-    private final Animator mAnimator;
-    private final Interpolator mDefaultInterpolator;
+    @Nullable private final Variant mFromVariant;
+    @NonNull private final Variant mToVariant;
+    @Nullable private final Event mOnEvent;
+    @Nullable private final Animator mAnimator;
+    @NonNull private final Interpolator mDefaultInterpolator;
     private final long mDefaultDuration;
 
     /**
-     * Constructor for Transition.
+     * Constructor for Transition. Package-private; use the Builder.
      *
      * @param fromVariant The variant to transition from (can be null).
      * @param toVariant The variant to transition to.
@@ -71,17 +52,22 @@ public class Transition {
      * @param defaultDuration The default duration of the transition.
      * @param defaultInterpolator The default interpolator to use for the transition.
      */
-    public Transition(Variant fromVariant, @NonNull Variant toVariant, String onEvent,
-            String onEventTokens, Animator animator, long defaultDuration,
-            Interpolator defaultInterpolator) {
+    Transition(
+            @Nullable Variant fromVariant,
+            @NonNull Variant toVariant,
+            @Nullable Event onEvent,
+            @Nullable Animator animator,
+            long defaultDuration,
+            @Nullable Interpolator defaultInterpolator) {
         mFromVariant = fromVariant;
         mToVariant = toVariant;
         mAnimator = animator;
-        mOnEvent = createEventFromStrings(onEvent, onEventTokens);
+        mOnEvent = onEvent;
         mDefaultDuration = defaultDuration >= 0 ? defaultDuration : DEFAULT_DURATION;
-        mDefaultInterpolator = defaultInterpolator != null
-                ? defaultInterpolator
-                : new AccelerateDecelerateInterpolator();
+        mDefaultInterpolator =
+                defaultInterpolator != null
+                        ? defaultInterpolator
+                        : new AccelerateDecelerateInterpolator();
     }
 
     /**
@@ -89,6 +75,7 @@ public class Transition {
      *
      * @return The "from" variant, or null if not specified.
      */
+    @Nullable
     public Variant getFromVariant() {
         return mFromVariant;
     }
@@ -98,7 +85,8 @@ public class Transition {
      *
      * @return The "to" variant.
      */
-    public @NonNull Variant getToVariant() {
+    @NonNull
+    public Variant getToVariant() {
         return mToVariant;
     }
 
@@ -113,7 +101,8 @@ public class Transition {
      * @param fromVariant The actual "from" variant of the transition.
      * @return The animator for the transition.
      */
-    public Animator getAnimator(Panel panel, @NonNull Variant fromVariant) {
+    @Nullable
+    public Animator getAnimator(@NonNull Panel panel, @NonNull Variant fromVariant) {
         if (fromVariant.getId().equals(mToVariant.getId())) {
             return null;
         }
@@ -123,7 +112,8 @@ public class Transition {
             animator.setTarget(panel);
             return animator;
         }
-        return fromVariant.getAnimator(panel, mToVariant, mDefaultDuration, mDefaultInterpolator);
+        return fromVariant.getAnimator(
+                panel, mToVariant, mDefaultDuration, mDefaultInterpolator);
     }
 
     /**
@@ -136,71 +126,85 @@ public class Transition {
         return mOnEvent;
     }
 
-    private Event createEventFromStrings(@Nullable String eventId, @Nullable String eventTokens) {
-        if (eventId == null) {
-            return null;
-        }
-        Event event = new Event(eventId);
-        addTokensFromString(event, eventTokens);
-        return event;
-    }
-
-    private void addTokensFromString(@NonNull Event event, @Nullable String eventTokens) {
-        if (TextUtils.isEmpty(eventTokens)) {
-            return;
-        }
-        StringTokenizer tokenizer = new StringTokenizer(eventTokens, ";");
-        while (tokenizer.hasMoreTokens()) {
-            String pair = tokenizer.nextToken();
-            String[] keyValue = pair.split("=");
-            event.addToken(keyValue[0], keyValue[1]);
-        }
-    }
-
-    /**
-     * Creates a Transition object from an XML parser.
-     *
-     * @param context The context to use.
-     * @param panelState The panel state that this transition belongs to.
-     * @param defaultDuration The default duration to use if not specified in the XML.
-     * @param defaultInterpolator The default interpolator to use if not specified in the XML.
-     * @param parser The XML parser.
-     * @return The created Transition object.
-     * @throws XmlPullParserException If an error occurs during XML parsing.
-     * @throws IOException If an I/O error occurs while reading the XML.
-     */
-    public static Transition create(Context context, PanelState panelState, long defaultDuration,
-                                    Interpolator defaultInterpolator, XmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, null, TRANSITION_TAG);
-        AttributeSet attrs = Xml.asAttributeSet(parser);
-
-        String from = attrs.getAttributeValue(null, FROM_VARIANT_ATTRIBUTE);
-        String to = attrs.getAttributeValue(null, TO_VARIANT_ATTRIBUTE);
-        String onEvent = attrs.getAttributeValue(null, ON_EVENT_ATTRIBUTE);
-        String onEventTokens = attrs.getAttributeValue(null, ON_EVENT_TOKENS_ATTRIBUTE);
-        int animatorId = attrs.getAttributeResourceValue(null, ANIMATOR_ATTRIBUTE, 0);
-        Animator animator = animatorId == 0
-                ? null
-                : AnimatorInflater.loadAnimator(context, animatorId);
-        Variant fromVariant = panelState.getVariant(from);
-        Variant toVariant = panelState.getVariant(to);
-        Transition result = new Transition(fromVariant, toVariant, onEvent, onEventTokens,
-                animator, defaultDuration, defaultInterpolator);
-        parser.nextTag();
-        parser.require(XmlPullParser.END_TAG, null, TRANSITION_TAG);
-        return result;
-    }
-
     @Override
+    @NonNull
     public String toString() {
         return "Transition{"
-                + "mFromVariant=" + mFromVariant
-                + ", mToVariant=" + mToVariant
-                + ", mOnEvent='" + mOnEvent + '\''
+                + "mFromVariant=" + (mFromVariant != null ? mFromVariant.getId() : "null")
+                + ", mToVariant=" + (mToVariant != null ? mToVariant.getId() : "null")
+                + ", mOnEvent=" + mOnEvent
                 + ", mAnimator=" + mAnimator
                 + ", mDefaultInterpolator=" + mDefaultInterpolator
                 + ", mDefaultDuration=" + mDefaultDuration
                 + '}';
+    }
+
+    /** Builder for {@link Transition} objects. */
+    public static class Builder {
+        @Nullable private Variant mFromVariant; // Now nullable
+        @NonNull private Variant mToVariant;
+        @Nullable private Event mOnEvent;
+        @Nullable private Animator mAnimator;
+        @Nullable private Interpolator mDefaultInterpolator;
+        @Nullable private Long mDefaultDuration; // Use boxed type Long
+
+        public Builder(@Nullable Variant fromVariant, @NonNull Variant toVariant) {
+            mFromVariant = fromVariant;
+            mToVariant = toVariant;
+        }
+
+        /** Sets from variant */
+        public Builder setFromVariant(@Nullable Variant fromVariant) {
+            mFromVariant = fromVariant; // Accept null
+            return this;
+        }
+
+        /** Sets to variant */
+        public Builder setToVariant(@NonNull Variant toVariant) {
+            mToVariant = toVariant;
+            return this;
+        }
+
+        /** Sets onEvent */
+        public Builder setOnEvent(@Nullable String eventId, @Nullable String eventTokens) {
+            if (eventId == null) {
+                mOnEvent = null;
+            } else {
+                mOnEvent = new Event.Builder(eventId)
+                        .addTokensFromString(eventTokens)
+                        .build();
+            }
+            return this;
+        }
+
+        /** Sets animator */
+        public Builder setAnimator(@Nullable Animator animator) {
+            mAnimator = animator;
+            return this;
+        }
+
+        /** Sets default duration */
+        public Builder setDefaultDuration(long duration) {
+            mDefaultDuration = duration;
+            return this;
+        }
+
+        /** Sets default interpolator */
+        public Builder setDefaultInterpolator(@Nullable Interpolator interpolator) {
+            mDefaultInterpolator = interpolator;
+            return this;
+        }
+
+        /** Returns the {@link Transition} instance */
+        @NonNull
+        public Transition build() {
+            return new Transition(
+                    mFromVariant,
+                    mToVariant,
+                    mOnEvent,
+                    mAnimator,
+                    mDefaultDuration != null ? mDefaultDuration : DEFAULT_DURATION,
+                    mDefaultInterpolator);
+        }
     }
 }

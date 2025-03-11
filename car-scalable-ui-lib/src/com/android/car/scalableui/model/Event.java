@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,22 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.car.scalableui.model;
 
-package com.android.car.scalableui.manager;
-
-import android.annotation.Nullable;
 import android.text.TextUtils;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * Describes an event in the system. An event has an id and optionally tokens to match against
  * transitions.
  */
 public class Event {
+
     /** Id string associated with this event. */
+    @NonNull
     private final String mId;
+
     /**
      * Token map for this event to be matched against. These tokens are in the format of key:value
      * strings.
@@ -36,38 +41,41 @@ public class Event {
     private final Map<String, String> mTokens = new HashMap<>();
 
     /**
-     * Constructs an Event.
+     * Constructs an Event.  Package-private; use the Builder.
      *
      * @param id A unique identifier associated with this event.
      */
-    public Event(String id) {
+    Event(@NonNull String id) {
         mId = id;
     }
 
-    /**
-     * Adds a token to this event to be matched against.
-     */
+    private Event(@NonNull String id, @NonNull Map<String, String> tokens) {
+        mId = id;
+        mTokens.putAll(tokens); // Defensive copy
+    }
+
+    /** Adds a token to this event to be matched against. */
     public final Event addToken(String tokenId, String tokenValue) {
         mTokens.put(tokenId, tokenValue);
         return this;
     }
 
-    /**
-     * Returns the id associated with this event.
-     */
+    /** Returns the id associated with this event. */
+    @NonNull
     public String getId() {
         return mId;
     }
 
-    /**
-     * Return the tokens associated with this event.
-     */
+    /** Return the tokens associated with this event. */
+    @NonNull
     public Map<String, String> getTokens() {
-        return mTokens;
+        // Return a copy to prevent external modification
+        return new HashMap<>(mTokens);
     }
 
     /**
      * Whether the passed in parameters match this event.
+     *
      * @param transitionEvent the event from the transition to match against
      * @return true if this event matches the passed in parameters.
      */
@@ -93,8 +101,8 @@ public class Event {
         }
 
         for (String key : transitionTokens.keySet()) {
-            if (!mTokens.containsKey(key) || !TextUtils.equals(mTokens.get(key),
-                    transitionTokens.get(key))) {
+            if (!mTokens.containsKey(key)
+                    || !TextUtils.equals(mTokens.get(key), transitionTokens.get(key))) {
                 // tokens don't match - not a match
                 return false;
             }
@@ -104,7 +112,48 @@ public class Event {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return "Event{" + "mId='" + mId + "' mTokens='" + mTokens + "'}";
+    }
+
+    /** Builder for {@link Event} objects. */
+    public static class Builder {
+        private String mId;
+        private Map<String, String> mTokens = new HashMap<>();
+
+        public Builder(@NonNull String id) {
+            mId = id;
+        }
+
+        /** Adds token */
+        public Builder addToken(String key, String value) {
+            mTokens.put(key, value);
+            return this;
+        }
+
+        /** Sets token */
+        public Builder addTokensFromString(@Nullable String eventTokens) {
+            if (!TextUtils.isEmpty(eventTokens)) {
+                StringTokenizer tokenizer = new StringTokenizer(eventTokens, ";");
+                while (tokenizer.hasMoreTokens()) {
+                    String pair = tokenizer.nextToken();
+                    String[] keyValue = pair.split("=");
+                    if (keyValue.length == 2) {
+                        mTokens.put(keyValue[0], keyValue[1]);
+                    } // else:  Ignore malformed tokens.
+                }
+            }
+            return this;
+        }
+
+        /** Returns the {@link Event} instance */
+        @NonNull
+        public Event build() {
+            if (mId == null) {
+                throw new IllegalStateException("Event ID must be set.");
+            }
+            return new Event(mId, mTokens);
+        }
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.car.scalableui.model;
+package com.android.car.scalableui.loader.xml;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
