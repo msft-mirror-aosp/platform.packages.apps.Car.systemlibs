@@ -26,6 +26,7 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Insets;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Xml;
@@ -38,7 +39,6 @@ import androidx.annotation.Nullable;
 import com.android.car.scalableui.model.Alpha;
 import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.Corner;
-import com.android.car.scalableui.model.Insets;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.Role;
@@ -141,8 +141,17 @@ public class PanelStateXmlParser {
         int displayId = (displayIdStr == null) ? DEFAULT_DISPLAY : Integer.parseInt(displayIdStr);
         String defaultVariant = attrs.getAttributeValue(null, DEFAULT_VARIANT_ATTRIBUTE);
         int roleValue = attrs.getAttributeResourceValue(null, ROLE_ATTRIBUTE, 0);
-        int defaultLayer =
-                attrs.getAttributeIntValue(null, DEFAULT_LAYER_ATTRIBUTE, DEFAULT_LAYER);
+
+        Integer defaultLayer = null;
+        if (attrs.getAttributeValue(null, DEFAULT_LAYER_ATTRIBUTE) != null) {
+            int resId = attrs.getAttributeResourceValue(null, DEFAULT_LAYER_ATTRIBUTE, 0);
+            if (resId != 0) {
+                defaultLayer = context.getResources().getInteger(resId);
+            } else {
+                defaultLayer =
+                        attrs.getAttributeIntValue(null, DEFAULT_LAYER_ATTRIBUTE, DEFAULT_LAYER);
+            }
+        }
 
         PanelState.Builder builder = new PanelState.Builder(id, new Role(roleValue));
         builder.setDisplayId(displayId);
@@ -175,20 +184,19 @@ public class PanelStateXmlParser {
     private static Variant parseVariant(
             @NonNull Context context,
             @NonNull PanelState panelState,
-            int defaultLayer,
+            @Nullable Integer defaultLayer,
             @NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, VARIANT_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
+
         String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
         String parentVariantId = attrs.getAttributeValue(null, PARENT_ATTRIBUTE);
         Variant parentVariant = panelState.getVariant(parentVariantId);
 
         Variant.Builder variantBuilder = new Variant.Builder(id);
         variantBuilder.setLayer(defaultLayer);
-        if (parentVariant != null) {
-            variantBuilder.setParent(parentVariant);
-        }
+        variantBuilder.setParent(parentVariant);
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String name = parser.getName();
@@ -209,7 +217,7 @@ public class PanelStateXmlParser {
                     variantBuilder.setCornerRadius(parseCorner(context, parser).getRadius());
                     break;
                 case INSETS_TAG:
-                    variantBuilder.setInsets(parseInsets(context, parser).getRect());
+                    variantBuilder.setInsets(parseInsets(context, parser));
                     break;
                 default:
                     XmlPullParserHelper.skip(parser); // Skip other nested tags
@@ -330,21 +338,11 @@ public class PanelStateXmlParser {
         Integer right = getDimensionPixelSize(context, attrs, RIGHT_ATTRIBUTE, true);
         Integer bottom = getDimensionPixelSize(context, attrs, BOTTOM_ATTRIBUTE, false);
 
-        Integer width = getDimensionPixelSize(context, attrs, WIDTH_ATTRIBUTE, true);
-        Integer height = getDimensionPixelSize(context, attrs, HEIGHT_ATTRIBUTE, false);
-
         while (parser.next() != XmlPullParser.END_TAG) {
             XmlPullParserHelper.skip(parser); // Skip any nested tags
         }
 
-        return new Insets.Builder()
-                .setLeft(left)
-                .setTop(top)
-                .setRight(right)
-                .setBottom(bottom)
-                .setWidth(width)
-                .setHeight(height)
-                .build();
+        return Insets.of(left, top, right, bottom);
     }
 
     @NonNull
