@@ -296,19 +296,19 @@ public class Variant {
         }
 
         /** Sets alpha */
-        public Builder setAlpha(float alpha) {
+        public Builder setAlpha(@Nullable Float alpha) {
             mAlpha = alpha;
             return this;
         }
 
         /** Sets visibility */
-        public Builder setVisibility(boolean isVisible) {
+        public Builder setVisibility(@Nullable Boolean isVisible) {
             mIsVisible = isVisible;
             return this;
         }
 
         /** Sets layer */
-        public Builder setLayer(int layer) {
+        public Builder setLayer(@Nullable Integer layer) {
             mLayer = layer;
             return this;
         }
