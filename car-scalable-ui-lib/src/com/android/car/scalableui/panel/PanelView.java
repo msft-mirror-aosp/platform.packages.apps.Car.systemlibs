@@ -37,6 +37,7 @@ public class PanelView extends FrameLayout implements Panel {
 
     private int mLayer = -1;
     private int mRole = 0;
+    private String mId = "";
 
     private int mImageHolderLayoutId;
     private int mImageId;
@@ -245,5 +246,11 @@ public class PanelView extends FrameLayout implements Panel {
     private boolean isLayoutRole(int role) {
         String resourceTypeName = getContext().getResources().getResourceTypeName(role);
         return LAYOUT_RESOURCE_TYPE.equals(resourceTypeName);
+    }
+
+    @Override
+    @NonNull
+    public String getPanelId() {
+        return mId;
     }
 }
