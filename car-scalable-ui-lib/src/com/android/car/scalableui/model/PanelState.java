@@ -37,6 +37,7 @@ public class PanelState {
     private static final String TAG = PanelState.class.getSimpleName();
 
     public static final String DEFAULT_ROLE = "DEFAULT";
+    public static final String DECOR_PANEL_ID_PREFIX = "decor";
 
     private String mDefaultVariant;
     private int mDisplayId;

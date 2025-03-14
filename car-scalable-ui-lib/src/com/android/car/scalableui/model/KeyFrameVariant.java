@@ -17,6 +17,7 @@ package com.android.car.scalableui.model;
 
 import android.animation.FloatEvaluator;
 import android.animation.RectEvaluator;
+import android.graphics.Insets;
 import android.graphics.Rect;
 
 import androidx.annotation.NonNull;
@@ -38,7 +39,7 @@ import java.util.Objects;
  * properties such as bounds, visibility, and alpha.
  */
 public class KeyFrameVariant extends Variant {
-
+    private static final String TAG = KeyFrameVariant.class.getSimpleName();
     private float mFraction;
     private final RectEvaluator mRectEvaluator = new RectEvaluator();
     private final FloatEvaluator mFloatEvaluator = new FloatEvaluator();
@@ -52,11 +53,38 @@ public class KeyFrameVariant extends Variant {
          * Constructor for KeyFrame.
          *
          * @param framePosition The position of the keyframe (0-100).
-         * @param variant The variant associated with this keyframe.
+         * @param variant       The variant associated with this keyframe.
          */
         public KeyFrame(int framePosition, @NonNull Variant variant) {
             mFramePosition = framePosition;
             mVariant = variant;
+        }
+
+        /** Builder for {@link KeyFrameVariant} objects. */
+        public static class Builder {
+            private final int mFramePosition;
+            private final Variant mVariant;
+
+            public Builder(int framePosition, @NonNull Variant variant) {
+                mVariant = variant;
+                mFramePosition = framePosition;
+            }
+
+            /** Returns the {@link KeyFrameVariant} instance */
+            public KeyFrame build() {
+                if (mVariant == null) {
+                    throw new IllegalStateException("Variant must be set for KeyFrame");
+                }
+                return new KeyFrame(mFramePosition, mVariant);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "KeyFrame{"
+                    + "mFramePosition=" + mFramePosition
+                    + ", mVariant=" + mVariant
+                    + '}';
         }
     }
 
@@ -65,10 +93,10 @@ public class KeyFrameVariant extends Variant {
     /**
      * Constructor for KeyFrameVariant. Package-private, use the Builder.
      *
-     * @param id The ID of this variant.
+     * @param id   The ID of this variant.
      * @param base The base variant to inherit properties from.
      */
-    KeyFrameVariant(@NonNull String id, @Nullable Variant base) {
+    KeyFrameVariant(@NonNull String id, @NonNull Variant base) {
         super(id, base);
     }
 
@@ -152,7 +180,7 @@ public class KeyFrameVariant extends Variant {
     @Nullable
     private KeyFrame before(float fraction) {
         if (mKeyFrames.isEmpty()) return null;
-        KeyFrame current = mKeyFrames.get(0);
+        KeyFrame current = mKeyFrames.getFirst();
         for (KeyFrame keyFrame : mKeyFrames) {
             if (keyFrame.mFramePosition >= fraction * 100) {
                 return current;
@@ -186,12 +214,12 @@ public class KeyFrameVariant extends Variant {
      * value (between 0 and 1). It calculates the fraction between the two keyframes, effectively
      * normalizing the overall fraction to the range between the keyframes.
      *
-     * <p>For example, if framePosition1 is 20, framePosition2 is 80, and fraction is 0.5, the
-     * resultwill be 0.75, because 0.5 lies at 75% of the range between 20 and 80.
+     * <p>For example, if framePosition1 is 0, framePosition2 is 80, and fraction is 0.5, the
+     * result will be 0.75, because 0.5 lies at 62.5% of the range between 0 and 80.
      *
      * @param framePosition1 The position of the first keyframe (0-100).
      * @param framePosition2 The position of the second keyframe (0-100).
-     * @param fraction The overall fraction value (between 0 and 1).
+     * @param fraction       The overall fraction value (between 0 and 1).
      * @return The fraction between the two keyframes.
      */
     private float getKeyFrameFraction(int framePosition1, int framePosition2, float fraction) {
@@ -219,6 +247,22 @@ public class KeyFrameVariant extends Variant {
                         keyFrame1.mFramePosition, keyFrame2.mFramePosition, fraction);
         Rect rect = mRectEvaluator.evaluate(fractionInBetween, bounds1, bounds2);
         return new Rect(rect.left, rect.top, rect.right, rect.bottom);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("KeyFrameVariant{ mid=")
+                .append(mId)
+                .append(", mFraction=")
+                .append(mFraction);
+        for (KeyFrame keyFrame : mKeyFrames) {
+            sb.append(", keyFrame=").append(keyFrame);
+        }
+        sb.append(", layer=").append(getLayer());
+        sb.append(", visibility=").append(isVisible());
+        sb.append("}");
+        return sb.toString();
     }
 
     /**
@@ -252,18 +296,11 @@ public class KeyFrameVariant extends Variant {
     }
 
     /** Builder for {@link KeyFrameVariant} objects. */
-    public static class Builder {
-        private String mId;
-        private Variant mBaseVariant;
+    public static class Builder extends Variant.Builder {
         private List<KeyFrame> mKeyFrames = new ArrayList<>();
 
         public Builder(@NonNull String id) {
-            mId = id;
-        }
-
-        public Builder(@NonNull String id, @Nullable Variant baseVariant) {
-            mId = id;
-            mBaseVariant = baseVariant;
+            super(id);
         }
 
         /** Adds keyframe */
@@ -278,16 +315,37 @@ public class KeyFrameVariant extends Variant {
             return this;
         }
 
-        /** Sets base variant */
-        public Builder setBaseVariant(@Nullable Variant variant) {
-            mBaseVariant = variant;
-            return this;
-        }
-
         /** Returns the {@link KeyFrameVariant} instance */
+        @Override
         @NonNull
         public KeyFrameVariant build() {
-            KeyFrameVariant variant = new KeyFrameVariant(mId, mBaseVariant);
+            KeyFrameVariant variant;
+            if (mParent != null) {
+                variant = new KeyFrameVariant(mId, mParent);
+            } else {
+                variant = new KeyFrameVariant(mId);
+            }
+
+            if (mAlpha != null) {
+                variant.setAlpha(mAlpha);
+            }
+            if (mIsVisible != null) {
+                variant.setVisibility(mIsVisible);
+            }
+            if (mLayer != null) {
+                variant.setLayer(mLayer);
+            }
+            if (mBounds != null) {
+                variant.setBounds(new Rect(mBounds)); // Defensive copy
+            }
+            if (mCornerRadius != null) {
+                variant.setCornerRadius(mCornerRadius);
+            }
+            if (mInsets != null) {
+                variant.setInsets(
+                        Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
+            }
+
             // Sort keyframes by frame position after adding them all.
             mKeyFrames.sort(Comparator.comparingInt(o -> o.mFramePosition));
             for (KeyFrame keyFrame : mKeyFrames) {

@@ -130,8 +130,8 @@ public class Transition {
     @NonNull
     public String toString() {
         return "Transition{"
-                + "mFromVariant=" + (mFromVariant != null ? mFromVariant.getId() : "null")
-                + ", mToVariant=" + (mToVariant != null ? mToVariant.getId() : "null")
+                + "mFromVariant=" + (mFromVariant != null ? mFromVariant : "null")
+                + ", mToVariant=" + (mToVariant != null ? mToVariant : "null")
                 + ", mOnEvent=" + mOnEvent
                 + ", mAnimator=" + mAnimator
                 + ", mDefaultInterpolator=" + mDefaultInterpolator

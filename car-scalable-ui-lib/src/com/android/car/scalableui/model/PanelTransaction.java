@@ -41,7 +41,7 @@ public class PanelTransaction {
     /**
      * Adds a {@link Transition} for the panel with the specified ID.
      *
-     * @param id The ID of the panel.
+     * @param id         The ID of the panel.
      * @param transition The transition to apply to the panel.
      */
     void addPanelTransaction(@NonNull String id, @NonNull Transition transition) {
@@ -57,7 +57,7 @@ public class PanelTransaction {
     /**
      * Adds a {@link Animator} for the panel with the specified ID.
      *
-     * @param id The ID of the panel.
+     * @param id       The ID of the panel.
      * @param animator The animator to apply to the panel.
      */
     void addAnimator(@NonNull String id, @Nullable Animator animator) {
@@ -91,7 +91,7 @@ public class PanelTransaction {
         /**
          * Adds a {@link Transition} for the panel with the specified ID.
          *
-         * @param id The ID of the panel.
+         * @param id         The ID of the panel.
          * @param transition The transition to apply to the panel.
          * @return The builder instance.
          */
@@ -104,7 +104,7 @@ public class PanelTransaction {
         /**
          * Adds a {@link Animator} for the panel with the specified ID.
          *
-         * @param id The ID of the panel.
+         * @param id       The ID of the panel.
          * @param animator The animator to apply to the panel.
          * @return The builder instance.
          */
@@ -123,5 +123,19 @@ public class PanelTransaction {
         public PanelTransaction build() {
             return mPanelTransaction;
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("[ PanelTransaction:");
+        for (Map.Entry<String, Transition> entry : mTransactionMap.entrySet()) {
+            sb.append(" Transition: ").append(entry.getKey()).append("=").append(
+                    entry.getValue()).append(", ");
+        }
+        for (Map.Entry<String, Animator> entry : mAnimatorMap.entrySet()) {
+            sb.append(" Animator: ").append(entry.getKey()).append("=").append(
+                    entry.getValue()).append(", ");
+        }
+        return sb.append("]").toString();
     }
 }

@@ -45,7 +45,6 @@ import java.util.Map;
  * based on their current state.
  */
 public class StateManager {
-
     private static final String TAG = StateManager.class.getSimpleName();
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
@@ -105,15 +104,27 @@ public class StateManager {
      * @param event The event to be handled.
      */
     public static PanelTransaction handleEvent(Event event) {
+        logIfDebuggable("handleEvent " + event);
         PanelTransaction.Builder panelTransactionBuilder = new PanelTransaction.Builder();
         for (PanelState panelState : sInstance.mPanelStates.values()) {
+            if (panelState == null) {
+                Log.e(TAG, "panel state is null");
+                continue;
+            }
             Transition transition = panelState.getTransition(event);
             if (transition == null) {
+                Log.e(TAG, "transition is null for " + panelState.getId());
                 continue;
             }
             Panel panel = PanelPool.getInstance().getPanel(panelState.getId());
 
             Variant toVariant = transition.getToVariant();
+            Variant fromVariant = panelState.getCurrentVariant();
+
+            if (fromVariant == null) {
+                logIfDebuggable("fromVariant is null");
+                continue;
+            }
 
             Animator animator = transition.getAnimator(panel, panelState.getCurrentVariant());
             if (animator != null) {
@@ -129,14 +140,15 @@ public class StateManager {
                         applyState(panelState);
                     }
                 });
-                Log.d(TAG, "add animator for " + panelState.getId());
+                logIfDebuggable("add animator for " + panelState.getId());
                 panelTransactionBuilder.addAnimator(panelState.getId(), animator);
             } else if (!panelState.isAnimating()) {
                 // Force apply the new state if there is no on going animation.
+                logIfDebuggable("No animator for " + panelState.getId());
                 panelState.setVariant(toVariant.getId(), event);
                 applyState(panelState);
             }
-            Log.d(TAG, "add transition for " + panelState.getId());
+            logIfDebuggable("add transition for " + panelState.getId());
             panelTransactionBuilder.addPanelTransaction(panelState.getId(), transition);
         }
         return panelTransactionBuilder.build();
@@ -183,5 +195,11 @@ public class StateManager {
     @VisibleForTesting
     Map<String, PanelState> getPanelStates() {
         return mPanelStates;
+    }
+
+    private static void logIfDebuggable(String msg) {
+        if (DEBUG) {
+            Log.d(TAG, msg);
+        }
     }
 }
