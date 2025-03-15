@@ -16,43 +16,31 @@
 
 package com.android.car.scalableui.model;
 
-import android.util.AttributeSet;
-import android.util.Xml;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Represents the visibility of a Panel in the Scalable UI system.
  *
- * <p>This class encapsulates a boolean value indicating whether a panel is visible or not.
- * It can be created from an XML definition or directly using a boolean value.
+ * <p>This class encapsulates a boolean value indicating whether a panel is visible or not. It can
+ * be created from an XML definition or directly using a boolean value.
  */
 public class Visibility {
-    static final String VISIBILITY_TAG = "Visibility";
-    private static final String IS_VISIBLE_ATTRIBUTE = "isVisible";
-    static final boolean DEFAULT_VISIBILITY = true;
+    public static final boolean DEFAULT_VISIBILITY = true;
 
     private final boolean mIsVisible;
 
     /**
-     * Constructor for Visibility.
+     * Constructor for Visibility. Package-private; use the Builder.
      *
      * @param isVisible Whether the element is visible.
      */
-    public Visibility(boolean isVisible) {
+    Visibility(boolean isVisible) {
         this.mIsVisible = isVisible;
     }
 
-    /**
-     * Copy constructor for Visibility.
-     *
-     * @param visibility The Visibility object to copy from.
-     */
-    public Visibility(Visibility visibility) {
-        this(visibility.mIsVisible);
+    public Visibility(Visibility original) {
+        this.mIsVisible = original.isVisible();
     }
 
     /**
@@ -64,22 +52,24 @@ public class Visibility {
         return mIsVisible;
     }
 
-    /**
-     * Creates a Visibility object from an XML parser.
-     *
-     * @param parser The XML parser.
-     * @return The created Visibility object.
-     * @throws XmlPullParserException If an error occurs during XML parsing.
-     * @throws IOException If an I/O error occurs while reading the XML.
-     */
-    public static Visibility create(XmlPullParser parser) throws XmlPullParserException,
-            IOException {
-        parser.require(XmlPullParser.START_TAG, null, VISIBILITY_TAG);
-        AttributeSet attrs = Xml.asAttributeSet(parser);
-        boolean isVisible = attrs.getAttributeBooleanValue(null, IS_VISIBLE_ATTRIBUTE,
-                DEFAULT_VISIBILITY);
-        parser.nextTag();
-        parser.require(XmlPullParser.END_TAG, null, VISIBILITY_TAG);
-        return new Visibility(isVisible);
+    /** Builder for {@link Visibility} objects. */
+    public static class Builder {
+        @Nullable private Boolean mIsVisible; // Use boxed type
+
+        public Builder() {}
+
+        /** Set visibility*/
+        public Builder setIsVisible(boolean isVisible) {
+            mIsVisible = isVisible;
+            return this;
+        }
+
+        /** Returns the {@link Visibility} instance */
+        @NonNull
+        public Visibility build() {
+            // Use default if not explicitly set
+            boolean visible = (mIsVisible != null) ? mIsVisible : DEFAULT_VISIBILITY;
+            return new Visibility(visible);
+        }
     }
 }
