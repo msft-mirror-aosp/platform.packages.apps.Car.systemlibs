@@ -16,58 +16,40 @@
 
 package com.android.car.scalableui.model;
 
-import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Rect;
-import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.util.Xml;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
-import java.util.Locale;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Represents the bounds of a UI element. This class provides methods for creating a Bounds object
  * from an XML definition and retrieving the bounds as a {@link Rect}.
  *
  * <p>The Bounds class supports defining dimensions in the following formats:
+ *
  * <ul>
- *     <li><b>Absolute pixels:</b> e.g., <code>left="100"</code></li>
- *     <li><b>Density-independent pixels (dp):</b> e.g., <code>top="50dip"</code></li>
- *     <li><b>Percentage of screen width/height:</b> e.g., <code>right="80%"</code></li>
- *     <li><b>Resource references:</b> e.g., <code>bottom="@dimen/my_bottom_margin"</code></li>
+ *   <li><b>Absolute pixels:</b> e.g., <code>left="100"</code></li>
+ *   <li><b>Density-independent pixels (dp):</b> e.g., <code>top="50dip"</code></li>
+ *   <li><b>Percentage of screen width/height:</b> e.g., <code>right="80%"</code></li>
+ *   <li><b>Resource references:</b> e.g., <code>bottom="@dimen/my_bottom_margin"</code></li>
  * </ul>
  *
  * <p>It also allows defining either the left and right positions, or the left position and width.
  * Similarly, it allows defining either the top and bottom positions, or the top position and
  * height.
  */
-class Bounds {
-    static final String BOUNDS_TAG = "Bounds";
-    private static final String LEFT_ATTRIBUTE = "left";
-    private static final String RIGHT_ATTRIBUTE = "right";
-    private static final String TOP_ATTRIBUTE = "top";
-    private static final String BOTTOM_ATTRIBUTE = "bottom";
-    private static final String WIDTH_ATTRIBUTE = "width";
-    private static final String HEIGHT_ATTRIBUTE = "height";
-    private static final String DIP = "dip";
-    private static final String DP = "dp";
-    private static final String PERCENT = "%";
+public class Bounds {
     private final int mLeft;
     private final int mTop;
     private final int mRight;
     private final int mBottom;
 
     /**
-     * Constructs a Bounds object with the specified left, top, right, and bottom positions.
+     * Constructs a Bounds object. Package-private constructor; use the Builder.
      *
-     * @param left The left position in pixels.
-     * @param top The top position in pixels.
-     * @param right The right position in pixels.
+     * @param left   The left position in pixels.
+     * @param top    The top position in pixels.
+     * @param right  The right position in pixels.
      * @param bottom The bottom position in pixels.
      */
     Bounds(int left, int top, int right, int bottom) {
@@ -82,88 +64,91 @@ class Bounds {
      *
      * @return A Rect object representing the bounds.
      */
+    @NonNull
     public Rect getRect() {
         return new Rect(mLeft, mTop, mRight, mBottom);
     }
 
-    /**
-     * Creates a Bounds object from an XML parser.
-     *
-     * <p>This method parses an XML element with the tag "Bounds" and extracts the "left", "top",
-     * "right", and "bottom" attributes (or equivalent width/height combinations) to create a
-     * Bounds object.
-     *
-     * @param context The application context.
-     * @param parser The XML parser.
-     * @return A Bounds object with the parsed bounds.
-     * @throws XmlPullParserException If an error occurs during XML parsing.
-     * @throws IOException If an I/O error occurs while reading the XML.
-     */
-    static Bounds create(Context context, XmlPullParser parser) throws XmlPullParserException,
-            IOException {
-        parser.require(XmlPullParser.START_TAG, null, BOUNDS_TAG);
-        AttributeSet attrs = Xml.asAttributeSet(parser);
-        int left = getDimensionPixelSize(context, attrs, LEFT_ATTRIBUTE, true);
-        int top = getDimensionPixelSize(context, attrs,  TOP_ATTRIBUTE, false);
-        int right = getDimensionPixelSize(context, attrs, RIGHT_ATTRIBUTE, true);
-        int bottom = getDimensionPixelSize(context, attrs, BOTTOM_ATTRIBUTE, false);
+    /** Builder for {@link Bounds} objects. */
+    public static class Builder {
+        @Nullable private Integer mLeft;
+        @Nullable private Integer mTop;
+        @Nullable private Integer mRight;
+        @Nullable private Integer mBottom;
+        @Nullable private Integer mWidth;
+        @Nullable private Integer mHeight;
 
-        int width = getDimensionPixelSize(context, attrs, WIDTH_ATTRIBUTE, true);
-        int height = getDimensionPixelSize(context, attrs, HEIGHT_ATTRIBUTE, false);
-        if (attrs.getAttributeValue(null, RIGHT_ATTRIBUTE) == null) {
-            right = left + width;
-        } else if (attrs.getAttributeValue(null, LEFT_ATTRIBUTE) == null) {
-            left = right - width;
-        }
-        if (attrs.getAttributeValue(null, BOTTOM_ATTRIBUTE) == null) {
-            bottom = top + height;
-        } else if (attrs.getAttributeValue(null, TOP_ATTRIBUTE) == null) {
-            top = bottom - height;
+        public Builder() {}
+
+        /** Sets left */
+        public Builder setLeft(@Nullable Integer left) {
+            mLeft = left;
+            return this;
         }
 
-        parser.nextTag();
-        parser.require(XmlPullParser.END_TAG, null, BOUNDS_TAG);
-        return new Bounds(left, top, right, bottom);
-    }
+        /** Sets top */
+        public Builder setTop(@Nullable Integer top) {
+            mTop = top;
+            return this;
+        }
 
-    /**
-     * Helper method to get a dimension pixel size from an attribute set.
-     *
-     * @param context The application context.
-     * @param attrs The attribute set.
-     * @param name The name of the attribute.
-     * @param isHorizontal Whether the dimension is horizontal (width) or vertical (height).
-     * @return The dimension pixel size.
-     */
-    private static int getDimensionPixelSize(Context context, AttributeSet attrs, String name,
-            boolean isHorizontal) {
-        int resId = attrs.getAttributeResourceValue(null, name, 0);
-        if (resId != 0) {
-            return context.getResources().getDimensionPixelSize(resId);
+        /** Sets right */
+        public Builder setRight(@Nullable Integer right) {
+            mRight = right;
+            return this;
         }
-        String dimenStr = attrs.getAttributeValue(null, name);
-        if (dimenStr == null) {
-            return 0;
+
+        /** Sets bottom */
+        public Builder setBottom(@Nullable Integer bottom) {
+            mBottom = bottom;
+            return this;
         }
-        if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DP)) {
-            String valueStr = dimenStr.substring(0, dimenStr.length() - DP.length());
-            float value = Float.parseFloat(valueStr);
-            return (int) (value * Resources.getSystem().getDisplayMetrics().density);
-        } else if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DIP)) {
-            String valueStr = dimenStr.substring(0, dimenStr.length() - DIP.length());
-            float value = Float.parseFloat(valueStr);
-            return (int) (value * Resources.getSystem().getDisplayMetrics().density);
-        } else if (dimenStr.toLowerCase(Locale.ROOT).endsWith(PERCENT)) {
-            String valueStr = dimenStr.substring(0, dimenStr.length() - PERCENT.length());
-            float value = Float.parseFloat(valueStr);
-            DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
-            if (isHorizontal) {
-                return (int) (value * displayMetrics.widthPixels / 100);
-            } else {
-                return (int) (value * displayMetrics.heightPixels / 100);
+
+        /** Sets width */
+        public Builder setWidth(@Nullable Integer width) {
+            mWidth = width;
+            return this;
+        }
+
+        /** Sets height */
+        public Builder setHeight(@Nullable Integer height) {
+            mHeight = height;
+            return this;
+        }
+
+        /** Sets rect */
+        public Builder setRect(@NonNull Rect rect) {
+            mLeft = rect.left;
+            mTop = rect.top;
+            mRight = rect.right;
+            mBottom = rect.bottom;
+            return this;
+        }
+
+        /** Returns the {@link Bounds} instance */
+        @NonNull
+        public Bounds build() {
+            // Default values and logic to ensure a valid Rect.
+            int left = (mLeft != null) ? mLeft : 0;
+            int top = (mTop != null) ? mTop : 0;
+            int right = (mRight != null) ? mRight : 0;
+            int bottom = (mBottom != null) ? mBottom : 0;
+            int width = (mWidth != null) ? mWidth : 0;
+            int height = (mHeight != null) ? mHeight : 0;
+
+            // Handle width/height combinations, prioritizing explicit left/right/top/bottom
+            if (mRight == null && mWidth != null) {
+                right = left + width;
+            } else if (mLeft == null && mWidth != null) {
+                left = right - width;
             }
-        } else {
-            return attrs.getAttributeIntValue(null, name, 0);
+            if (mBottom == null && mHeight != null) {
+                bottom = top + height;
+            } else if (mTop == null && mHeight != null) {
+                top = bottom - height;
+            }
+
+            return new Bounds(left, top, right, bottom);
         }
     }
 }

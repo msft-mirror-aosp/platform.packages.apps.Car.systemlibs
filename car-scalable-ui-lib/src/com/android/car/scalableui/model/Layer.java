@@ -16,31 +16,23 @@
 
 package com.android.car.scalableui.model;
 
-import android.util.AttributeSet;
-import android.util.Xml;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Represents the layer of a {@code Panel}. This class provides methods for creating a Layer object
  * from an XML definition and retrieving the layer value.
  */
-class Layer {
-    static final String LAYER_TAG = "Layer";
-    private static final String LAYER_ATTRIBUTE = "layer";
+public class Layer {
 
-    static final int DEFAULT_LAYER = 0;
+    public static final int DEFAULT_LAYER = 0;
 
     private final int mLayer;
 
     /**
-     * Constructs a Layer object with the specified layer value.
+     * Constructs a Layer object. Package-private; use the Builder.
      *
-     * @param layer The layer value. Higher values indicate that the element should be drawn on top
-     *              of elements with lower layer values.
+     * @param layer The layer value.
      */
     Layer(int layer) {
         mLayer = layer;
@@ -55,23 +47,24 @@ class Layer {
         return mLayer;
     }
 
-    /**
-     * Creates a Layer object from an XML parser.
-     *
-     * <p>This method parses an XML element with the tag "Layer" and extracts the "layer" attribute
-     * to create a Layer object. If the "layer" attribute is not specified, it defaults to 0.
-     *
-     * @param parser The XML parser.
-     * @return A Layer object with the parsed layer value.
-     * @throws XmlPullParserException If an error occurs during XML parsing.
-     * @throws IOException If an I/O error occurs while reading the XML.
-     */
-    static Layer create(XmlPullParser parser) throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, null, LAYER_TAG);
-        AttributeSet attrs = Xml.asAttributeSet(parser);
-        int layer = attrs.getAttributeIntValue(null, LAYER_ATTRIBUTE, DEFAULT_LAYER);
-        parser.nextTag();
-        parser.require(XmlPullParser.END_TAG, null, LAYER_TAG);
-        return new Layer(layer);
+    /** Builder for {@link Layer} objects. */
+    public static class Builder {
+        @Nullable private Integer mLayer;
+
+        public Builder() {}
+
+        /** Sets layer */
+        public Builder setLayer(int layer) {
+            mLayer = layer;
+            return this;
+        }
+
+        /** Returns the {@link Layer} instance */
+        @NonNull
+        public Layer build() {
+            // Use default if not explicitly set
+            int layerValue = (mLayer != null) ? mLayer : DEFAULT_LAYER;
+            return new Layer(layerValue);
+        }
     }
 }
