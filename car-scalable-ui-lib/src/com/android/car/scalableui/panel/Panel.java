@@ -15,6 +15,7 @@
  */
 package com.android.car.scalableui.panel;
 
+import android.graphics.Insets;
 import android.graphics.Rect;
 
 import androidx.annotation.NonNull;
@@ -181,4 +182,15 @@ public interface Panel {
      */
     @NonNull
     String getPanelId();
+
+    /**
+     * Sets the {@link Insets}
+     */
+    void setInsets(@NonNull Insets insets);
+
+    /**
+     * @return The {@link Insets}
+     */
+    @NonNull
+    Insets getInsets();
 }
