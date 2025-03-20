@@ -39,6 +39,12 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "car-ui-lib-no-overlayable",
-        "car-resource-common",
+        "oem-token-lib",
     ],
+
+    libs: [
+        "token-shared-lib-prebuilt",
+    ],
+
+    enforce_uses_libs: false,
 }

@@ -22,6 +22,6 @@
           android:color="@color/qc_toggle_off_background_color"/>
     <item android:state_enabled="false"
           android:alpha="?android:attr/disabledAlpha"
-          android:color="?android:attr/colorAccent"/>
-    <item android:color="?android:attr/colorAccent"/>
+          android:color="?oemColorPrimary"/>
+    <item android:color="?oemColorPrimary"/>
 </selector>
