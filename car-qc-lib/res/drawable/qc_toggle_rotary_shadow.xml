@@ -19,7 +19,7 @@
         <shape android:shape="rectangle">
             <stroke android:width="@dimen/qc_toggle_rotary_shadow_width"
                 android:color="@color/qc_toggle_rotary_shadow_color"/>
-            <corners android:radius="@dimen/qc_toggle_rotary_shadow_radius" />
+            <corners android:radius="?qcToggleRotaryShadowRadius" />
         </shape>
     </item>
 </selector>

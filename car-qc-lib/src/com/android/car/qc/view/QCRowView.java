@@ -49,6 +49,7 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.oem.tokens.Token;
 import com.android.car.qc.QCActionItem;
 import com.android.car.qc.QCCategory;
 import com.android.car.qc.QCItem;
@@ -190,6 +191,7 @@ public class QCRowView extends FrameLayout {
     }
 
     private void init(Context context) {
+        context.getTheme().applyStyle(R.style.CarQcLibThemeOverlay, true);
         mLayoutInflater = LayoutInflater.from(context);
         mBidiFormatter = BidiFormatter.getInstance();
         mLayoutInflater.inflate(R.layout.qc_row_view, /* root= */ this);
@@ -254,12 +256,12 @@ public class QCRowView extends FrameLayout {
                     mBidiFormatter.unicodeWrap(row.getActionText(),
                             TextDirectionHeuristics.LOCALE));
             if (row.getCategory() == QCCategory.WARNING) {
-                mActionText.setTextColor(
-                        getResources().getColor(R.color.qc_warning_text_color));
+                mActionText.setTextColor(getResources().getColor(
+                        R.color.qc_warning_text_color, mContentView.getContext().getTheme()));
             } else {
                 mActionText.setTextColor(
-                        getResources().getColor(
-                                com.android.car.resource.common.R.color.car_on_surface_variant));
+                        Token.getColor(mContentView.getContext(),
+                                com.android.car.oem.tokens.R.attr.oemColorSurfaceVariant));
             }
         } else {
             mActionText.setVisibility(GONE);
@@ -269,7 +271,8 @@ public class QCRowView extends FrameLayout {
             Drawable drawable = row.getStartIcon().loadDrawable(getContext());
             if (drawable != null && row.isStartIconTintable()) {
                 if (mStartIconTint == 0) {
-                    mStartIconTint = getContext().getColor(R.color.qc_start_icon_color);
+                    mStartIconTint = getContext().getResources().getColor(
+                            R.color.qc_start_icon_color, getContext().getTheme());
                 }
                 drawable.setTint(mStartIconTint);
             }
