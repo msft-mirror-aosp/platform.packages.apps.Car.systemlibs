@@ -18,9 +18,11 @@ package com.android.car.scalableui.model;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.graphics.Insets;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -53,6 +55,7 @@ public class TransitionTest {
     @Test
     public void testGetAnimator_defaultAnimator() {
         Panel panel = mock(Panel.class);
+        when(panel.getInsets()).thenReturn(mock(Insets.class));
         Variant fromVariant = new Variant(FROM_VARIANT_ID);
         Variant toVariant = new Variant(TO_VARIANT_ID);
         Transition transition = new Transition(fromVariant, toVariant, TEST_EVENT, null, 500,
