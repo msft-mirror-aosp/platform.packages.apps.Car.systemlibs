@@ -17,6 +17,7 @@
 package com.android.car.scalableui.panel;
 
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -226,6 +227,16 @@ public class PanelView extends FrameLayout implements Panel {
     @Override
     public void reset() {
         // no-op
+    }
+
+    @Override
+    public void setInsets(Insets insets) {
+        setPadding(insets.left, insets.top, insets.right, insets.bottom);
+    }
+
+    @Override
+    public Insets getInsets() {
+        return Insets.of(getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
     }
 
     @Override
