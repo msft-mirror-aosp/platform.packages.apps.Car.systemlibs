@@ -22,6 +22,8 @@ import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.os.Build;
+import android.util.Log;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
@@ -37,11 +39,14 @@ import com.android.car.scalableui.panel.Panel;
  * different variants.
  */
 public class Variant {
+    private static final String TAG = Variant.class.getSimpleName();
+    private static final boolean DEBUG = Build.IS_DEBUGGABLE;
+
     private final FloatEvaluator mFloatEvaluator = new FloatEvaluator();
     private final RectEvaluator mRectEvaluator = new RectEvaluator();
     private final IntEvaluator mIntEvaluator = new IntEvaluator();
 
-    @NonNull private final String mId;
+    @NonNull protected final String mId;
     private float mAlpha;
     private boolean mIsVisible;
     private int mLayer;
@@ -122,6 +127,8 @@ public class Variant {
             Rect toBounds = new Rect(toVariant.getBounds());
             boolean isVisible = panel.isVisible() || toVariant.isVisible();
             int layer = toVariant.getLayer();
+            Rect fromInsets = panel.getInsets().toRect();
+            Rect toInsets = toVariant.getInsets().toRect();
             ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
             valueAnimator.setDuration(duration);
             valueAnimator.setInterpolator(interpolator);
@@ -137,6 +144,12 @@ public class Variant {
                         int radius = mIntEvaluator.evaluate(fraction, fromCornerRadius,
                                 toCornerRadius);
                         panel.setCornerRadius(radius);
+                        Rect insets = mRectEvaluator.evaluate(fraction, fromInsets,
+                                toInsets);
+                        panel.setInsets(Insets.of(insets));
+                        if (DEBUG) {
+                            Log.d(TAG, "Panel updated: " + panel);
+                        }
                     });
             return valueAnimator;
         }
@@ -282,14 +295,14 @@ public class Variant {
 
     /** Builder for {@link Variant} objects. */
     public static class Builder {
-        @NonNull private String mId;
-        @Nullable private Float mAlpha;
-        @Nullable private Boolean mIsVisible;
-        @Nullable private Integer mLayer;
-        @Nullable private Rect mBounds;
-        @Nullable private Integer mCornerRadius;
-        @Nullable private Insets mInsets;
-        @Nullable private Variant mParent;
+        @NonNull protected String mId;
+        @Nullable protected Float mAlpha;
+        @Nullable protected Boolean mIsVisible;
+        @Nullable protected Integer mLayer;
+        @Nullable protected Rect mBounds;
+        @Nullable protected Integer mCornerRadius;
+        @Nullable protected Insets mInsets;
+        @Nullable protected Variant mParent;
 
         public Builder(@NonNull String id) {
             mId = id;

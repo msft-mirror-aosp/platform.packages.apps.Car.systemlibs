@@ -17,6 +17,7 @@
 package com.android.car.scalableui.panel;
 
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -37,6 +38,7 @@ public class PanelView extends FrameLayout implements Panel {
 
     private int mLayer = -1;
     private int mRole = 0;
+    private String mId = "";
 
     private int mImageHolderLayoutId;
     private int mImageId;
@@ -228,6 +230,16 @@ public class PanelView extends FrameLayout implements Panel {
     }
 
     @Override
+    public void setInsets(Insets insets) {
+        setPadding(insets.left, insets.top, insets.right, insets.bottom);
+    }
+
+    @Override
+    public Insets getInsets() {
+        return Insets.of(getPaddingLeft(), getPaddingTop(), getPaddingRight(), getPaddingBottom());
+    }
+
+    @Override
     public void setCornerRadius(int radius) {
         // no-op
     }
@@ -245,5 +257,11 @@ public class PanelView extends FrameLayout implements Panel {
     private boolean isLayoutRole(int role) {
         String resourceTypeName = getContext().getResources().getResourceTypeName(role);
         return LAYOUT_RESOURCE_TYPE.equals(resourceTypeName);
+    }
+
+    @Override
+    @NonNull
+    public String getPanelId() {
+        return mId;
     }
 }

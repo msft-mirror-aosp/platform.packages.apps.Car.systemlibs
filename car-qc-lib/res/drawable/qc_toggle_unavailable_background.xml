@@ -24,7 +24,7 @@
             <solid android:color="@color/qc_toggle_unavailable_background_color" />
             <stroke android:color="@color/qc_toggle_unavailable_color"
                 android:width="@dimen/qc_toggle_unavailable_outline_width" />
-            <corners android:radius="@dimen/qc_toggle_background_radius" />
+            <corners android:radius="?qcToggleBackgroundRadius" />
         </shape>
     </item>
     <item android:width="@dimen/qc_toggle_rotary_highlight_size"

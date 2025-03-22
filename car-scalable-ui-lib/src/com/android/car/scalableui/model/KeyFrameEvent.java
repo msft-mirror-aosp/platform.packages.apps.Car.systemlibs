@@ -16,6 +16,9 @@
 package com.android.car.scalableui.model;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import java.util.Map;
 
 /**
  * Describes a KeyframeEvent in the system. This is the same as a standard {@link Event} but
@@ -30,9 +33,16 @@ public class KeyFrameEvent extends Event {
      * @param id       A unique identifier associated with this event.
      * @param fraction A fraction value (between 0 and 1).
      */
-    public KeyFrameEvent(@NonNull String id, float fraction) {
-        super(id);
+    public KeyFrameEvent(@NonNull String id, float fraction, @NonNull Map<String, String> tokens) {
+        super(id, tokens);
         mFraction = fraction;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "KeyFrameEvent{" + "mId=" + mId + ", mTokens=" + mTokens + ", mFraction="
+                + mFraction + "}";
     }
 
     /**
@@ -42,5 +52,39 @@ public class KeyFrameEvent extends Event {
      */
     public float getFraction() {
         return mFraction;
+    }
+
+    /** Builder for {@link Event} objects. */
+    public static class Builder extends Event.Builder {
+        private final float mFraction;
+
+        public Builder(@NonNull String id, float fraction) {
+            super(id);
+            mFraction = fraction;
+        }
+
+        @Override
+        public Builder addTokensFromString(@Nullable String eventTokens) {
+            super.addTokensFromString(eventTokens);
+            return this;
+        }
+
+        @Override
+        public Builder addToken(String key, String value) {
+            super.addToken(key, value);
+            return this;
+        }
+
+        /** Returns the {@link Event} instance */
+        @Override
+        @NonNull
+        public KeyFrameEvent build() {
+            if (mFraction < 0 || mFraction > 1) {
+                throw new IllegalStateException(
+                        "KeyFrameEvent ID must be set with valid fraction." + mId + " "
+                                + mFraction);
+            }
+            return new KeyFrameEvent(mId, mFraction, mTokens);
+        }
     }
 }
