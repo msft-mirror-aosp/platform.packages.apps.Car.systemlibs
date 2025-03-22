@@ -39,6 +39,7 @@ import androidx.annotation.Nullable;
 import com.android.car.scalableui.model.Alpha;
 import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.Corner;
+import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.Role;
@@ -86,6 +87,12 @@ public class PanelStateXmlParser {
     // --- Variant Tags ---
     public static final String VARIANT_TAG = "Variant";
     public static final String PARENT_ATTRIBUTE = "parent";
+
+    // --- KeyFrameVariant Tags ---
+    static final String KEY_FRAME_VARIANT_TAG = "KeyFrameVariant";
+    private static final String KEY_FRAME_TAG = "KeyFrame";
+    private static final String FRAME_ATTRIBUTE = "frame";
+    private static final String VARIANT_ATTRIBUTE = "variant";
 
     // --- Visibility Tags ---
     public static final String VISIBILITY_TAG = "Visibility";
@@ -166,6 +173,9 @@ public class PanelStateXmlParser {
                     panelState.addVariant(
                             parseVariant(context, panelState, defaultLayer, parser));
                     break;
+                case KEY_FRAME_VARIANT_TAG:
+                    panelState.addVariant(parseKeyFrameVariant(panelState, parser));
+                    break;
                 case TRANSITIONS_TAG:
                     List<Transition> transitions = parseTransitions(context, panelState, parser);
                     for (Transition transition : transitions) {
@@ -178,6 +188,47 @@ public class PanelStateXmlParser {
         }
         panelState.setVariant(defaultVariant); // Set the initial variant
         return panelState;
+    }
+
+    @NonNull
+    private static Variant parseKeyFrameVariant(
+            @NonNull PanelState panelState,
+            @NonNull XmlPullParser parser) throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, null, KEY_FRAME_VARIANT_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
+        String parentStr = attrs.getAttributeValue(null, PARENT_ATTRIBUTE);
+        Variant parent = panelState.getVariant(parentStr);
+        KeyFrameVariant.Builder builder = new KeyFrameVariant.Builder(id);
+        if (parent != null) {
+            builder.setParent(parent);
+        }
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) continue;
+            String name = parser.getName();
+            if (name.equals(KEY_FRAME_TAG)) {
+                builder.addKeyFrame(parseKeyFrame(panelState, parser));
+            } else {
+                XmlPullParserHelper.skip(parser);
+            }
+        }
+        return builder.build();
+    }
+
+    private static KeyFrameVariant.KeyFrame parseKeyFrame(
+            @NonNull PanelState panelState,
+            @NonNull XmlPullParser parser) throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, null, KEY_FRAME_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        int frame = attrs.getAttributeIntValue(null, FRAME_ATTRIBUTE, 0);
+        String variant = attrs.getAttributeValue(null, VARIANT_ATTRIBUTE);
+        parser.nextTag();
+        parser.require(XmlPullParser.END_TAG, null, KEY_FRAME_TAG);
+        Variant panelVariant = panelState.getVariant(variant);
+        if (panelVariant == null) {
+            throw new XmlPullParserException("Variant not found: " + variant);
+        }
+        return new KeyFrameVariant.KeyFrame.Builder(frame, panelVariant).build();
     }
 
     @NonNull
@@ -330,7 +381,7 @@ public class PanelStateXmlParser {
     private static Insets parseInsets(@NonNull Context context, @NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
 
-        parser.require(XmlPullParser.START_TAG, null, BOUNDS_TAG);
+        parser.require(XmlPullParser.START_TAG, null, INSETS_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
         Integer left = getDimensionPixelSize(context, attrs, LEFT_ATTRIBUTE, true);
@@ -418,9 +469,9 @@ public class PanelStateXmlParser {
     /**
      * Helper method to get a dimension pixel size from an attribute set.
      *
-     * @param context The application context.
-     * @param attrs The attribute set.
-     * @param name The name of the attribute.
+     * @param context      The application context.
+     * @param attrs        The attribute set.
+     * @param name         The name of the attribute.
      * @param isHorizontal Whether the dimension is horizontal (width) or vertical (height).
      * @return The dimension pixel size.
      */
