@@ -26,6 +26,7 @@ import androidx.lifecycle.Observer;
 
 import com.android.car.qc.QCItem;
 import com.android.car.qc.QCList;
+import com.android.car.qc.R;
 
 /**
  * Quick Controls view for {@link QCList} instances.
@@ -56,6 +57,7 @@ public class QCListView extends LinearLayout implements Observer<QCItem> {
 
     private void init() {
         setOrientation(VERTICAL);
+        getContext().getTheme().applyStyle(R.style.CarQcLibThemeOverlay, true);
     }
 
     /**

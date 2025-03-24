@@ -32,13 +32,13 @@ public class Event {
 
     /** Id string associated with this event. */
     @NonNull
-    private final String mId;
+    protected final String mId;
 
     /**
      * Token map for this event to be matched against. These tokens are in the format of key:value
      * strings.
      */
-    private final Map<String, String> mTokens = new HashMap<>();
+    protected final Map<String, String> mTokens = new HashMap<>();
 
     /**
      * Constructs an Event.  Package-private; use the Builder.
@@ -49,7 +49,7 @@ public class Event {
         mId = id;
     }
 
-    private Event(@NonNull String id, @NonNull Map<String, String> tokens) {
+    protected Event(@NonNull String id, @NonNull Map<String, String> tokens) {
         mId = id;
         mTokens.putAll(tokens); // Defensive copy
     }
@@ -119,8 +119,8 @@ public class Event {
 
     /** Builder for {@link Event} objects. */
     public static class Builder {
-        private String mId;
-        private Map<String, String> mTokens = new HashMap<>();
+        protected String mId;
+        protected Map<String, String> mTokens = new HashMap<>();
 
         public Builder(@NonNull String id) {
             mId = id;

@@ -37,5 +37,6 @@
         android:id="@android:id/summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/TextAppearance.QC.Subtitle"/>
+        android:textColor="?oemColorOnSurfaceVariant"
+        android:textAppearance="?oemTextAppearanceBodySmall"/>
 </com.android.car.ui.uxr.DrawableStateLinearLayout>

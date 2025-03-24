@@ -56,7 +56,8 @@ public class QCViewUtils {
         }
 
         if (!available) {
-            int unavailableToggleIconTint = context.getColor(R.color.qc_toggle_unavailable_color);
+            int unavailableToggleIconTint = context.getResources().getColor(
+                    R.color.qc_toggle_unavailable_color, context.getTheme());
             iconDrawable.setTint(unavailableToggleIconTint);
         } else {
             ColorStateList defaultToggleIconTint = context.getColorStateList(

@@ -15,7 +15,10 @@
  */
 package com.android.car.scalableui.panel;
 
+import android.graphics.Insets;
 import android.graphics.Rect;
+
+import androidx.annotation.NonNull;
 
 /**
  * Represents a rectangular panel that can be displayed on the screen.
@@ -173,4 +176,21 @@ public interface Panel {
      * @return The corner radius
      */
     int getCornerRadius();
+
+    /**
+     * Returns the ID of the panel.
+     */
+    @NonNull
+    String getPanelId();
+
+    /**
+     * Sets the {@link Insets}
+     */
+    void setInsets(@NonNull Insets insets);
+
+    /**
+     * @return The {@link Insets}
+     */
+    @NonNull
+    Insets getInsets();
 }

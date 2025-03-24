@@ -16,4 +16,7 @@
 
 <resources>
     <attr name="state_toggle_unavailable"/>
+    <attr name="qcToggleBackgroundRadius" format="dimension"/>
+    <attr name="qcToggleRotaryHighlightRadius" format="dimension"/>
+    <attr name="qcToggleRotaryShadowRadius" format="dimension"/>
 </resources>
