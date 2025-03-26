@@ -33,6 +33,9 @@ public class PanelTransaction {
     /** A map of panel IDs to panel {@link Animator}s. */
     private final HashMap<String, Animator> mAnimatorMap;
 
+    private Runnable mAnimationStartCallbackRunnable;
+    private Runnable mAnimationEndCallbackRunnable;
+
     public PanelTransaction() {
         mTransactionMap = new HashMap<>();
         mAnimatorMap = new HashMap<>();
@@ -69,6 +72,41 @@ public class PanelTransaction {
     public Set<Map.Entry<String, Animator>> getAnimators() {
         return mAnimatorMap.entrySet();
     }
+
+    /**
+     * Adds a {@link Runnable} to be executed when the animations are starting for this
+     * transaction.
+     */
+    void setAnimationStartCallbackRunnable(@NonNull Runnable runnable) {
+        mAnimationStartCallbackRunnable = runnable;
+    }
+
+    /**
+     * Adds a {@link Runnable} to be executed when the animations have finished for this
+     * transaction.
+     */
+    void setAnimationEndCallbackRunnable(@NonNull Runnable runnable) {
+        mAnimationEndCallbackRunnable = runnable;
+    }
+
+    /**
+     * Get the {@link Runnable} to be executed when the animations are starting for this
+     * transaction.
+     */
+    @Nullable
+    public Runnable getAnimationStartCallbackRunnable() {
+        return mAnimationStartCallbackRunnable;
+    }
+
+    /**
+     * Get the {@link Runnable} to be executed when the animations have finished for this
+     * transaction.
+     */
+    @Nullable
+    public Runnable getAnimationEndCallbackRunnable() {
+        return mAnimationEndCallbackRunnable;
+    }
+
 
     /**
      * Retrieves the {@link Transition} state associated with the given panel ID.
@@ -111,6 +149,26 @@ public class PanelTransaction {
         @NonNull
         public Builder addAnimator(@NonNull String id, @Nullable Animator animator) {
             mPanelTransaction.addAnimator(id, animator);
+            return this;
+        }
+
+        /**
+         * Adds a {@link Runnable} to be executed when the animations are starting for this
+         * transaction.
+         */
+        @NonNull
+        public Builder setAnimationStartCallbackRunnable(@NonNull Runnable runnable) {
+            mPanelTransaction.setAnimationStartCallbackRunnable(runnable);
+            return this;
+        }
+
+        /**
+         * Adds a {@link Runnable} to be executed when the animations have finished for this
+         * transaction.
+         */
+        @NonNull
+        public Builder setAnimationEndCallbackRunnable(@NonNull Runnable runnable) {
+            mPanelTransaction.setAnimationEndCallbackRunnable(runnable);
             return this;
         }
 
