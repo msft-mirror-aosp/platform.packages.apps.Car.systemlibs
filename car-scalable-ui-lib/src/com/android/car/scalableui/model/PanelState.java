@@ -62,6 +62,20 @@ public class PanelState {
         mDisplayId = DEFAULT_DISPLAY;
     }
 
+    /**
+     * Constructor to copy a PanelState
+     */
+    public PanelState(@NonNull PanelState other) {
+        mId = other.mId;
+        mRole = other.mRole;
+        mDisplayId = other.mDisplayId;
+        mDefaultVariant = other.mDefaultVariant;
+        mVariants.addAll(other.mVariants);
+        mTransitions.addAll(other.mTransitions);
+        mRunningAnimator = other.mRunningAnimator;
+        mCurrentVariant = other.mCurrentVariant;
+    }
+
     /** Returns id */
     @NonNull
     public String getId() {

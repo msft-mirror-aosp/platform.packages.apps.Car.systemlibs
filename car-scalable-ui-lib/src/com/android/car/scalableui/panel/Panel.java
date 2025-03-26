@@ -171,6 +171,11 @@ public interface Panel {
     void setDisplayId(int displayId);
 
     /**
+     * Gets the display ID of the panel.
+     */
+    int getDisplayId();
+
+    /**
      * Initializes the panel.
      */
     void init();

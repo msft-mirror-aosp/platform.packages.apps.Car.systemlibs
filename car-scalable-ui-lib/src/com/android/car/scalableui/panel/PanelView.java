@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -229,6 +230,11 @@ public class PanelView extends FrameLayout implements Panel {
     @Override
     public void setDisplayId(int displayId) {
         // no-op
+    }
+
+    @Override
+    public int getDisplayId() {
+        return Display.INVALID_DISPLAY;
     }
 
     @Override
