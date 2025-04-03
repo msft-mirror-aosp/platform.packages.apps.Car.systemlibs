@@ -16,4 +16,8 @@
 
 <resources>
     <string name="connectivity_flow_app" translatable="false">com.android.car.datasubscription</string>
+    <string name="data_subscription_uxr_prompt">See plans when parked.</string>
+    <string name="data_subscription_non_uxr_prompt">Tap to see available plans.</string>
+    <string name="data_subscription_expiring_soon_proactive_prompt">Your internet plan expires in %s days.</string>
+    <string name="data_subscription_expiring_soon_reactive_prompt">%1$s needs internet. Plan ends in %2$s days.</string>
 </resources>

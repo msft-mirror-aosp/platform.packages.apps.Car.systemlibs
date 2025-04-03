@@ -20,7 +20,7 @@ public interface DataSubscriptionViewActionListener {
     /**
      * Called when the message is dismissed
      */
-    void onMsgDismissed();
+    void onMessageDismissed();
     /**
      * Register the listeners
      */
@@ -32,6 +32,6 @@ public interface DataSubscriptionViewActionListener {
     /**
      * Set the network task event listener
      */
-    void setNetworkTaskEventListener(NetworkTaskEventListener
-            networkTaskEventListener);
+    void setDataSubscriptionMessageEventListener(DataSubscriptionMessageEventListener
+            dataSubscriptionMessageEventListener);
 }

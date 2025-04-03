@@ -82,7 +82,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     private Set<String> mPackagesBlocklist;
     private CountDownLatch mLatch;
     private boolean mIsNetworkCallbackRegistered;
-    private NetworkTaskEventListener mNetworkTaskEventListener;
+    private DataSubscriptionMessageEventListener mDataSubscriptionMessageEventListener;
     private int mUserId = -1;
     private final TaskStackListener mTaskStackListener = new TaskStackListener() {
         @SuppressLint("MissingPermission")
@@ -151,7 +151,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                     } finally {
                         if (mNetworkCallback.mNetwork == null) {
                             mNetworkCapabilities = null;
-                            updateShouldDisplayReactiveMsgForApp(mTopLabel);
+                            updateShouldDisplayReactiveMessageForApp(mTopLabel);
                         }
                     }
                 });
@@ -168,18 +168,23 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                 public void onRestrictionsChanged(@NonNull CarUxRestrictions carUxRestrictions) {
                     mIsDistractionOptimizationRequired =
                             carUxRestrictions.isRequiresDistractionOptimization();
-                    if (mNetworkTaskEventListener != null) {
-                        mNetworkTaskEventListener.onUxrChange(mIsDistractionOptimizationRequired);
+                    if (mDataSubscriptionMessageCreator != null) {
+                        mUxrPrompt = mDataSubscriptionMessageCreator.getUxrPrompt(
+                            mIsDistractionOptimizationRequired);
+                    }
+                    if (mDataSubscriptionMessageEventListener != null) {
+                        mDataSubscriptionMessageEventListener.onUxrChanged(
+                                mIsDistractionOptimizationRequired, mUxrPrompt);
                     }
                 }
             };
-
+    private final DataSubscriptionMessageCreator mDataSubscriptionMessageCreator;
     // Determines whether a proactive message was already displayed
-    private boolean mWasProactiveMsgDisplayed;
+    private boolean mWasProactiveMessageDisplayed;
     private boolean mIsDistractionOptimizationRequired;
-    private boolean mShouldDisplayProactiveMsg;
+    private boolean mShouldDisplayProactiveMessage;
 
-    private boolean mShouldDisplayReactiveMsg;
+    private boolean mShouldDisplayReactiveMessage;
     private String mTopActivity;
     private String mTopPackage;
     private CharSequence mTopLabel;
@@ -190,6 +195,8 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     private int mCurrentInterval;
     private int mCurrentCycle;
     private int mCurrentActiveDays;
+    private int mCurrentStatus;
+    private String mUxrPrompt;
 
     @VisibleForTesting
     static final String KEY_PREV_POPUP_DATE =
@@ -205,7 +212,8 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
             "com.android.car.systemui.car.qc.PREV_STATUS";
 
     @SuppressLint("MissingPermission")
-    public DataSubscriptionController(Context context) {
+    public DataSubscriptionController(Context context,
+            DataSubscriptionMessageCreator dataSubscriptionMessageCreator) {
         mContext = context;
         mSubscription = new DataSubscription(context);
         mMainHandler = new Handler(Looper.getMainLooper());
@@ -229,30 +237,46 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         mSharedPreferences = mContext.getSharedPreferences(
                 DATA_SUBSCRIPTION_SHARED_PREFERENCE_PATH, Context.MODE_PRIVATE);
         mEditor = mSharedPreferences.edit();
+        mDataSubscriptionMessageCreator = dataSubscriptionMessageCreator;
+        mUxrPrompt = mDataSubscriptionMessageCreator.getUxrPrompt(
+            CarUxRestrictionsUtil.getInstance(mContext).getCurrentRestrictions()
+                .isRequiresDistractionOptimization());
     }
 
-    void updateShouldDisplayProactiveMsg() {
-        mShouldDisplayProactiveMsg = !mWasProactiveMsgDisplayed
-                && mSubscription.isDataSubscriptionInactive()
+    void updateShouldDisplayProactiveMessage() {
+        if (mShouldDisplayProactiveMessage) {
+            return;
+        }
+        mShouldDisplayProactiveMessage = !mWasProactiveMessageDisplayed
                 && isValidTimeInterval()
                 && isValidCycle()
                 && isValidActiveDays();
-        if (mNetworkTaskEventListener.onDataSubscriptionStatusChanged(
-                mIsDistractionOptimizationRequired,
-                mShouldDisplayProactiveMsg)) {
-            writeLatestPopupDate();
-            writeLatestPopupCycle();
-            writeLatestPopupActiveDays();
+        if (mShouldDisplayProactiveMessage && mDataSubscriptionMessageEventListener != null) {
+            String message = mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
+                    mCurrentStatus);
+            boolean isMessageDisplayed =
+                    mDataSubscriptionMessageEventListener.onDataSubscriptionStatusChanged(
+                        mIsDistractionOptimizationRequired, message, mUxrPrompt);
+            if (isMessageDisplayed) {
+                writeLatestPopupDate();
+                writeLatestPopupCycle();
+                writeLatestPopupActiveDays();
+            }
         }
     }
 
-    private void updateShouldDisplayReactiveMsgForApp(CharSequence appLabel) {
-        mShouldDisplayReactiveMsg = ((mNetworkCapabilities == null
-                || (!isSuspendedNetwork() && !isValidNetwork()))
-                && mSubscription.isDataSubscriptionInactive());
-        mNetworkTaskEventListener.onAppForeground(mIsDistractionOptimizationRequired,
-                mShouldDisplayReactiveMsg, appLabel);
-        mActivitiesBlocklist.add(mTopActivity);
+    private void updateShouldDisplayReactiveMessageForApp(CharSequence appLabel) {
+        mShouldDisplayReactiveMessage = mNetworkCapabilities == null
+                || (!isSuspendedNetwork() && !isValidNetwork());
+        if (mShouldDisplayReactiveMessage && mDataSubscriptionMessageEventListener != null) {
+            String message = mDataSubscriptionMessageCreator.getReactiveMessageForStatus(
+                    mCurrentStatus, appLabel);
+            boolean isMessageDisplayed = mDataSubscriptionMessageEventListener.onAppForegrounded(
+                    mIsDistractionOptimizationRequired, message, mUxrPrompt);
+            if (isMessageDisplayed) {
+                mActivitiesBlocklist.add(mTopActivity);
+            }
+        }
     }
 
     /** Register needed listeners */
@@ -273,7 +297,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         updateCurrentCycle();
         updateCurrentActiveDays();
         updateCurrentStatus();
-        updateShouldDisplayProactiveMsg();
+        updateShouldDisplayProactiveMessage();
     }
 
     /** Unregister active listeners */
@@ -288,8 +312,9 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     }
 
     @Override
-    public void setNetworkTaskEventListener(NetworkTaskEventListener networkTaskEventListener) {
-        mNetworkTaskEventListener = networkTaskEventListener;
+    public void setDataSubscriptionMessageEventListener(
+            DataSubscriptionMessageEventListener dataSubscriptionMessageEventListener) {
+        mDataSubscriptionMessageEventListener = dataSubscriptionMessageEventListener;
     }
 
     boolean isValidNetwork() {
@@ -303,15 +328,15 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     }
 
     @Override
-    public void onChange(int value) {
+    public void onStatusChanged(int value) {
         updateCurrentStatus();
-        updateShouldDisplayProactiveMsg();
+        updateShouldDisplayProactiveMessage();
     }
 
     @Override
-    public void onMsgDismissed() {
-        if (!mWasProactiveMsgDisplayed) {
-            mWasProactiveMsgDisplayed = true;
+    public void onMessageDismissed() {
+        if (!mWasProactiveMessageDisplayed) {
+            mWasProactiveMessageDisplayed = true;
         }
     }
 
@@ -335,7 +360,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
             }
             mNetwork = network;
             mNetworkCapabilities = networkCapabilities;
-            updateShouldDisplayReactiveMsgForApp(mTopLabel);
+            updateShouldDisplayReactiveMessageForApp(mTopLabel);
         }
     }
 
@@ -367,12 +392,13 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     @VisibleForTesting
     void updateCurrentStatus() {
         int prevStatus = mSharedPreferences.getInt(KEY_PREV_POPUP_STATUS, 0);
-        int currentStatus = mSubscription.getDataSubscriptionStatus();
-        if (prevStatus == DataSubscriptionStatus.INACTIVE && prevStatus != currentStatus) {
+        mCurrentStatus = mSubscription.getDataSubscriptionStatus();
+        // if the data subscription changes from inactive to paid, we want to reset the caches
+        if (prevStatus != mCurrentStatus && !mSubscription.isDataSubscriptionInactive()) {
             mEditor.clear();
             mEditor.apply();
         }
-        mEditor.putInt(KEY_PREV_POPUP_STATUS, currentStatus);
+        mEditor.putInt(KEY_PREV_POPUP_STATUS, mCurrentStatus);
         mEditor.apply();
     }
 
@@ -398,7 +424,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
 
     private void writeLatestPopupDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(mContext.getString(
-                R.string.config_latestPopUpDisplayDateTimeFormat));
+                R.string.config_dataSubscriptionDateTimeFormat));
         LocalDate newDate = LocalDate.now(ZoneId.systemDefault());
         String formattedNewDate = newDate.format(formatter);
         mEditor.putString(KEY_PREV_POPUP_DATE, formattedNewDate);
@@ -423,8 +449,8 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     }
 
     @VisibleForTesting
-    boolean getShouldDisplayProactiveMsg() {
-        return mShouldDisplayProactiveMsg;
+    boolean getShouldDisplayProactiveMessage() {
+        return mShouldDisplayProactiveMessage;
     }
 
     @VisibleForTesting
@@ -448,8 +474,8 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     }
 
     @VisibleForTesting
-    boolean getShouldDisplayReactiveMsg() {
-        return mShouldDisplayReactiveMsg;
+    boolean getShouldDisplayReactiveMessage() {
+        return mShouldDisplayReactiveMessage;
     }
 
     @VisibleForTesting
@@ -488,8 +514,8 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     }
 
     @VisibleForTesting
-    void setWasProactiveMsgDisplayed(boolean value) {
-        mWasProactiveMsgDisplayed = value;
+    void setWasProactiveMessageDisplayed(boolean value) {
+        mWasProactiveMessageDisplayed = value;
     }
 
     @VisibleForTesting
