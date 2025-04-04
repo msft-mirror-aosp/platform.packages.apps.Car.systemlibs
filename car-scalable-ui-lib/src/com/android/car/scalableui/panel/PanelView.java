@@ -74,6 +74,18 @@ public class PanelView extends FrameLayout implements Panel {
         setBottom(bounds.bottom);
     }
 
+    @NonNull
+    @Override
+    public Rect getSafeBounds() {
+        // no-op
+        return new Rect();
+    }
+
+    @Override
+    public void setSafeBounds(@NonNull Rect safeBounds) {
+        // no-op
+    }
+
     public int getLayer() {
         return mLayer;
     }
