@@ -108,6 +108,7 @@ public class PanelStateXmlParser {
 
     // --- Bounds Tags ---
     public static final String BOUNDS_TAG = "Bounds";
+    public static final String SAFE_BOUNDS_TAG = "SafeBounds";
     public static final String LEFT_ATTRIBUTE = "left";
     public static final String RIGHT_ATTRIBUTE = "right";
     public static final String TOP_ATTRIBUTE = "top";
@@ -264,6 +265,9 @@ public class PanelStateXmlParser {
                 case BOUNDS_TAG:
                     variantBuilder.setBounds(parseBounds(context, parser).getRect());
                     break;
+                case SAFE_BOUNDS_TAG:
+                    variantBuilder.setSafeBounds(parseBounds(context, parser).getRect());
+                    break;
                 case CORNER_TAG:
                     variantBuilder.setCornerRadius(parseCorner(context, parser).getRadius());
                     break;
@@ -336,8 +340,13 @@ public class PanelStateXmlParser {
     @NonNull
     private static Bounds parseBounds(@NonNull Context context, @NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
-
-        parser.require(XmlPullParser.START_TAG, null, BOUNDS_TAG);
+        if (XmlPullParser.START_TAG != parser.getEventType()
+                || !(BOUNDS_TAG.equals(parser.getName())
+                || SAFE_BOUNDS_TAG.equals(parser.getName()))) {
+            throw new XmlPullParserException(
+                    "parseBounds called with wrong parser event type: " + parser.getEventType()
+                            + " or name: " + parser.getName());
+        }
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
         Integer left = getDimensionPixelSize(context, attrs, LEFT_ATTRIBUTE, true);

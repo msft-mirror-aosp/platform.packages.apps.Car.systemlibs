@@ -46,13 +46,18 @@ public class Variant {
     private final RectEvaluator mRectEvaluator = new RectEvaluator();
     private final IntEvaluator mIntEvaluator = new IntEvaluator();
 
-    @NonNull protected final String mId;
+    @NonNull
+    protected final String mId;
     private float mAlpha;
     private boolean mIsVisible;
     private int mLayer;
     private int mCornerRadius;
-    @NonNull private Rect mBounds;
-    @NonNull private Insets mInsets;
+    @NonNull
+    private Rect mBounds;
+    @NonNull
+    private Rect mSafeBounds;
+    @NonNull
+    private Insets mInsets;
 
     /**
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
@@ -65,6 +70,7 @@ public class Variant {
 
         // Initialize with default values
         mBounds = new Rect();
+        mSafeBounds = new Rect();
         mIsVisible = Visibility.DEFAULT_VISIBILITY;
         mLayer = Layer.DEFAULT_LAYER;
         mAlpha = Alpha.DEFAULT_ALPHA;
@@ -84,6 +90,7 @@ public class Variant {
     Variant(@NonNull String id, @NonNull Variant base) {
         this(id);
         mBounds = new Rect(base.getBounds());
+        mSafeBounds = new Rect(base.getSafeBounds());
         mIsVisible = base.isVisible();
         mLayer = base.getLayer();
         mAlpha = base.getAlpha();
@@ -229,6 +236,25 @@ public class Variant {
     }
 
     /**
+     * Returns the safe bounds of the variant.
+     *
+     * @return The safe bounds of the variant.
+     */
+    @NonNull
+    public Rect getSafeBounds() {
+        return mSafeBounds;
+    }
+
+    /**
+     * Sets the safe bounds of the variant.
+     *
+     * @param safeBounds The bounds to set.
+     */
+    protected void setSafeBounds(@NonNull Rect safeBounds) {
+        mSafeBounds = safeBounds;
+    }
+
+    /**
      * Returns the corner radius of the variant.
      *
      * @return The corner radius of the variant.
@@ -258,7 +284,7 @@ public class Variant {
     /**
      * @return {@link Insets}.
      */
-    @Nullable
+    @NonNull
     public Insets getInsets() {
         return mInsets;
     }
@@ -286,6 +312,8 @@ public class Variant {
                 + mLayer
                 + ", mBounds="
                 + mBounds
+                + ", mSafeBounds="
+                + mSafeBounds
                 + ", mCornerRadius="
                 + mCornerRadius
                 + ", mInsets="
@@ -295,14 +323,24 @@ public class Variant {
 
     /** Builder for {@link Variant} objects. */
     public static class Builder {
-        @NonNull protected String mId;
-        @Nullable protected Float mAlpha;
-        @Nullable protected Boolean mIsVisible;
-        @Nullable protected Integer mLayer;
-        @Nullable protected Rect mBounds;
-        @Nullable protected Integer mCornerRadius;
-        @Nullable protected Insets mInsets;
-        @Nullable protected Variant mParent;
+        @NonNull
+        protected String mId;
+        @Nullable
+        protected Float mAlpha;
+        @Nullable
+        protected Boolean mIsVisible;
+        @Nullable
+        protected Integer mLayer;
+        @Nullable
+        protected Rect mBounds;
+        @Nullable
+        protected Rect mSafeBounds;
+        @Nullable
+        protected Integer mCornerRadius;
+        @Nullable
+        protected Insets mInsets;
+        @Nullable
+        protected Variant mParent;
 
         public Builder(@NonNull String id) {
             mId = id;
@@ -329,6 +367,15 @@ public class Variant {
         /** Sets bounds */
         public Builder setBounds(@NonNull Rect bounds) {
             mBounds = bounds;
+            return this;
+        }
+
+        /**
+         * Sets safe bounds. This is an area generally not overlapped by display cutouts or insets
+         * for display compatibility apps to be drawn within.
+         */
+        public Builder setSafeBounds(@NonNull Rect safeBounds) {
+            mSafeBounds = safeBounds;
             return this;
         }
 
@@ -371,6 +418,11 @@ public class Variant {
             }
             if (mBounds != null) {
                 variant.setBounds(new Rect(mBounds)); // Defensive copy
+            }
+            if (mSafeBounds != null) {
+                variant.setSafeBounds(new Rect(mSafeBounds)); // Defensive copy
+            } else if (mBounds != null) {
+                variant.setSafeBounds(new Rect(mBounds)); // Defensive copy
             }
             if (mCornerRadius != null) {
                 variant.setCornerRadius(mCornerRadius);
