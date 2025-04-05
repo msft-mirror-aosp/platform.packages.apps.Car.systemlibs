@@ -17,14 +17,12 @@ package com.android.car.scalableui.manager;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.car.scalableui.loader.xml.XmlModelLoader;
 import com.android.car.scalableui.model.Event;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.PanelTransaction;
@@ -33,10 +31,8 @@ import com.android.car.scalableui.model.Variant;
 import com.android.car.scalableui.panel.Panel;
 import com.android.car.scalableui.panel.PanelPool;
 
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -68,18 +64,6 @@ public class StateManager {
      */
     public static StateManager getInstance() {
         return sInstance;
-    }
-
-    /**
-     * Adds a new panel state definition.
-     */
-    public static void addState(Context context, int stateResId)
-            throws XmlPullParserException, IOException {
-        if (DEBUG) {
-            Log.d(TAG, "addState: stateResId " + stateResId);
-        }
-        XmlModelLoader loader = new XmlModelLoader(context);
-        addState(loader.createPanelState(stateResId));
     }
 
     /**
@@ -182,6 +166,22 @@ public class StateManager {
     public static void handlePanelReset() {
         for (PanelState panelState : getInstance().mPanelStates.values()) {
             PanelPool.getInstance().getPanel(panelState.getId()).reset();
+        }
+    }
+
+
+    /**
+     * Reloads {@link PanelState}.
+     */
+    public static void reloadPanelState(List<PanelState> panelStates) {
+        for (PanelState panelState: panelStates) {
+            if (sInstance.mPanelStates.put(panelState.getId(), panelState) != null) {
+                if (DEBUG) {
+                    Log.w(TAG, "PanelState with id=" + panelState.getId() + " got reloaded");
+                }
+            }
+            applyState(panelState);
+            handlePanelReset();
         }
     }
 
