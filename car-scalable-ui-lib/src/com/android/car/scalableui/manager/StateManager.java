@@ -156,6 +156,7 @@ public class StateManager {
         panel.setDisplayId(panelState.getDisplayId());
         panel.setCornerRadius(variant.getCornerRadius());
         panel.setSafeBounds(variant.getSafeBounds());
+        panel.setBlur(variant.getBlur());
     }
 
     //TODO(b/390006880): make this part of configuration.

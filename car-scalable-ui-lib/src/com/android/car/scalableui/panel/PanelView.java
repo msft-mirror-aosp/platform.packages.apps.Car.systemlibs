@@ -28,6 +28,8 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.scalableui.model.Blur;
+
 /**
  * A view based implementation of a {@link Panel}.
  */
@@ -86,12 +88,24 @@ public class PanelView extends FrameLayout implements Panel {
         // no-op
     }
 
+    @Override
+    public void setBlur(Blur blur) {
+        // no-op
+    }
+
+    @Override
+    public Blur getBlur() {
+        // no-op
+        return null;
+    }
+
     public int getLayer() {
         return mLayer;
     }
 
     /**
      * Sets the z-order of the panel.
+     *
      * @param layer the required z-order.
      */
     public void setLayer(int layer) {
