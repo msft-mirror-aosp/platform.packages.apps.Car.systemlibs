@@ -20,6 +20,8 @@ import android.graphics.Rect;
 
 import androidx.annotation.NonNull;
 
+import com.android.car.scalableui.model.Blur;
+
 /**
  * Represents a rectangular panel that can be displayed on the screen.
  * Panels have properties such as bounds, layer, visibility, and alpha.
@@ -55,6 +57,18 @@ public interface Panel {
      * @param safeBounds The new bounding safe rectangle.
      */
     void setSafeBounds(@NonNull Rect safeBounds);
+
+    /**
+     * Sets the blur properties for the Panel. This is used only with the decor panel as a surface.
+     *
+     * @param blur properties to set on surface
+     */
+    void setBlur(Blur blur);
+
+    /**
+     * Gets the Blur properties for a surface
+     */
+    Blur getBlur();
 
     /**
      * Gets the layer of this panel.
