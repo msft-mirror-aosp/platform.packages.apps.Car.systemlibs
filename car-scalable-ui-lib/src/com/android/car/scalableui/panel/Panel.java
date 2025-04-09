@@ -22,7 +22,6 @@ import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import com.android.car.scalableui.model.Blur;
 import com.android.car.scalableui.model.PanelControllerMetadata;
 import com.android.car.scalableui.model.Role;
@@ -253,7 +252,6 @@ public interface Panel {
      * @return The Panel's Context
      */
     Context getContext();
-
     /**
      * Gets the {@link PanelControllerMetadata}
      */
