@@ -15,10 +15,13 @@
  */
 package com.android.car.scalableui.panel;
 
+import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * Represents a rectangular panel that can be displayed on the screen.
@@ -215,4 +218,17 @@ public interface Panel {
      */
     @NonNull
     Insets getInsets();
+
+    /**
+     * @return The associated leash {@link SurfaceControl}
+     */
+    @Nullable
+    default SurfaceControl getLeash() {
+        return null;
+    }
+
+    /**
+     * @return The Panel's Context
+     */
+    Context getContext();
 }
