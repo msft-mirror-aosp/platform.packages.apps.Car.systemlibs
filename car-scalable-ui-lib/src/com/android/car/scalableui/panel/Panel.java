@@ -40,6 +40,23 @@ public interface Panel {
     void setBounds(Rect bounds);
 
     /**
+     * Gets safe bounds. This is an area generally not overlapped by display cutouts or insets
+     * for display compatibility apps to be drawn within.
+     *
+     * @return The bounding safe rectangle.
+     */
+    @NonNull
+    Rect getSafeBounds();
+
+    /**
+     * Sets safe bounds. This is an area generally not overlapped by display cutouts or insets
+     * for display compatibility apps to be drawn within.
+     *
+     * @param safeBounds The new bounding safe rectangle.
+     */
+    void setSafeBounds(@NonNull Rect safeBounds);
+
+    /**
      * Gets the layer of this panel.
      * Panels with higher layer values are drawn on top of panels with lower layer values.
      *
@@ -152,6 +169,11 @@ public interface Panel {
      * TODO(b/388021504):This api should move to role
      */
     void setDisplayId(int displayId);
+
+    /**
+     * Gets the display ID of the panel.
+     */
+    int getDisplayId();
 
     /**
      * Initializes the panel.
