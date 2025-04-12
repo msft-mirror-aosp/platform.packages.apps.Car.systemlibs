@@ -24,6 +24,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.car.scalableui.metrics.MetricsHelper;
 import com.android.car.scalableui.model.Event;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.PanelTransaction;
@@ -31,8 +32,10 @@ import com.android.car.scalableui.model.Transition;
 import com.android.car.scalableui.model.Variant;
 import com.android.car.scalableui.panel.Panel;
 import com.android.car.scalableui.panel.PanelPool;
+import com.android.internal.jank.InteractionJankMonitor;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * Manages the state of UI panels. This class is responsible for loading panel definitions,
@@ -54,6 +58,10 @@ public class StateManager {
     private static final StateManager sInstance = new StateManager();
 
     private final Map<String, PanelState> mPanelStates;
+
+    private static final MetricsHelper sMetricsHelper = new MetricsHelper(
+            InteractionJankMonitor.getInstance(),
+            MetricsHelper.MetricsCujMapping.getInstance(PanelPool.getInstance()));
     private final ArraySet<PanelStateObserverData> mObservers = new ArraySet<>();
 
     private StateManager() {
@@ -99,6 +107,10 @@ public class StateManager {
         logIfDebuggable("handleEvent " + event);
         PanelTransaction.Builder panelTransactionBuilder = new PanelTransaction.Builder();
         HashSet<String> changedPanelIds = new HashSet<>();
+        // Make a ShallowCopy of the currentPanelStates.
+        Collection<PanelState> initialState = sInstance.mPanelStates.values()
+                .stream()
+                .map(PanelState::clone).collect(Collectors.toList());
         for (PanelState panelState : sInstance.mPanelStates.values()) {
             if (panelState == null) {
                 Log.e(TAG, "panel state is null");
@@ -127,11 +139,6 @@ public class StateManager {
                 panelState.setVariant(toVariant.getId(), event);
                 animator.addListener(new AnimatorListenerAdapter() {
                     @Override
-                    public void onAnimationStart(Animator animation) {
-                        super.onAnimationStart(animation);
-                    }
-
-                    @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
                         panelState.onAnimationEnd();
@@ -158,6 +165,10 @@ public class StateManager {
             panelTransactionBuilder.setAnimationEndCallbackRunnable(
                     sInstance.getAfterPanelStateChangeRunnable(changedPanelIds, panelStatesCopy));
         }
+        PanelTransaction panelTransaction = panelTransactionBuilder.build();
+        if (sMetricsHelper != null) {
+            sMetricsHelper.recordJankCuj(event, panelTransaction.getAnimators(), initialState);
+        }
         return panelTransactionBuilder.build();
     }
 
@@ -180,6 +191,7 @@ public class StateManager {
         panel.setInsets(variant.getInsets());
         panel.setCornerRadius(variant.getCornerRadius());
         panel.setSafeBounds(variant.getSafeBounds());
+        panel.setBlur(variant.getBlur());
     }
 
     //TODO(b/390006880): make this part of configuration.
