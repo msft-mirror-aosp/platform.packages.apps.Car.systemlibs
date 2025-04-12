@@ -18,11 +18,13 @@ package com.android.car.scalableui.manager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.os.Build;
+import android.util.ArraySet;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.car.scalableui.metrics.MetricsHelper;
 import com.android.car.scalableui.model.Event;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.PanelTransaction;
@@ -30,10 +32,19 @@ import com.android.car.scalableui.model.Transition;
 import com.android.car.scalableui.model.Variant;
 import com.android.car.scalableui.panel.Panel;
 import com.android.car.scalableui.panel.PanelPool;
+import com.android.internal.jank.InteractionJankMonitor;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * Manages the state of UI panels. This class is responsible for loading panel definitions,
@@ -47,6 +58,11 @@ public class StateManager {
     private static final StateManager sInstance = new StateManager();
 
     private final Map<String, PanelState> mPanelStates;
+
+    private static final MetricsHelper sMetricsHelper = new MetricsHelper(
+            InteractionJankMonitor.getInstance(),
+            MetricsHelper.MetricsCujMapping.getInstance(PanelPool.getInstance()));
+    private final ArraySet<PanelStateObserverData> mObservers = new ArraySet<>();
 
     private StateManager() {
         mPanelStates = new HashMap<>();
@@ -90,6 +106,11 @@ public class StateManager {
     public static PanelTransaction handleEvent(Event event) {
         logIfDebuggable("handleEvent " + event);
         PanelTransaction.Builder panelTransactionBuilder = new PanelTransaction.Builder();
+        HashSet<String> changedPanelIds = new HashSet<>();
+        // Make a ShallowCopy of the currentPanelStates.
+        Collection<PanelState> initialState = sInstance.mPanelStates.values()
+                .stream()
+                .map(PanelState::clone).collect(Collectors.toList());
         for (PanelState panelState : sInstance.mPanelStates.values()) {
             if (panelState == null) {
                 Log.e(TAG, "panel state is null");
@@ -126,6 +147,7 @@ public class StateManager {
                 });
                 logIfDebuggable("add animator for " + panelState.getId());
                 panelTransactionBuilder.addAnimator(panelState.getId(), animator);
+                changedPanelIds.add(panelState.getId());
             } else if (!panelState.isAnimating()) {
                 // Force apply the new state if there is no on going animation.
                 logIfDebuggable("No animator for " + panelState.getId());
@@ -134,6 +156,18 @@ public class StateManager {
             }
             logIfDebuggable("add transition for " + panelState.getId());
             panelTransactionBuilder.addPanelTransaction(panelState.getId(), transition);
+        }
+        if (!changedPanelIds.isEmpty()) {
+            // Store copy of existing panel state in case it changes prior to callback
+            Map<String, PanelState> panelStatesCopy = sInstance.createPanelStateCopy();
+            panelTransactionBuilder.setAnimationStartCallbackRunnable(
+                    sInstance.getBeforePanelStateChangeRunnable(changedPanelIds, panelStatesCopy));
+            panelTransactionBuilder.setAnimationEndCallbackRunnable(
+                    sInstance.getAfterPanelStateChangeRunnable(changedPanelIds, panelStatesCopy));
+        }
+        PanelTransaction panelTransaction = panelTransactionBuilder.build();
+        if (sMetricsHelper != null) {
+            sMetricsHelper.recordJankCuj(event, panelTransaction.getAnimators(), initialState);
         }
         return panelTransactionBuilder.build();
     }
@@ -156,6 +190,8 @@ public class StateManager {
         panel.setDisplayId(panelState.getDisplayId());
         panel.setInsets(variant.getInsets());
         panel.setCornerRadius(variant.getCornerRadius());
+        panel.setSafeBounds(variant.getSafeBounds());
+        panel.setBlur(variant.getBlur());
     }
 
     //TODO(b/390006880): make this part of configuration.
@@ -201,6 +237,110 @@ public class StateManager {
     private static void logIfDebuggable(String msg) {
         if (DEBUG) {
             Log.d(TAG, msg);
+        }
+    }
+
+    /**
+     * Add an observer to the panel state
+     * @param observer the observer
+     * @param panelIds the panel ids to observe
+     */
+    public void addPanelStateObserver(PanelStateObserver observer, String... panelIds) {
+        synchronized (mObservers) {
+            removePanelStateObserver(observer);
+            mObservers.add(new PanelStateObserverData(observer, panelIds));
+        }
+    }
+
+    /**
+     * Remove a panel state observer
+     */
+    public void removePanelStateObserver(PanelStateObserver observer) {
+        synchronized (mObservers) {
+            mObservers.removeIf(element -> element.mObserver == observer);
+        }
+    }
+
+    private Runnable getBeforePanelStateChangeRunnable(Set<String> changedPanelIds,
+            Map<String, PanelState> panelStates) {
+        return () -> notifyPanelStateChange(changedPanelIds, panelStates, /* before= */ true);
+    }
+
+    private Runnable getAfterPanelStateChangeRunnable(Set<String> changedPanelIds,
+            Map<String, PanelState> panelStates) {
+        return () -> notifyPanelStateChange(changedPanelIds, panelStates, /* before= */ false);
+    }
+
+    private void notifyPanelStateChange(Set<String> changedPanelIds,
+            Map<String, PanelState> panelStates, boolean before) {
+        try (ExecutorService executorService =  Executors.newSingleThreadExecutor()) {
+            executorService.execute(() -> {
+                synchronized (mObservers) {
+                    for (PanelStateObserverData data : mObservers) {
+                        if (data.observesPanel(changedPanelIds)) {
+                            if (before) {
+                                data.mObserver.onBeforePanelStateChanged(changedPanelIds,
+                                        panelStates);
+                            } else {
+                                data.mObserver.onPanelStateChanged(changedPanelIds,
+                                        panelStates);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    private Map<String, PanelState> createPanelStateCopy() {
+        Map<String, PanelState> panelStatesCopy = new HashMap<>();
+        mPanelStates.forEach((key, value) -> {
+            panelStatesCopy.put(key, new PanelState(value));
+        });
+        return panelStatesCopy;
+    }
+
+    @VisibleForTesting
+    void clearPanelStateObservers() {
+        synchronized (mObservers) {
+            mObservers.clear();
+        }
+    }
+
+    public interface PanelStateObserver {
+        /**
+         * Notify of a panel state change that has just started
+         * @param changedPanelIds the panelIds that are changing
+         * @param toPanelStates the panel states from after the change
+         */
+        void onBeforePanelStateChanged(Set<String> changedPanelIds,
+                Map<String, PanelState> toPanelStates);
+        /**
+         * Notify of a panel state change that has finished
+         * @param changedPanelIds the panelIds that have changed
+         * @param toPanelStates the panel states from after the change
+         */
+        void onPanelStateChanged(Set<String> changedPanelIds,
+                Map<String, PanelState> toPanelStates);
+    }
+
+    private static class PanelStateObserverData {
+        final PanelStateObserver mObserver;
+        final ArraySet<String> mPanelIds = new ArraySet<>();
+
+        PanelStateObserverData(PanelStateObserver observer, String... panelIds) {
+            mObserver = observer;
+            mPanelIds.addAll(Arrays.asList(panelIds));
+        }
+
+        boolean observesPanel(Set<String> changedPanelIds) {
+            if (mPanelIds.isEmpty()) {
+                return true;
+            }
+            if (changedPanelIds.isEmpty()) {
+                return false;
+            }
+            return !Collections.disjoint(mPanelIds, changedPanelIds);
         }
     }
 }

@@ -15,10 +15,15 @@
  */
 package com.android.car.scalableui.panel;
 
+import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.android.car.scalableui.model.Blur;
 
 /**
  * Represents a rectangular panel that can be displayed on the screen.
@@ -38,6 +43,35 @@ public interface Panel {
      * @param bounds The new bounding rectangle.
      */
     void setBounds(Rect bounds);
+
+    /**
+     * Gets safe bounds. This is an area generally not overlapped by display cutouts or insets
+     * for display compatibility apps to be drawn within.
+     *
+     * @return The bounding safe rectangle.
+     */
+    @NonNull
+    Rect getSafeBounds();
+
+    /**
+     * Sets safe bounds. This is an area generally not overlapped by display cutouts or insets
+     * for display compatibility apps to be drawn within.
+     *
+     * @param safeBounds The new bounding safe rectangle.
+     */
+    void setSafeBounds(@NonNull Rect safeBounds);
+
+    /**
+     * Sets the blur properties for the Panel. This is used only with the decor panel as a surface.
+     *
+     * @param blur properties to set on surface
+     */
+    void setBlur(Blur blur);
+
+    /**
+     * Gets the Blur properties for a surface
+     */
+    Blur getBlur();
 
     /**
      * Gets the layer of this panel.
@@ -154,6 +188,11 @@ public interface Panel {
     void setDisplayId(int displayId);
 
     /**
+     * Gets the display ID of the panel.
+     */
+    int getDisplayId();
+
+    /**
      * Initializes the panel.
      */
     void init();
@@ -193,4 +232,17 @@ public interface Panel {
      */
     @NonNull
     Insets getInsets();
+
+    /**
+     * @return The associated leash {@link SurfaceControl}
+     */
+    @Nullable
+    default SurfaceControl getLeash() {
+        return null;
+    }
+
+    /**
+     * @return The Panel's Context
+     */
+    Context getContext();
 }

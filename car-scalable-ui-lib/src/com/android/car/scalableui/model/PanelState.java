@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * transitions between those variants. It also manages the current variant and any running
  * animations.
  */
-public class PanelState {
+public class PanelState implements Cloneable {
     private static final String TAG = PanelState.class.getSimpleName();
 
     public static final String DEFAULT_ROLE = "DEFAULT";
@@ -60,6 +60,20 @@ public class PanelState {
         mId = id;
         mRole = role;
         mDisplayId = DEFAULT_DISPLAY;
+    }
+
+    /**
+     * Constructor to copy a PanelState
+     */
+    public PanelState(@NonNull PanelState other) {
+        mId = other.mId;
+        mRole = other.mRole;
+        mDisplayId = other.mDisplayId;
+        mDefaultVariant = other.mDefaultVariant;
+        mVariants.addAll(other.mVariants);
+        mTransitions.addAll(other.mTransitions);
+        mRunningAnimator = other.mRunningAnimator;
+        mCurrentVariant = other.mCurrentVariant;
     }
 
     /** Returns id */
@@ -239,6 +253,16 @@ public class PanelState {
                 + ", mCurrentVariant="
                 + (mCurrentVariant != null ? mCurrentVariant.getId() : "null")
                 + '}';
+    }
+
+    @Override
+    public PanelState clone() {
+        try {
+            // shallow copy is sufficient, mVariants and mTransitions might remain the same.
+            return (PanelState) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
     /** Builder for {@link PanelState} objects. */

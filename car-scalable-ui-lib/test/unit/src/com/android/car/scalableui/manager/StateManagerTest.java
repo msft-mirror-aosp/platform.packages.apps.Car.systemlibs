@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,6 +46,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Map;
+import java.util.Set;
+
 @RunWith(AndroidJUnit4.class)
 public class StateManagerTest {
     private static final String TEST_PANEL_ID = "panel_id";
@@ -54,16 +58,17 @@ public class StateManagerTest {
     @Before
     public void setUp() {
         StateManager.clearStates();
+        StateManager.getInstance().clearPanelStateObservers();
     }
 
     @Test
     public void testHandleEvent_withTransition() {
-        PanelState mockPanelState = mock(PanelState.class);
-        when(mockPanelState.getId()).thenReturn(TEST_PANEL_ID);
-        when(mockPanelState.getTransition(any(Event.class))).thenReturn(mock(Transition.class));
-        when(mockPanelState.getCurrentVariant()).thenReturn(mock(Variant.class));
-        when(mockPanelState.isAnimating()).thenReturn(false);
-        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, mockPanelState);
+        PanelState panelState = spy(new PanelState(TEST_PANEL_ID, new Role(0)));
+        when(panelState.getTransition(any(Event.class))).thenReturn(mock(Transition.class));
+        Variant mockVariant = mock(Variant.class);
+        when(mockVariant.getId()).thenReturn(TO_VARIANT_ID);
+        panelState.addVariant(mockVariant);
+        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, panelState);
 
         Panel mockPanel = mock(Panel.class);
         PanelPool.PanelCreatorDelegate delegate = mock(PanelPool.PanelCreatorDelegate.class);
@@ -71,15 +76,15 @@ public class StateManagerTest {
         when(delegate.createPanel(any())).thenReturn(mockPanel);
         Transition mockTransition = mock(Transition.class);
         when(mockTransition.getToVariant()).thenReturn(new Variant.Builder(TO_VARIANT_ID).build());
-        when(mockPanelState.getTransition(any(Event.class))).thenReturn(mockTransition);
+        when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
         Animator mockAnimator = mock(Animator.class);
         when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(
                 mockAnimator);
 
         PanelTransaction panelTransaction = StateManager.handleEvent(TEST_EVENT);
 
-        verify(mockPanelState).setVariant(TO_VARIANT_ID, TEST_EVENT);
-        verify(mockPanelState).onAnimationStart(mockAnimator);
+        verify(panelState).setVariant(TO_VARIANT_ID, TEST_EVENT);
+        verify(panelState).onAnimationStart(mockAnimator);
         verify(mockAnimator).removeAllListeners();
         verify(mockAnimator).addListener(any(AnimatorListenerAdapter.class));
         assertThat(panelTransaction.getAnimators()).hasSize(/* expectedSize= */ 1);
@@ -88,10 +93,9 @@ public class StateManagerTest {
 
     @Test
     public void testHandleEvent_withoutTransition() {
-        PanelState mockPanelState = mock(PanelState.class);
-        when(mockPanelState.getId()).thenReturn(TEST_PANEL_ID);
-        when(mockPanelState.getTransition(any(Event.class))).thenReturn(null);
-        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, mockPanelState);
+        PanelState panelState = spy(new PanelState(TEST_PANEL_ID, new Role(0)));
+        when(panelState.getTransition(any(Event.class))).thenReturn(null);
+        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, panelState);
 
         Panel mockPanel = mock(Panel.class);
         PanelPool.PanelCreatorDelegate delegate = mock(PanelPool.PanelCreatorDelegate.class);
@@ -101,7 +105,7 @@ public class StateManagerTest {
         StateManager.handleEvent(TEST_EVENT);
 
         // Verify that no state changes or animations are applied
-        verify(mockPanelState, never()).setVariant(any(String.class), any(Event.class));
+        verify(panelState, never()).setVariant(any(String.class), any(Event.class));
         verify(mockPanel, never()).setBounds(any(Rect.class));
         verify(mockPanel, never()).setVisibility(any(Boolean.class));
         verify(mockPanel, never()).setAlpha(any(Float.class));
@@ -110,13 +114,12 @@ public class StateManagerTest {
 
     @Test
     public void testHandleEvent_withTransitionWithoutAnimation() {
-        PanelState mockPanelState = mock(PanelState.class);
-        when(mockPanelState.getId()).thenReturn(TEST_PANEL_ID);
-        when(mockPanelState.getTransition(any(Event.class))).thenReturn(mock(Transition.class));
-        when(mockPanelState.getCurrentVariant()).thenReturn(mock(Variant.class));
-        when(mockPanelState.isAnimating()).thenReturn(false);
-        when(mockPanelState.getRole()).thenReturn(new Role(0));
-        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, mockPanelState);
+        PanelState panelState = spy(new PanelState(TEST_PANEL_ID, new Role(0)));
+        when(panelState.getTransition(any(Event.class))).thenReturn(mock(Transition.class));
+        Variant mockVariant = mock(Variant.class);
+        when(mockVariant.getId()).thenReturn(TO_VARIANT_ID);
+        panelState.addVariant(mockVariant);
+        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, panelState);
 
         Panel mockPanel = mock(Panel.class);
         PanelPool.PanelCreatorDelegate delegate = mock(PanelPool.PanelCreatorDelegate.class);
@@ -125,31 +128,29 @@ public class StateManagerTest {
         when(PanelPool.getInstance().getPanel(anyString())).thenReturn(mockPanel);
         Transition mockTransition = mock(Transition.class);
         when(mockTransition.getToVariant()).thenReturn(new Variant.Builder(TO_VARIANT_ID).build());
-        when(mockPanelState.getTransition(any(Event.class))).thenReturn(mockTransition);
+        when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
         when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(null);
 
         StateManager.handleEvent(TEST_EVENT);
 
-        verify(mockPanelState).setVariant(TO_VARIANT_ID, TEST_EVENT);
+        verify(panelState).setVariant(TO_VARIANT_ID, TEST_EVENT);
     }
 
     @Test
     public void testApplyState() {
         int roleValue = 1;
-        PanelState mockPanelState = mock(PanelState.class);
-        when(mockPanelState.getId()).thenReturn(TEST_PANEL_ID);
-        when(mockPanelState.getRole()).thenReturn(new Role(roleValue));
-        when(mockPanelState.getDisplayId()).thenReturn(0);
+        PanelState panelState = spy(new PanelState(TEST_PANEL_ID, new Role(roleValue)));
         Variant mockVariant = mock(Variant.class);
-        when(mockPanelState.getCurrentVariant()).thenReturn(mockVariant);
-        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, mockPanelState);
+        when(mockVariant.getId()).thenReturn(TO_VARIANT_ID);
+        panelState.addVariant(mockVariant);
+        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, panelState);
         PanelPool.PanelCreatorDelegate delegate = mock(PanelPool.PanelCreatorDelegate.class);
         PanelPool.getInstance().setDelegate(delegate);
         Panel mockPanel = mock(Panel.class);
         when(delegate.createPanel(any())).thenReturn(mockPanel);
         when(PanelPool.getInstance().getPanel(TEST_PANEL_ID)).thenReturn(mockPanel);
 
-        StateManager.applyState(mockPanelState);
+        StateManager.applyState(panelState);
 
         verify(mockPanel).setRole(roleValue);
         verify(mockPanel).setBounds(mockVariant.getBounds());
@@ -165,12 +166,10 @@ public class StateManagerTest {
         final String testPanel1 = "testPanel1";
         final String testPanel2 = "testPanel2";
 
-        PanelState mockPanelState1 = mock(PanelState.class);
-        when(mockPanelState1.getId()).thenReturn(testPanel1);
-        PanelState mockPanelState2 = mock(PanelState.class);
-        when(mockPanelState2.getId()).thenReturn(testPanel2);
-        StateManager.getInstance().getPanelStates().put(testPanel1, mockPanelState1);
-        StateManager.getInstance().getPanelStates().put(testPanel2, mockPanelState2);
+        PanelState panelState1 = spy(new PanelState(testPanel1, new Role(0)));
+        PanelState panelState2 = spy(new PanelState(testPanel2, new Role(0)));
+        StateManager.getInstance().getPanelStates().put(testPanel1, panelState1);
+        StateManager.getInstance().getPanelStates().put(testPanel2, panelState2);
 
         Panel mockPanel1 = mock(Panel.class);
         Panel mockPanel2 = mock(Panel.class);
@@ -189,12 +188,89 @@ public class StateManagerTest {
 
     @Test
     public void testGetPanelState() {
-        PanelState mockPanelState = mock(PanelState.class);
-        when(mockPanelState.getId()).thenReturn(TEST_PANEL_ID);
-        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, mockPanelState);
+        PanelState panelState = spy(new PanelState(TEST_PANEL_ID, new Role(0)));
+        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, panelState);
 
         PanelState retrievedPanelState = StateManager.getPanelState(TEST_PANEL_ID);
 
-        assertThat(retrievedPanelState).isEqualTo(mockPanelState);
+        assertThat(retrievedPanelState).isEqualTo(panelState);
+    }
+
+    @Test
+    public void testPanelStateListener_withAnimation() {
+        TestPanelStateObserver observer = new TestPanelStateObserver();
+        StateManager.getInstance().addPanelStateObserver(observer);
+        PanelState panelState = spy(new PanelState(TEST_PANEL_ID, new Role(0)));
+        when(panelState.getTransition(any(Event.class))).thenReturn(mock(Transition.class));
+        Variant mockVariant = mock(Variant.class);
+        when(mockVariant.getId()).thenReturn(TO_VARIANT_ID);
+        panelState.addVariant(mockVariant);
+        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, panelState);
+
+        Panel mockPanel = mock(Panel.class);
+        PanelPool.PanelCreatorDelegate delegate = mock(PanelPool.PanelCreatorDelegate.class);
+        PanelPool.getInstance().setDelegate(delegate);
+        when(delegate.createPanel(any())).thenReturn(mockPanel);
+        Transition mockTransition = mock(Transition.class);
+        when(mockTransition.getToVariant()).thenReturn(new Variant.Builder(TO_VARIANT_ID).build());
+        when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
+        Animator mockAnimator = mock(Animator.class);
+        when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(
+                mockAnimator);
+
+        PanelTransaction panelTransaction = StateManager.handleEvent(TEST_EVENT);
+        assertThat(panelTransaction.getAnimationStartCallbackRunnable()).isNotNull();
+        assertThat(panelTransaction.getAnimationEndCallbackRunnable()).isNotNull();
+
+        panelTransaction.getAnimationStartCallbackRunnable().run();
+        assertThat(observer.mOnBeforePanelStateChangedCalled).isTrue();
+        assertThat(observer.mOnPanelStateChangedCalled).isFalse();
+
+        panelTransaction.getAnimationEndCallbackRunnable().run();
+        assertThat(observer.mOnPanelStateChangedCalled).isTrue();
+    }
+
+    @Test
+    public void testPanelStateListener_withoutAnimation() {
+        TestPanelStateObserver observer = new TestPanelStateObserver();
+        StateManager.getInstance().addPanelStateObserver(observer);
+        PanelState panelState = spy(new PanelState(TEST_PANEL_ID, new Role(0)));
+        when(panelState.getTransition(any(Event.class))).thenReturn(mock(Transition.class));
+        Variant mockVariant = mock(Variant.class);
+        when(mockVariant.getId()).thenReturn(TO_VARIANT_ID);
+        panelState.addVariant(mockVariant);
+        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, panelState);
+
+        Panel mockPanel = mock(Panel.class);
+        PanelPool.PanelCreatorDelegate delegate = mock(PanelPool.PanelCreatorDelegate.class);
+        PanelPool.getInstance().setDelegate(delegate);
+        when(delegate.createPanel(any())).thenReturn(mockPanel);
+        when(PanelPool.getInstance().getPanel(anyString())).thenReturn(mockPanel);
+        Transition mockTransition = mock(Transition.class);
+        when(mockTransition.getToVariant()).thenReturn(new Variant.Builder(TO_VARIANT_ID).build());
+        when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
+        when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(null);
+
+        PanelTransaction panelTransaction = StateManager.handleEvent(TEST_EVENT);
+
+        assertThat(panelTransaction.getAnimationStartCallbackRunnable()).isNull();
+        assertThat(panelTransaction.getAnimationEndCallbackRunnable()).isNull();
+    }
+
+    private static class TestPanelStateObserver implements StateManager.PanelStateObserver {
+        private boolean mOnBeforePanelStateChangedCalled = false;
+        private boolean mOnPanelStateChangedCalled = false;
+
+        @Override
+        public void onBeforePanelStateChanged(Set<String> changedPanelIds,
+                Map<String, PanelState> panelStates) {
+            mOnBeforePanelStateChangedCalled = true;
+        }
+
+        @Override
+        public void onPanelStateChanged(Set<String> changedPanelIds,
+                Map<String, PanelState> panelStates) {
+            mOnPanelStateChangedCalled = true;
+        }
     }
 }

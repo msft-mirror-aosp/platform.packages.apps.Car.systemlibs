@@ -46,13 +46,20 @@ public class Variant {
     private final RectEvaluator mRectEvaluator = new RectEvaluator();
     private final IntEvaluator mIntEvaluator = new IntEvaluator();
 
-    @NonNull protected final String mId;
+    @NonNull
+    protected final String mId;
     private float mAlpha;
     private boolean mIsVisible;
     private int mLayer;
     private int mCornerRadius;
-    @NonNull private Rect mBounds;
-    @NonNull private Insets mInsets;
+    @NonNull
+    private Rect mBounds;
+    @NonNull
+    private Rect mSafeBounds;
+    @NonNull
+    private Insets mInsets;
+    @NonNull
+    private Blur mBlur;
 
     /**
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
@@ -65,6 +72,7 @@ public class Variant {
 
         // Initialize with default values
         mBounds = new Rect();
+        mSafeBounds = new Rect();
         mIsVisible = Visibility.DEFAULT_VISIBILITY;
         mLayer = Layer.DEFAULT_LAYER;
         mAlpha = Alpha.DEFAULT_ALPHA;
@@ -78,17 +86,19 @@ public class Variant {
      *
      * <p>If a base variant is provided, the new variant inherits its visual properties.
      *
-     * @param id The ID of the variant.
+     * @param id   The ID of the variant.
      * @param base The optional base variant to inherit properties from.
      */
     Variant(@NonNull String id, @NonNull Variant base) {
         this(id);
         mBounds = new Rect(base.getBounds());
+        mSafeBounds = new Rect(base.getSafeBounds());
         mIsVisible = base.isVisible();
         mLayer = base.getLayer();
         mAlpha = base.getAlpha();
         mCornerRadius = base.getCornerRadius();
         mInsets = base.getInsets();
+        mBlur = base.getBlur();
     }
 
     /**
@@ -104,9 +114,9 @@ public class Variant {
     /**
      * Creates an animator to transition from the current state of a panel to this variant.
      *
-     * @param panel The panel to animate.
-     * @param toVariant The target variant to animate to.
-     * @param duration The duration of the animation.
+     * @param panel        The panel to animate.
+     * @param toVariant    The target variant to animate to.
+     * @param duration     The duration of the animation.
      * @param interpolator The interpolator to use for the animation.
      * @return An animator that animates the panel's properties to the target variant.
      */
@@ -229,6 +239,25 @@ public class Variant {
     }
 
     /**
+     * Returns the safe bounds of the variant.
+     *
+     * @return The safe bounds of the variant.
+     */
+    @NonNull
+    public Rect getSafeBounds() {
+        return mSafeBounds;
+    }
+
+    /**
+     * Sets the safe bounds of the variant.
+     *
+     * @param safeBounds The bounds to set.
+     */
+    protected void setSafeBounds(@NonNull Rect safeBounds) {
+        mSafeBounds = safeBounds;
+    }
+
+    /**
      * Returns the corner radius of the variant.
      *
      * @return The corner radius of the variant.
@@ -258,9 +287,21 @@ public class Variant {
     /**
      * @return {@link Insets}.
      */
-    @Nullable
+    @NonNull
     public Insets getInsets() {
         return mInsets;
+    }
+
+    /**
+     * @return {@link Blur}.
+     */
+    @Nullable
+    public Blur getBlur() {
+        return mBlur;
+    }
+
+    protected void setBlur(Blur blur) {
+        mBlur = blur;
     }
 
     /**
@@ -286,6 +327,8 @@ public class Variant {
                 + mLayer
                 + ", mBounds="
                 + mBounds
+                + ", mSafeBounds="
+                + mSafeBounds
                 + ", mCornerRadius="
                 + mCornerRadius
                 + ", mInsets="
@@ -295,14 +338,27 @@ public class Variant {
 
     /** Builder for {@link Variant} objects. */
     public static class Builder {
-        @NonNull protected String mId;
-        @Nullable protected Float mAlpha;
-        @Nullable protected Boolean mIsVisible;
-        @Nullable protected Integer mLayer;
-        @Nullable protected Rect mBounds;
-        @Nullable protected Integer mCornerRadius;
-        @Nullable protected Insets mInsets;
-        @Nullable protected Variant mParent;
+        @NonNull
+        protected String mId;
+        @Nullable
+        protected Float mAlpha;
+        @Nullable
+        protected Boolean mIsVisible;
+        @Nullable
+        protected Integer mLayer;
+        @Nullable
+        protected Rect mBounds;
+        @Nullable
+        protected Rect mSafeBounds;
+        @Nullable
+        protected Integer mCornerRadius;
+        @Nullable
+        protected Insets mInsets;
+        @Nullable
+        protected Blur mBlur;
+        @Nullable
+        protected Variant mParent;
+
 
         public Builder(@NonNull String id) {
             mId = id;
@@ -332,6 +388,15 @@ public class Variant {
             return this;
         }
 
+        /**
+         * Sets safe bounds. This is an area generally not overlapped by display cutouts or insets
+         * for display compatibility apps to be drawn within.
+         */
+        public Builder setSafeBounds(@NonNull Rect safeBounds) {
+            mSafeBounds = safeBounds;
+            return this;
+        }
+
         /** Sets corner radius */
         public Builder setCornerRadius(@NonNull Integer cornerRadius) {
             mCornerRadius = cornerRadius;
@@ -341,6 +406,12 @@ public class Variant {
         /** Sets insets */
         public Builder setInsets(@NonNull Insets insets) {
             mInsets = insets;
+            return this;
+        }
+
+        /** Sets insets */
+        public Builder setBlur(@NonNull Blur blur) {
+            mBlur = blur;
             return this;
         }
 
@@ -372,12 +443,20 @@ public class Variant {
             if (mBounds != null) {
                 variant.setBounds(new Rect(mBounds)); // Defensive copy
             }
+            if (mSafeBounds != null) {
+                variant.setSafeBounds(new Rect(mSafeBounds)); // Defensive copy
+            } else if (mBounds != null) {
+                variant.setSafeBounds(new Rect(mBounds)); // Defensive copy
+            }
             if (mCornerRadius != null) {
                 variant.setCornerRadius(mCornerRadius);
             }
             if (mInsets != null) {
                 variant.setInsets(
                         Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
+            }
+            if (mBlur != null) {
+                variant.setBlur(mBlur);
             }
 
             return variant;

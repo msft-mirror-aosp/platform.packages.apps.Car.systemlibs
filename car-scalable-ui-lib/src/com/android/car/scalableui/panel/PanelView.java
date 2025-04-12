@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,8 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.android.car.scalableui.model.Blur;
 
 /**
  * A view based implementation of a {@link Panel}.
@@ -75,12 +78,36 @@ public class PanelView extends FrameLayout implements Panel {
         setBottom(bounds.bottom);
     }
 
+    @NonNull
+    @Override
+    public Rect getSafeBounds() {
+        // no-op
+        return new Rect();
+    }
+
+    @Override
+    public void setSafeBounds(@NonNull Rect safeBounds) {
+        // no-op
+    }
+
+    @Override
+    public void setBlur(Blur blur) {
+        // no-op
+    }
+
+    @Override
+    public Blur getBlur() {
+        // no-op
+        return null;
+    }
+
     public int getLayer() {
         return mLayer;
     }
 
     /**
      * Sets the z-order of the panel.
+     *
      * @param layer the required z-order.
      */
     public void setLayer(int layer) {
@@ -217,6 +244,11 @@ public class PanelView extends FrameLayout implements Panel {
     @Override
     public void setDisplayId(int displayId) {
         // no-op
+    }
+
+    @Override
+    public int getDisplayId() {
+        return Display.INVALID_DISPLAY;
     }
 
     @Override
