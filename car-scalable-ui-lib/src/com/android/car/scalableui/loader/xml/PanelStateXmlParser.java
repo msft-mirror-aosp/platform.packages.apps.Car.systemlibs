@@ -126,6 +126,7 @@ public class PanelStateXmlParser {
     public static final String DIP = "dip";
     public static final String DP = "dp";
     public static final String PERCENT = "%";
+    public static final String PIXEL = "px";
 
     @NonNull
     static PanelState parse(@NonNull Context context, @NonNull XmlPullParser parser)
@@ -495,26 +496,30 @@ public class PanelStateXmlParser {
         if (dimenStr == null) {
             return null;
         }
+        if (dimenStr.toLowerCase(Locale.ROOT).endsWith(PIXEL)) {
+            String valueStr = dimenStr.substring(0, dimenStr.length() - PIXEL.length());
+            return (int) Float.parseFloat(valueStr);
+        }
         if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DP)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - DP.length());
             float value = Float.parseFloat(valueStr);
             return (int) (value * Resources.getSystem().getDisplayMetrics().density);
-        } else if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DIP)) {
+        }
+        if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DIP)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - DIP.length());
             float value = Float.parseFloat(valueStr);
             return (int) (value * Resources.getSystem().getDisplayMetrics().density);
-        } else if (dimenStr.toLowerCase(Locale.ROOT).endsWith(PERCENT)) {
+        }
+        if (dimenStr.toLowerCase(Locale.ROOT).endsWith(PERCENT)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - PERCENT.length());
             float value = Float.parseFloat(valueStr);
             DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
             if (isHorizontal) {
                 return (int) (value * displayMetrics.widthPixels / 100);
-            } else {
-                return (int) (value * displayMetrics.heightPixels / 100);
             }
-        } else {
-            // The default value is never returned because `attrs.getAttributeValue` is not null.
-            return attrs.getAttributeIntValue(null, name, 0);
+            return (int) (value * displayMetrics.heightPixels / 100);
         }
+        // The default value is never returned because `attrs.getAttributeValue` is not null.
+        return attrs.getAttributeIntValue(null, name, 0);
     }
 }
