@@ -341,6 +341,7 @@ public class KeyFrameVariant extends Variant {
             if (mCornerRadius != null) {
                 variant.setCornerRadius(mCornerRadius);
             }
+            variant.setSafeBounds(new Rect( (mSafeBounds != null) ? mSafeBounds : mBounds));
             if (mInsets != null) {
                 variant.setInsets(
                         Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));

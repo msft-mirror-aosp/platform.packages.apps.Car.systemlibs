@@ -32,39 +32,21 @@ public class PanelTransaction {
 
     /** A map of panel IDs to panel {@link Animator}s. */
     private final HashMap<String, Animator> mAnimatorMap;
+    private boolean mHasWindowChanges;
 
     private Runnable mAnimationStartCallbackRunnable;
     private Runnable mAnimationEndCallbackRunnable;
 
-    public PanelTransaction() {
-        mTransactionMap = new HashMap<>();
-        mAnimatorMap = new HashMap<>();
-    }
-
-    /**
-     * Adds a {@link Transition} for the panel with the specified ID.
-     *
-     * @param id         The ID of the panel.
-     * @param transition The transition to apply to the panel.
-     */
-    void addPanelTransaction(@NonNull String id, @NonNull Transition transition) {
-        mTransactionMap.put(id, transition);
+    public PanelTransaction(Map<String, Transition> transactionMap,
+            Map<String, Animator> animatorMap) {
+        mTransactionMap = new HashMap<>(transactionMap);
+        mAnimatorMap = new HashMap<>(animatorMap);
     }
 
     /** Returns a set of entries representing the transactions in this object. */
     @NonNull
     public Set<Map.Entry<String, Transition>> getPanelTransactionStates() {
         return mTransactionMap.entrySet();
-    }
-
-    /**
-     * Adds a {@link Animator} for the panel with the specified ID.
-     *
-     * @param id       The ID of the panel.
-     * @param animator The animator to apply to the panel.
-     */
-    void addAnimator(@NonNull String id, @Nullable Animator animator) {
-        mAnimatorMap.put(id, animator);
     }
 
     /** Returns a set of entries representing the Animation for given panel. */
@@ -118,12 +100,28 @@ public class PanelTransaction {
         return mTransactionMap.get(id);
     }
 
+    /**
+     * Return if this Panel transaction contains any window change.
+     */
+    public boolean hasWindowChanges() {
+        return mHasWindowChanges;
+    }
+
+    private void setHasWindowChanges(boolean hasWindowChanges) {
+        mHasWindowChanges = hasWindowChanges;
+    }
+
     /** Builder for {@link PanelTransaction}. */
     public static class Builder {
-        private final PanelTransaction mPanelTransaction;
+        private final HashMap<String, Transition> mTransactionMap;
+        private final HashMap<String, Animator> mAnimatorMap;
+        private Runnable mAnimationStartCallbackRunnable;
+        private Runnable mAnimationEndCallbackRunnable;
+        private boolean mHasWindowChanges = true;
 
         public Builder() {
-            mPanelTransaction = new PanelTransaction();
+            mTransactionMap = new HashMap<>();
+            mAnimatorMap = new HashMap<>();
         }
 
         /**
@@ -135,7 +133,16 @@ public class PanelTransaction {
          */
         @NonNull
         public Builder addPanelTransaction(@NonNull String id, @NonNull Transition transition) {
-            mPanelTransaction.addPanelTransaction(id, transition);
+            mTransactionMap.put(id, transition);
+            return this;
+        }
+
+        /**
+         * Sets a flag indicating whether the object under construction has window changes.
+         */
+        @NonNull
+        public Builder setHasWindowChanges(boolean hasWindowChanges) {
+            mHasWindowChanges = hasWindowChanges;
             return this;
         }
 
@@ -148,7 +155,7 @@ public class PanelTransaction {
          */
         @NonNull
         public Builder addAnimator(@NonNull String id, @Nullable Animator animator) {
-            mPanelTransaction.addAnimator(id, animator);
+            mAnimatorMap.put(id, animator);
             return this;
         }
 
@@ -158,7 +165,7 @@ public class PanelTransaction {
          */
         @NonNull
         public Builder setAnimationStartCallbackRunnable(@NonNull Runnable runnable) {
-            mPanelTransaction.setAnimationStartCallbackRunnable(runnable);
+            mAnimationStartCallbackRunnable = runnable;
             return this;
         }
 
@@ -168,7 +175,7 @@ public class PanelTransaction {
          */
         @NonNull
         public Builder setAnimationEndCallbackRunnable(@NonNull Runnable runnable) {
-            mPanelTransaction.setAnimationEndCallbackRunnable(runnable);
+            mAnimationEndCallbackRunnable = runnable;
             return this;
         }
 
@@ -179,21 +186,53 @@ public class PanelTransaction {
          */
         @NonNull
         public PanelTransaction build() {
-            return mPanelTransaction;
+            PanelTransaction panelTransaction = new PanelTransaction(mTransactionMap, mAnimatorMap);
+            panelTransaction.setHasWindowChanges(mHasWindowChanges);
+            if (mAnimationStartCallbackRunnable != null) {
+                panelTransaction.setAnimationStartCallbackRunnable(mAnimationStartCallbackRunnable);
+            }
+            if (mAnimationEndCallbackRunnable != null) {
+                panelTransaction.setAnimationEndCallbackRunnable(mAnimationEndCallbackRunnable);
+            }
+            return panelTransaction;
         }
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("[ PanelTransaction:");
-        for (Map.Entry<String, Transition> entry : mTransactionMap.entrySet()) {
-            sb.append(" Transition: ").append(entry.getKey()).append("=").append(
-                    entry.getValue()).append(", ");
+        StringBuilder sb = new StringBuilder("[PanelTransaction:");
+
+        if (!mTransactionMap.isEmpty()) {
+            sb.append(" Transitions={");
+            sb.append(" HasWindowChange= ").append(hasWindowChanges()).append(", ");
+            boolean firstTransition = true;
+            for (Map.Entry<String, Transition> entry : mTransactionMap.entrySet()) {
+                if (!firstTransition) {
+                    sb.append(", ");
+                }
+                sb.append(entry.getKey()).append("=").append(entry.getValue());
+                firstTransition = false;
+            }
+            sb.append("}");
         }
-        for (Map.Entry<String, Animator> entry : mAnimatorMap.entrySet()) {
-            sb.append(" Animator: ").append(entry.getKey()).append("=").append(
-                    entry.getValue()).append(", ");
+
+        if (!mAnimatorMap.isEmpty()) {
+            if (!mTransactionMap.isEmpty()) {
+                sb.append(", ");
+            }
+            sb.append(" Animators={");
+            boolean firstAnimator = true;
+            for (Map.Entry<String, Animator> entry : mAnimatorMap.entrySet()) {
+                if (!firstAnimator) {
+                    sb.append(", ");
+                }
+                sb.append(entry.getKey()).append("=").append(entry.getValue());
+                firstAnimator = false;
+            }
+            sb.append("}");
         }
-        return sb.append("]").toString();
+
+        sb.append("]");
+        return sb.toString();
     }
 }

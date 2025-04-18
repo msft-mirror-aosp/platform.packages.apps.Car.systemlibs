@@ -26,6 +26,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.car.scalableui.metrics.MetricsHelper;
 import com.android.car.scalableui.model.Event;
+import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.PanelTransaction;
 import com.android.car.scalableui.model.Transition;
@@ -155,6 +156,9 @@ public class StateManager {
                 applyState(panelState);
             }
             logIfDebuggable("add transition for " + panelState.getId());
+            if (toVariant instanceof KeyFrameVariant) {
+                panelTransactionBuilder.setHasWindowChanges(false);
+            }
             panelTransactionBuilder.addPanelTransaction(panelState.getId(), transition);
         }
         if (!changedPanelIds.isEmpty()) {
@@ -190,8 +194,12 @@ public class StateManager {
         panel.setDisplayId(panelState.getDisplayId());
         panel.setInsets(variant.getInsets());
         panel.setCornerRadius(variant.getCornerRadius());
-        panel.setSafeBounds(variant.getSafeBounds());
         panel.setBlur(variant.getBlur());
+        // KeyFrameVariant might not have safe bounds.
+        if (!(variant instanceof KeyFrameVariant)) {
+            panel.setSafeBounds(variant.getSafeBounds());
+        }
+        panel.setPanelControllerMetadata(panelState.getPanelControllerMetadata());
     }
 
     //TODO(b/390006880): make this part of configuration.

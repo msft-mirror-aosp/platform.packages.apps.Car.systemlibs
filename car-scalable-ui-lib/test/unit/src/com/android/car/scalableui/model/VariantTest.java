@@ -18,8 +18,10 @@ package com.android.car.scalableui.model;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.view.animation.Interpolator;
 
@@ -70,6 +72,7 @@ public class VariantTest {
         final String toVariantId = "toVariantId";
         final String fromVariantId = "fromVariantId";
         Panel panel = mock(Panel.class);
+        when(panel.getInsets()).thenReturn(mock(Insets.class));
         Variant fromVariant = new Variant(fromVariantId);
         Variant toVariant = new Variant(toVariantId);
         Interpolator interpolator = mock(Interpolator.class);
