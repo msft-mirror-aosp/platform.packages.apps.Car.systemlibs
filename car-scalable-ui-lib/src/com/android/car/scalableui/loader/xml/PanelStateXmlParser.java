@@ -26,9 +26,11 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.graphics.Insets;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.Xml;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
@@ -39,9 +41,11 @@ import androidx.annotation.Nullable;
 import com.android.car.scalableui.model.Alpha;
 import com.android.car.scalableui.model.Blur;
 import com.android.car.scalableui.model.Bounds;
+import com.android.car.scalableui.model.BreakPoint;
 import com.android.car.scalableui.model.Corner;
 import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.Layer;
+import com.android.car.scalableui.model.PanelControllerMetadata;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.Role;
 import com.android.car.scalableui.model.Transition;
@@ -69,6 +73,7 @@ public class PanelStateXmlParser {
     public static final String ROLE_ATTRIBUTE = "role";
     public static final String DISPLAY_ID = "displayId";
     public static final String DEFAULT_LAYER_ATTRIBUTE = "defaultLayer";
+    public static final String CONTROLLER = "controller";
 
     // --- Transitions Tags ---
     public static final String TRANSITIONS_TAG = "Transitions";
@@ -110,6 +115,7 @@ public class PanelStateXmlParser {
     // --- Bounds Tags ---
     public static final String BOUNDS_TAG = "Bounds";
     public static final String SAFE_BOUNDS_TAG = "SafeBounds";
+
     public static final String LEFT_ATTRIBUTE = "left";
     public static final String RIGHT_ATTRIBUTE = "right";
     public static final String TOP_ATTRIBUTE = "top";
@@ -134,6 +140,21 @@ public class PanelStateXmlParser {
     public static final String DIP = "dip";
     public static final String DP = "dp";
     public static final String PERCENT = "%";
+    public static final String PIXEL = "px";
+
+    // --- Controller Tags ---
+    public static final String CONTROLLER_TAG = "Controller";
+
+    // --- Config Tags ---
+    public static final String CONGIF_TAG = "Config";
+    public static final String CONGIF_KEY_TAG = "key";
+    public static final String CONGIF_VALUE_TAG = "value";
+
+    // --- BreakPoints Tags ---
+    public static final String BREAKPOINTS_TAG = "BreakPoints";
+    public static final String BREAKPOINT_TAG = "BreakPoint";
+    public static final String BREAKPOINT_POINT_TAG = "point";
+    public static final String BREAKPOINT_EVENT_ID_TAG = "eventId";
 
     @NonNull
     static PanelState parse(@NonNull Context context, @NonNull XmlPullParser parser)
@@ -168,10 +189,22 @@ public class PanelStateXmlParser {
                         attrs.getAttributeIntValue(null, DEFAULT_LAYER_ATTRIBUTE, DEFAULT_LAYER);
             }
         }
+        PanelControllerMetadata panelControllerMetaData = null;
+        if (attrs.getAttributeValue(null, CONTROLLER) != null) {
+            int xmlId = attrs.getAttributeResourceValue(null, CONTROLLER, 0);
+            if (xmlId != 0) {
+                try {
+                    panelControllerMetaData = createController(context, xmlId);
+                } catch (XmlPullParserException e) {
+                    Log.e(TAG, "error inflate" + id + " with controller " + xmlId);
+                }
+            }
+        }
 
         PanelState.Builder builder = new PanelState.Builder(id, new Role(roleValue));
         builder.setDisplayId(displayId);
         builder.setDefaultVariant(defaultVariant);
+        builder.setPanelControllerMetadata(panelControllerMetaData);
         PanelState panelState = builder.build();
 
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -197,6 +230,92 @@ public class PanelStateXmlParser {
         }
         panelState.setVariant(defaultVariant); // Set the initial variant
         return panelState;
+    }
+
+    private static PanelControllerMetadata createController(@NonNull Context context, int xmlId)
+            throws XmlPullParserException, IOException {
+        XmlResourceParser parser = context.getResources().getXml(xmlId);
+        return parseController(context, parser);
+
+    }
+
+    private static PanelControllerMetadata parseController(@NonNull Context context,
+            @NonNull XmlResourceParser parser) throws IOException, XmlPullParserException {
+        // Consume any START_DOCUMENT or whitespace events
+        int eventType = parser.getEventType();
+        while (eventType == XmlPullParser.START_DOCUMENT
+                || (eventType == XmlPullParser.TEXT && parser.isWhitespace())) {
+            eventType = parser.next();
+        }
+        if (eventType != XmlPullParser.START_TAG || !parser.getName().equals(CONTROLLER_TAG)) {
+            throw new XmlPullParserException("Expected <Controller> tag at the beginning but "
+                    + parser.getName());
+        }
+
+        parser.require(XmlPullParser.START_TAG, null, CONTROLLER_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
+        PanelControllerMetadata.Builder builder = PanelControllerMetadata.builder(id);
+        Log.e(TAG, "init " + id);
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
+                break;
+            }
+            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                continue;
+            }
+
+            if (parser.getName() == null) {
+                parser.next();
+                continue;
+            }
+
+            String name = parser.getName();
+            switch (name) {
+                case CONGIF_TAG:
+                    String key = attrs.getAttributeValue(null, CONGIF_KEY_TAG);
+                    String value = attrs.getAttributeValue(null, CONGIF_VALUE_TAG);
+                    builder.addConfiguration(key, value);
+                    parser.next();
+                    break;
+                case BREAKPOINTS_TAG:
+                    builder.addBreakPoints(parseBreakPoints(context, parser));
+                    parser.next();
+                    break;
+                default:
+                    XmlPullParserHelper.skip(parser);
+            }
+        }
+        return builder.build();
+    }
+
+    private static List<BreakPoint> parseBreakPoints(Context context, XmlResourceParser parser)
+            throws IOException, XmlPullParserException {
+        List<BreakPoint> points = new ArrayList<>();
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) continue;
+            String name = parser.getName();
+            if (name.equals(BREAKPOINT_TAG)) {
+                points.add(parseBreakPoint(context, parser));
+            } else {
+                XmlPullParserHelper.skip(parser);
+            }
+        }
+        // We are now at the END_TAG for <BreakPoints>
+        return points;
+    }
+
+    private static BreakPoint parseBreakPoint(@NonNull Context context,
+            @NonNull XmlPullParser parser) throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, null, BREAKPOINT_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        Integer point = getDimensionPixelSize(context, attrs, BREAKPOINT_POINT_TAG, false);
+        String eventId = attrs.getAttributeValue(null, BREAKPOINT_EVENT_ID_TAG);
+        parser.nextTag();
+        parser.require(XmlPullParser.END_TAG, null, BREAKPOINT_TAG);
+
+        return new BreakPoint.Builder(point, eventId).build();
     }
 
     @NonNull
@@ -527,26 +646,30 @@ public class PanelStateXmlParser {
         if (dimenStr == null) {
             return null;
         }
+        if (dimenStr.toLowerCase(Locale.ROOT).endsWith(PIXEL)) {
+            String valueStr = dimenStr.substring(0, dimenStr.length() - PIXEL.length());
+            return (int) Float.parseFloat(valueStr);
+        }
         if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DP)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - DP.length());
             float value = Float.parseFloat(valueStr);
             return (int) (value * Resources.getSystem().getDisplayMetrics().density);
-        } else if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DIP)) {
+        }
+        if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DIP)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - DIP.length());
             float value = Float.parseFloat(valueStr);
             return (int) (value * Resources.getSystem().getDisplayMetrics().density);
-        } else if (dimenStr.toLowerCase(Locale.ROOT).endsWith(PERCENT)) {
+        }
+        if (dimenStr.toLowerCase(Locale.ROOT).endsWith(PERCENT)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - PERCENT.length());
             float value = Float.parseFloat(valueStr);
             DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
             if (isHorizontal) {
                 return (int) (value * displayMetrics.widthPixels / 100);
-            } else {
-                return (int) (value * displayMetrics.heightPixels / 100);
             }
-        } else {
-            // The default value is never returned because `attrs.getAttributeValue` is not null.
-            return attrs.getAttributeIntValue(null, name, 0);
+            return (int) (value * displayMetrics.heightPixels / 100);
         }
+        // The default value is never returned because `attrs.getAttributeValue` is not null.
+        return attrs.getAttributeIntValue(null, name, 0);
     }
 }

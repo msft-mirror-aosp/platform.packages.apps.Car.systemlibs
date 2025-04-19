@@ -17,6 +17,7 @@
 package com.android.car.scalableui.model;
 
 import android.animation.Animator;
+import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
@@ -34,6 +35,8 @@ import com.android.car.scalableui.panel.Panel;
  */
 public class Transition {
     public static final long DEFAULT_DURATION = 300;
+    private static final String TAG = Transition.class.getSimpleName();
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.VERBOSE);
 
     @Nullable private final Variant mFromVariant;
     @NonNull private final Variant mToVariant;
@@ -103,6 +106,10 @@ public class Transition {
      */
     @Nullable
     public Animator getAnimator(@NonNull Panel panel, @NonNull Variant fromVariant) {
+        if (DEBUG) {
+            Log.d(TAG, "panel=" + panel.getPanelId() + "fromVariant=" + fromVariant + ", toVariant"
+                    + mToVariant);
+        }
         if (fromVariant.getId().equals(mToVariant.getId())) {
             return null;
         }

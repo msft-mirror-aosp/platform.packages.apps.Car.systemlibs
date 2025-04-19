@@ -47,13 +47,17 @@ public class PanelState implements Cloneable {
     private final List<Variant> mVariants = new ArrayList<>();
     private final List<Transition> mTransitions = new ArrayList<>();
 
-    @Nullable private Animator mRunningAnimator;
-    @Nullable private Variant mCurrentVariant;
+    @Nullable
+    private Animator mRunningAnimator;
+    @Nullable
+    private Variant mCurrentVariant;
+    @Nullable
+    private PanelControllerMetadata mPanelControllerMetadata;
 
     /**
      * Constructor for PanelState.
      *
-     * @param id The ID of the panel.
+     * @param id   The ID of the panel.
      * @param role The role of the panel.
      */
     public PanelState(@NonNull String id, @NonNull Role role) {
@@ -128,7 +132,7 @@ public class PanelState implements Cloneable {
     /**
      * Sets variant
      *
-     * @param id The ID of the variant to set.
+     * @param id    The ID of the variant to set.
      * @param event The event that triggered the variant change.
      */
     public void setVariant(@NonNull String id, @Nullable Event event) {
@@ -235,6 +239,16 @@ public class PanelState implements Cloneable {
         mTransitions.addAll(transitions);
     }
 
+    @Nullable
+    public PanelControllerMetadata getPanelControllerMetadata() {
+        return mPanelControllerMetadata;
+    }
+
+    private void setPanelControllerMetadata(
+            @Nullable PanelControllerMetadata panelControllerMetadata) {
+        mPanelControllerMetadata = panelControllerMetadata;
+    }
+
     @Override
     @NonNull
     public String toString() {
@@ -244,11 +258,11 @@ public class PanelState implements Cloneable {
                 + ", mDefaultVariant='" + mDefaultVariant + '\''
                 + ", mDisplayId=" + mDisplayId
                 + ", mVariants=" + mVariants.stream()
-                    .map(Variant::toString)
-                    .collect(Collectors.joining(", ", "[", "]"))
+                .map(Variant::toString)
+                .collect(Collectors.joining(", ", "[", "]"))
                 + ", mTransitions=" + mTransitions.stream()
-                    .map(Transition::toString)
-                    .collect(Collectors.joining(", ", "[", "]"))
+                .map(Transition::toString)
+                .collect(Collectors.joining(", ", "[", "]"))
                 + ", mRunningAnimator=" + mRunningAnimator
                 + ", mCurrentVariant="
                 + (mCurrentVariant != null ? mCurrentVariant.getId() : "null")
@@ -273,6 +287,7 @@ public class PanelState implements Cloneable {
         private Integer mDisplayId;
         private List<Variant> mVariants = new ArrayList<>();
         private List<Transition> mTransitions = new ArrayList<>();
+        private PanelControllerMetadata mPanelControllerMetadata;
 
         public Builder(@NonNull String id, @NonNull Role role) {
             mId = id;
@@ -315,6 +330,10 @@ public class PanelState implements Cloneable {
             return this;
         }
 
+        public void setPanelControllerMetadata(PanelControllerMetadata panelControllerMetaData) {
+            mPanelControllerMetadata = panelControllerMetaData;
+        }
+
         /** Returns the {@link PanelState} instance */
         @NonNull
         public PanelState build() {
@@ -325,6 +344,7 @@ public class PanelState implements Cloneable {
             }
             panelState.setVariants(mVariants);
             panelState.setTransitions(mTransitions);
+            panelState.setPanelControllerMetadata(mPanelControllerMetadata);
             return panelState;
         }
     }
