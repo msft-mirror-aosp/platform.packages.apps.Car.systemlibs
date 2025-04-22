@@ -137,7 +137,8 @@ public class StateManager {
                 Log.e(TAG, "toVariant is null for " + panel.getPanelId() + ", transition="
                         + toVariant);
                 continue;
-            } else if (Objects.equals(fromVariant.getId(), (toVariant.getId()))) {
+            } else if (Objects.equals(fromVariant.getId(), (toVariant.getId()))
+                    && !(toVariant instanceof KeyFrameVariant)) {
                 logIfDebuggable("fromVariant is the same as toVariant");
                 continue;
             }
@@ -204,7 +205,6 @@ public class StateManager {
         panel.setDisplayId(panelState.getDisplayId());
         panel.setInsets(variant.getInsets());
         panel.setCornerRadius(variant.getCornerRadius());
-        panel.setBlur(variant.getBlur());
         // KeyFrameVariant might not have safe bounds.
         if (!(variant instanceof KeyFrameVariant)) {
             panel.setSafeBounds(variant.getSafeBounds());
