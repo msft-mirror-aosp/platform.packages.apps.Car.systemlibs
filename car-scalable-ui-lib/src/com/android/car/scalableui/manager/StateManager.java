@@ -210,7 +210,6 @@ public class StateManager {
         panel.setDisplayId(panelState.getDisplayId());
         panel.setInsets(variant.getInsets());
         panel.setCornerRadius(variant.getCornerRadius());
-        panel.setBlur(variant.getBlur());
         // KeyFrameVariant might not have safe bounds.
         if (!(variant instanceof KeyFrameVariant)) {
             panel.setSafeBounds(variant.getSafeBounds());

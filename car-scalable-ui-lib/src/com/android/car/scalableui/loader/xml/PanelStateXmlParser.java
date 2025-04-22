@@ -41,7 +41,6 @@ import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.R;
 import com.android.car.scalableui.model.Alpha;
-import com.android.car.scalableui.model.Blur;
 import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.BreakPoint;
 import com.android.car.scalableui.model.Corner;
@@ -143,12 +142,6 @@ public class PanelStateXmlParser {
     public static final String TOP_OFFSET_ATTRIBUTE = "topOffset";
     public static final String RIGHT_OFFSET_ATTRIBUTE = "rightOffset";
     public static final String BOTTOM_OFFSET_ATTRIBUTE = "bottomOffset";
-
-    // --- Blur Tags ---
-    public static final String BLUR_TAG = "Blur";
-    public static final String CORNER_RADIUS_ATTRIBUTE = "cornerRadius";
-    public static final String BLUR_RADIUS_ATTRIBUTE = "blurRadius";
-    public static final String VAIL_ENABLED_ATTRIBUTE = "vailEnabled";
 
     // --- Corner Tags ---
     public static final String CORNER_TAG = "Corner";
@@ -450,9 +443,6 @@ public class PanelStateXmlParser {
                 case INSETS_TAG:
                     variantBuilder.setInsets(parseInsets(context, parser));
                     break;
-                case BLUR_TAG:
-                    variantBuilder.setBlur(parseBlur(context, parser));
-                    break;
                 case BACKGROUND_TAG:
                     variantBuilder.addDecor(parseBackground(context, parser, panelState.getId()));
                     break;
@@ -649,27 +639,6 @@ public class PanelStateXmlParser {
         }
 
         return Insets.of(left, top, right, bottom);
-    }
-
-    private static Blur parseBlur(@NonNull Context context, @NonNull XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-
-        parser.require(XmlPullParser.START_TAG, null, BLUR_TAG);
-        AttributeSet attrs = Xml.asAttributeSet(parser);
-
-        float cornerRadius = attrs.getAttributeFloatValue(null, CORNER_RADIUS_ATTRIBUTE, 0f);
-        int blurRadius = attrs.getAttributeIntValue(null, BLUR_RADIUS_ATTRIBUTE, 0);
-        boolean vailEnabled = attrs.getAttributeBooleanValue(null, VAIL_ENABLED_ATTRIBUTE, false);
-
-        int resId = attrs.getAttributeResourceValue(null, BACKGROUND_COLOR_ATTRIBUTE, 0);
-        int backgroundColor = context.getColor(resId);
-
-        while (parser.next() != XmlPullParser.END_TAG) {
-            XmlPullParserHelper.skip(parser); // Skip any nested tags
-        }
-
-        return new Blur.Builder().setBlurRadius(blurRadius).setBackgroundColor(
-                backgroundColor).setCornerRadius(cornerRadius).setEnableVail(vailEnabled).build();
     }
 
     @NonNull

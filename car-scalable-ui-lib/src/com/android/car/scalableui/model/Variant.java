@@ -67,8 +67,6 @@ public class Variant {
     @NonNull
     private Insets mInsets;
     @NonNull
-    private Blur mBlur;
-    @NonNull
     private final Map<String, Decor> mDecors;
 
     /**
@@ -109,7 +107,6 @@ public class Variant {
         mAlpha = base.getAlpha();
         mCornerRadius = base.getCornerRadius();
         mInsets = base.getInsets();
-        mBlur = base.getBlur();
     }
 
     /**
@@ -315,18 +312,6 @@ public class Variant {
     }
 
     /**
-     * @return {@link Blur}.
-     */
-    @Nullable
-    public Blur getBlur() {
-        return mBlur;
-    }
-
-    protected void setBlur(Blur blur) {
-        mBlur = blur;
-    }
-
-    /**
      * Sets insets.
      * This is essentially the panel's insets.
      */
@@ -406,8 +391,6 @@ public class Variant {
         @Nullable
         protected Insets mInsets;
         @Nullable
-        protected Blur mBlur;
-        @Nullable
         protected Variant mParent;
         @NonNull
         private Set<Decor> mDecors;
@@ -468,12 +451,6 @@ public class Variant {
             return this;
         }
 
-        /** Sets insets */
-        public Builder setBlur(@NonNull Blur blur) {
-            mBlur = blur;
-            return this;
-        }
-
         /** Sets parent */
         public Builder setParent(@Nullable Variant parent) {
             mParent = parent;
@@ -524,9 +501,6 @@ public class Variant {
             if (mInsets != null) {
                 variant.setInsets(
                         Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
-            }
-            if (mBlur != null) {
-                variant.setBlur(mBlur);
             }
             if (!mDecors.isEmpty()) {
                 variant.setDecors(mDecors);
