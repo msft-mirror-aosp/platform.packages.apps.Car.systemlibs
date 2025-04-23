@@ -16,6 +16,16 @@
 
 package com.android.car.scalableui.model;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.util.ArraySet;
+import android.view.LayoutInflater;
+import android.view.View;
+
+import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 /**
  * Represents the role of a {@code Panel} within the system.
  *
@@ -23,23 +33,105 @@ package com.android.car.scalableui.model;
  * specific meaning of the role value is determined by the system using it.
  */
 public class Role {
-    private final int mValue;
+    @LayoutRes
+    private final int mLayoutId;
+    private final boolean mIsDefault;
+    @Nullable
+    private final ComponentName[] mPersistedActivities;
 
-    /**
-     * Constructor for Role.
-     *
-     * @param value The integer value representing the role.
-     */
-    public Role(int value) {
-        mValue = value;
+    private Role(@LayoutRes int layoutId) {
+        mLayoutId = layoutId;
+        mIsDefault = false;
+        mPersistedActivities = null;
+    }
+
+    private Role(boolean isDefault, @Nullable ComponentName[] persistedActivities) {
+        mLayoutId = 0;
+        mIsDefault = isDefault;
+        mPersistedActivities = persistedActivities;
     }
 
     /**
-     * Returns the integer value representing the role.
-     *
-     * @return The integer value of the role.
+     * Returns if the role is the default role
      */
-    public int getValue() {
-        return mValue;
+    public boolean isDefault() {
+        return mIsDefault;
+    }
+
+    /**
+     * Inflates the view set in role attribute using the given context
+     */
+    @Nullable
+    public View getView(@NonNull Context context) {
+        if (mLayoutId == 0) {
+            return null;
+        }
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+        return inflater.inflate(mLayoutId, null);
+    }
+
+    /**
+     * Returns the persisted activities associated with this role.
+     */
+    @Nullable
+    public ComponentName[] getPersistedActivities() {
+        return mPersistedActivities;
+    }
+
+    /** Builder for {@link Role} objects. */
+    public static class Builder {
+        @LayoutRes
+        private int mLayoutId = 0;
+        protected boolean mIsDefault = false;
+        @NonNull
+        protected ArraySet<ComponentName> mPersistedActivities = new ArraySet<>();
+
+        public Builder() {}
+
+        /** Sets isDefault value */
+        public Builder setIsDefault(boolean isDefault) {
+            mIsDefault = false;
+            mPersistedActivities.clear();
+
+            mIsDefault = isDefault;
+            return this;
+        }
+
+        /** Adds a PersistentActivity */
+        public Builder addPersistentActivity(@NonNull String activityComponent) {
+            mLayoutId = 0;
+            mIsDefault = false;
+
+            ComponentName componentName = ComponentName.unflattenFromString(activityComponent);
+            mPersistedActivities.add(componentName);
+            return this;
+        }
+
+        /** Sets layout id to be inflated at runtime */
+        public Builder setLayoutId(@LayoutRes int layoutId) {
+            mIsDefault = false;
+            mPersistedActivities.clear();
+
+            mLayoutId = layoutId;
+            return this;
+        }
+
+        /** Returns the {@link Role} instance */
+        @NonNull
+        public Role build() {
+            if (mLayoutId == 0
+                    && !mIsDefault
+                    && mPersistedActivities.isEmpty()) {
+                throw new IllegalStateException("Role is not initialized correctly!");
+            }
+
+            if (mLayoutId != 0) {
+                return new Role(mLayoutId);
+            } else {
+                return new Role(mIsDefault,
+                        mPersistedActivities.stream().toArray(ComponentName[]::new));
+            }
+        }
     }
 }

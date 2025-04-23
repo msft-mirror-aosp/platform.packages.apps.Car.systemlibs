@@ -16,7 +16,7 @@
 
 package com.android.car.scalableui.model;
 
-import static com.google.common.truth.Truth.assertThat;
+import static org.testng.Assert.assertThrows;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -26,10 +26,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class RoleTest {
     @Test
-    public void testGetValue() {
-        int expectedValue = 25;
-        Role role = new Role(expectedValue);
-        int actualValue = role.getValue();
-        assertThat(actualValue).isEqualTo(expectedValue);
+    public void testRole_notInitialized_throwsException() {
+        assertThrows(IllegalStateException.class, () -> new Role.Builder().build());
     }
 }
