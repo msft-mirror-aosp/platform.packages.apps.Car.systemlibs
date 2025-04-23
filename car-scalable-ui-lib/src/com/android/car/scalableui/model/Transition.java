@@ -26,6 +26,8 @@ import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.panel.Panel;
 
+import java.util.Objects;
+
 /**
  * Represents a transition between two {@link Variant}s in the Scalable UI system.
  *
@@ -110,7 +112,7 @@ public class Transition {
             Log.d(TAG, "panel=" + panel.getPanelId() + "fromVariant=" + fromVariant + ", toVariant"
                     + mToVariant);
         }
-        if (fromVariant.getId().equals(mToVariant.getId())) {
+        if (Objects.equals(fromVariant.getId(), mToVariant.getId())) {
             return null;
         }
 
