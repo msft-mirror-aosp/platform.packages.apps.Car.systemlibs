@@ -34,6 +34,7 @@ import com.android.car.scalableui.panel.PanelPool;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Manages the state of UI panels. This class is responsible for loading panel definitions,
@@ -106,7 +107,16 @@ public class StateManager {
             Variant fromVariant = panelState.getCurrentVariant();
 
             if (fromVariant == null) {
-                logIfDebuggable("fromVariant is null");
+                logIfDebuggable("fromVariant is null for " + panel.getPanelId());
+                continue;
+            } else if (toVariant == null) {
+                // This should never happen, but observe if there is a bad config, add the check
+                // for now and enforce in Transition later.
+                Log.e(TAG, "toVariant is null for " + panel.getPanelId() + ", transition="
+                        + toVariant);
+                continue;
+            } else if (Objects.equals(fromVariant.getId(), (toVariant.getId()))) {
+                logIfDebuggable("fromVariant is the same as toVariant");
                 continue;
             }
 
@@ -175,7 +185,7 @@ public class StateManager {
      * Reloads {@link PanelState}.
      */
     public static void reloadPanelState(List<PanelState> panelStates) {
-        for (PanelState panelState: panelStates) {
+        for (PanelState panelState : panelStates) {
             if (sInstance.mPanelStates.put(panelState.getId(), panelState) != null) {
                 if (DEBUG) {
                     Log.w(TAG, "PanelState with id=" + panelState.getId() + " got reloaded");
