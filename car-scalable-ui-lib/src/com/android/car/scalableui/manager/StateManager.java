@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -128,7 +129,16 @@ public class StateManager {
             Variant fromVariant = panelState.getCurrentVariant();
 
             if (fromVariant == null) {
-                logIfDebuggable("fromVariant is null");
+                logIfDebuggable("fromVariant is null for " + panel.getPanelId());
+                continue;
+            } else if (toVariant == null) {
+                // This should never happen, but observe if there is a bad config, add the check
+                // for now and enforce in Transition later.
+                Log.e(TAG, "toVariant is null for " + panel.getPanelId() + ", transition="
+                        + toVariant);
+                continue;
+            } else if (Objects.equals(fromVariant.getId(), (toVariant.getId()))) {
+                logIfDebuggable("fromVariant is the same as toVariant");
                 continue;
             }
 
@@ -218,7 +228,7 @@ public class StateManager {
      * Reloads {@link PanelState}.
      */
     public static void reloadPanelState(List<PanelState> panelStates) {
-        for (PanelState panelState: panelStates) {
+        for (PanelState panelState : panelStates) {
             if (sInstance.mPanelStates.put(panelState.getId(), panelState) != null) {
                 if (DEBUG) {
                     Log.w(TAG, "PanelState with id=" + panelState.getId() + " got reloaded");
@@ -250,6 +260,7 @@ public class StateManager {
 
     /**
      * Add an observer to the panel state
+     *
      * @param observer the observer
      * @param panelIds the panel ids to observe
      */
@@ -281,7 +292,7 @@ public class StateManager {
 
     private void notifyPanelStateChange(Set<String> changedPanelIds,
             Map<String, PanelState> panelStates, boolean before) {
-        try (ExecutorService executorService =  Executors.newSingleThreadExecutor()) {
+        try (ExecutorService executorService = Executors.newSingleThreadExecutor()) {
             executorService.execute(() -> {
                 synchronized (mObservers) {
                     for (PanelStateObserverData data : mObservers) {
@@ -318,15 +329,18 @@ public class StateManager {
     public interface PanelStateObserver {
         /**
          * Notify of a panel state change that has just started
+         *
          * @param changedPanelIds the panelIds that are changing
-         * @param toPanelStates the panel states from after the change
+         * @param toPanelStates   the panel states from after the change
          */
         void onBeforePanelStateChanged(Set<String> changedPanelIds,
                 Map<String, PanelState> toPanelStates);
+
         /**
          * Notify of a panel state change that has finished
+         *
          * @param changedPanelIds the panelIds that have changed
-         * @param toPanelStates the panel states from after the change
+         * @param toPanelStates   the panel states from after the change
          */
         void onPanelStateChanged(Set<String> changedPanelIds,
                 Map<String, PanelState> toPanelStates);
