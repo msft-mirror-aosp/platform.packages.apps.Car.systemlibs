@@ -23,6 +23,9 @@ android_library {
     optimize: {
         enabled: true,
     },
+    resource_dirs: [
+        "res",
+    ],
     static_libs: [
         "androidx.annotation_annotation",
     ],
