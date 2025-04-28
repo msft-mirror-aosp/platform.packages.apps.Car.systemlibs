@@ -55,7 +55,7 @@ public class DataSubscriptionControllerTest {
     private Context mContext;
     private DataSubscriptionController mController;
     @Mock
-    private NetworkTaskEventListener mNetworkTaskEventListener;
+    private DataSubscriptionMessageEventListener mDataSubscriptionMessageEventListener;
     @Mock
     private ConnectivityManager mConnectivityManager;
     @Mock
@@ -70,17 +70,20 @@ public class DataSubscriptionControllerTest {
     private SharedPreferences mSharedPreferences;
     @Mock
     private SharedPreferences.Editor mEditor;
+    @Mock
+    private DataSubscriptionMessageCreator mDataSubscriptionMessageCreator;
     private ActivityManager.RunningTaskInfo mRunningTaskInfoMock;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mContext = spy(InstrumentationRegistry.getInstrumentation().getContext());
-        mController = new DataSubscriptionController(mContext);
+        mController = new DataSubscriptionController(mContext, mDataSubscriptionMessageCreator);
         mController.setSubscription(mDataSubscription);
         mController.setConnectivityManager(mConnectivityManager);
         mController.setSharedPreference(mSharedPreferences);
-        mController.setNetworkTaskEventListener(mNetworkTaskEventListener);
+        mController.setDataSubscriptionMessageEventListener(
+                mDataSubscriptionMessageEventListener);
         mController.setEditor(mEditor);
         mRunningTaskInfoMock = new ActivityManager.RunningTaskInfo();
         mRunningTaskInfoMock.topActivity = new ComponentName("testPkgName", "testClassName");
@@ -100,7 +103,7 @@ public class DataSubscriptionControllerTest {
 
         mController.getTaskStackListener().onTaskMovedToFront(mRunningTaskInfoMock);
 
-        assertFalse(mController.getShouldDisplayReactiveMsg());
+        assertFalse(mController.getShouldDisplayReactiveMessage());
     }
 
     @Test
@@ -111,7 +114,7 @@ public class DataSubscriptionControllerTest {
 
         mController.getTaskStackListener().onTaskMovedToFront(mRunningTaskInfoMock);
 
-        assertFalse(mController.getShouldDisplayReactiveMsg());
+        assertFalse(mController.getShouldDisplayReactiveMessage());
     }
 
     @Test
@@ -124,7 +127,7 @@ public class DataSubscriptionControllerTest {
 
         mController.getTaskStackListener().onTaskMovedToFront(mRunningTaskInfoMock);
 
-        assertFalse(mController.getShouldDisplayReactiveMsg());
+        assertFalse(mController.getShouldDisplayReactiveMessage());
     }
 
     @Test
@@ -165,7 +168,7 @@ public class DataSubscriptionControllerTest {
 
         mController.getTaskStackListener().onTaskMovedToFront(mRunningTaskInfoMock);
 
-        assertFalse(mController.getShouldDisplayReactiveMsg());
+        assertFalse(mController.getShouldDisplayReactiveMessage());
     }
 
     @Test
@@ -194,27 +197,28 @@ public class DataSubscriptionControllerTest {
     }
 
     @Test
-    public void updateShouldDisplayProactiveMsg_noCachedTimeInterval_popUpDisplay() {
+    public void updateShouldDisplayProactiveMessage_noCachedTimeInterval_popUpDisplay() {
         when(mSharedPreferences.getString(anyString(), anyString()))
                 .thenReturn("2025-01-15");
-        when(mDataSubscription.isDataSubscriptionInactive()).thenReturn(true);
-
-        mController.setWasProactiveMsgDisplayed(false);
+        when(mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
+                anyInt())).thenReturn("Valid Message");
+        mController.setWasProactiveMessageDisplayed(false);
         mController.setCurrentInterval(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_frequency) + 1);
 
-        mController.updateShouldDisplayProactiveMsg();
+        mController.updateShouldDisplayProactiveMessage();
 
-        assertTrue(mController.getShouldDisplayProactiveMsg());
+        assertTrue(mController.getShouldDisplayProactiveMessage());
     }
 
     @Test
-    public void updateShouldDisplayProactiveMsg_allConfigsAreValid_popUpDisplay() {
+    public void updateShouldDisplayProactiveMessage_allConfigsAreValid_popUpDisplay() {
         when(mSharedPreferences.getString(anyString(), anyString()))
                 .thenReturn("2025-01-15");
-        when(mDataSubscription.isDataSubscriptionInactive()).thenReturn(true);
+        when(mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
+                anyInt())).thenReturn("Valid Message");
 
-        mController.setWasProactiveMsgDisplayed(false);
+        mController.setWasProactiveMessageDisplayed(false);
         mController.setCurrentInterval(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_frequency));
         mController.setCurrentCycle(mContext.getResources()
@@ -222,35 +226,37 @@ public class DataSubscriptionControllerTest {
         mController.setCurrentActiveDays(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_active_days_limit));
 
-        mController.updateShouldDisplayProactiveMsg();
+        mController.updateShouldDisplayProactiveMessage();
 
-        assertTrue(mController.getShouldDisplayProactiveMsg());
+        assertTrue(mController.getShouldDisplayProactiveMessage());
     }
 
     @Test
-    public void updateShouldDisplayProactiveMsg_invalidTimeInterval_popUpNotDisplay() {
+    public void updateShouldDisplayProactiveMessage_invalidTimeInterval_popUpNotDisplay() {
         when(mSharedPreferences.getString(anyString(), anyString()))
                 .thenReturn("2025-01-15");
-        when(mDataSubscription.isDataSubscriptionInactive()).thenReturn(true);
+        when(mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
+                anyInt())).thenReturn("");
 
-        mController.setWasProactiveMsgDisplayed(false);
+        mController.setWasProactiveMessageDisplayed(false);
         mController.setCurrentInterval(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_frequency) - 1);
         mController.setCurrentCycle(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_startup_cycle_limit));
 
-        mController.updateShouldDisplayProactiveMsg();
+        mController.updateShouldDisplayProactiveMessage();
 
-        assertFalse(mController.getShouldDisplayProactiveMsg());
+        assertFalse(mController.getShouldDisplayProactiveMessage());
     }
 
     @Test
-    public void updateShouldDisplayProactiveMsg_invalidCycle_popUpNotDisplay() {
+    public void updateShouldDisplayProactiveMessage_invalidCycle_popUpNotDisplay() {
         when(mSharedPreferences.getString(anyString(), anyString()))
                 .thenReturn("2025-01-15");
-        when(mDataSubscription.isDataSubscriptionInactive()).thenReturn(true);
+        when(mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
+                anyInt())).thenReturn("");
 
-        mController.setWasProactiveMsgDisplayed(false);
+        mController.setWasProactiveMessageDisplayed(false);
         mController.setCurrentInterval(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_frequency));
         mController.setCurrentCycle(mContext.getResources()
@@ -258,33 +264,35 @@ public class DataSubscriptionControllerTest {
         mController.setCurrentCycle(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_startup_cycle_limit) + 1);
 
-        mController.updateShouldDisplayProactiveMsg();
+        mController.updateShouldDisplayProactiveMessage();
 
-        assertFalse(mController.getShouldDisplayProactiveMsg());
+        assertFalse(mController.getShouldDisplayProactiveMessage());
     }
 
     @Test
-    public void updateShouldDisplayProactiveMsg_invalidActiveDays_popUpNotDisplay() {
+    public void updateShouldDisplayProactiveMessage_invalidActiveDays_popUpNotDisplay() {
         when(mSharedPreferences.getString(anyString(), anyString()))
                 .thenReturn("2025-01-15");
-        when(mDataSubscription.isDataSubscriptionInactive()).thenReturn(true);
-        mController.setWasProactiveMsgDisplayed(false);
+        when(mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
+                anyInt())).thenReturn("");
+
+        mController.setWasProactiveMessageDisplayed(false);
         mController.setCurrentInterval(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_frequency));
         mController.setCurrentCycle(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_startup_cycle_limit) + 1);
 
-        mController.updateShouldDisplayProactiveMsg();
+        mController.updateShouldDisplayProactiveMessage();
 
-        assertFalse(mController.getShouldDisplayProactiveMsg());
+        assertFalse(mController.getShouldDisplayProactiveMessage());
     }
 
     @Test
-    public void updateShouldDisplayProactiveMsg_resetStatus_clearPreviousPreferences() {
+    public void updateShouldDisplayProactiveMessage_resetStatus_clearPreviousPreferences() {
         when(mSharedPreferences.getInt(anyString(), anyInt()))
-                .thenReturn(DataSubscriptionStatus.INACTIVE);
+                .thenReturn(0);
         when(mDataSubscription.getDataSubscriptionStatus())
-                .thenReturn(DataSubscriptionStatus.PAID);
+                .thenReturn(1);
 
         mController.updateCurrentStatus();
 

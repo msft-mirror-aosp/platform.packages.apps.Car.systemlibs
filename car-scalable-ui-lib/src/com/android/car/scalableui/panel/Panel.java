@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.model.Blur;
 import com.android.car.scalableui.model.PanelControllerMetadata;
+import com.android.car.scalableui.model.Role;
 
 /**
  * Represents a rectangular panel that can be displayed on the screen.
@@ -36,6 +37,7 @@ public interface Panel {
      *
      * @return The bounding rectangle.
      */
+    @NonNull
     Rect getBounds();
 
     /**
@@ -43,7 +45,7 @@ public interface Panel {
      *
      * @param bounds The new bounding rectangle.
      */
-    void setBounds(Rect bounds);
+    void setBounds(@NonNull Rect bounds);
 
     /**
      * Gets safe bounds. This is an area generally not overlapped by display cutouts or insets
@@ -180,12 +182,13 @@ public interface Panel {
      *
      * @param role The new role of this panel.
      */
-    void setRole(int role);
+    void setRole(@NonNull Role role);
 
     /**
      * Gets the role value of this panel.
      */
-    int getRole();
+    @NonNull
+    Role getRole();
 
     /**
      * Sets the display ID of the panel.
