@@ -46,7 +46,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/
+/**
  * Manages the state of UI panels. This class is responsible for loading panel definitions,
  * handling events that trigger state transitions, and applying visual updates to panels
  * based on their current state.
