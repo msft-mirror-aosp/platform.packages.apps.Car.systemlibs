@@ -137,9 +137,11 @@ public class StateManager {
                 Log.e(TAG, "toVariant is null for " + panel.getPanelId() + ", transition="
                         + toVariant);
                 continue;
-            } else if (Objects.equals(fromVariant.getId(), (toVariant.getId()))
+            } else if (Objects.equals(fromVariant, toVariant)
                     && !(toVariant instanceof KeyFrameVariant)) {
-                logIfDebuggable("fromVariant is the same as toVariant");
+                // Fraction in KeyFrameVariant is not updated at this point, cannot use for
+                // comparison.
+                logIfDebuggable("FromVariant is the same as toVariant, " + panelState.getId());
                 continue;
             }
 
