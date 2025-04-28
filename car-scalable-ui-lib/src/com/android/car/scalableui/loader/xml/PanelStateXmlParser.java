@@ -71,6 +71,9 @@ public class PanelStateXmlParser {
     public static final String ID_ATTRIBUTE = "id";
     public static final String DEFAULT_VARIANT_ATTRIBUTE = "defaultVariant";
     public static final String ROLE_ATTRIBUTE = "role";
+    public static final String ROLE_TYPE_STRING = "string";
+    public static final String ROLE_TYPE_ARRAY = "array";
+    public static final String ROLE_TYPE_LAYOUT = "layout";
     public static final String DISPLAY_ID = "displayId";
     public static final String DEFAULT_LAYER_ATTRIBUTE = "defaultLayer";
     public static final String CONTROLLER = "controller";
@@ -201,7 +204,32 @@ public class PanelStateXmlParser {
             }
         }
 
-        PanelState.Builder builder = new PanelState.Builder(id, new Role(roleValue));
+        Role.Builder roleBuilder = new Role.Builder();
+        String roleTypeName = context.getResources().getResourceTypeName(roleValue);
+        switch (roleTypeName) {
+            case ROLE_TYPE_STRING:
+                String roleString = context.getResources().getString(roleValue);
+                if (PanelState.DEFAULT_ROLE.equals(roleString)) {
+                    roleBuilder.setIsDefault(true);
+                } else {
+                    roleBuilder.addPersistentActivity(roleString);
+                }
+                break;
+            case ROLE_TYPE_ARRAY:
+                String[] componentNames = context.getResources().getStringArray(roleValue);
+                for (String componentName: componentNames) {
+                    roleBuilder.addPersistentActivity(componentName);
+                }
+                break;
+            case ROLE_TYPE_LAYOUT:
+                roleBuilder.setLayoutId(roleValue);
+                break;
+            default: {
+                Log.e(TAG, "Role type is not supported " + roleTypeName);
+            }
+        }
+
+        PanelState.Builder builder = new PanelState.Builder(id, roleBuilder.build());
         builder.setDisplayId(displayId);
         builder.setDefaultVariant(defaultVariant);
         builder.setPanelControllerMetadata(panelControllerMetaData);

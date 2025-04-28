@@ -196,7 +196,7 @@ public class StateManager {
         Variant variant = panelState.getCurrentVariant();
         String panelId = panelState.getId();
         Panel panel = PanelPool.getInstance().getPanel(panelId);
-        panel.setRole(panelState.getRole().getValue());
+        panel.setRole(panelState.getRole());
         panel.setBounds(variant.getBounds());
         panel.setVisibility(variant.isVisible());
         panel.setAlpha(variant.getAlpha());
