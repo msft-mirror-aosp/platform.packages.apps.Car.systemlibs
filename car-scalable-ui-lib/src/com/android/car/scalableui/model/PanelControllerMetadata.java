@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents immutable metadata associated with a panel controller.
@@ -44,10 +45,9 @@ public final class PanelControllerMetadata {
     public static final String ORIENTATION_TAG = "Orientation";
     public static final String SNAPTHREADHOLD_TAG = "SnapThreadhold";
     public static final String PERSISTENT_ACTIVITY = "PersistentActivity";
+    public static final String PERSISTENT_PACKAGE = "PersistentPackage";
     public static final String DEFAULT_COMPONENT = "DefaultComponent";
     public static final String UPDATABLE_INTENT_FILTER = "UpdateIntentFilter";
-    public static final String DEMOLITOR = ";";
-
 
     @NonNull
     private final Bundle mConfigurations;
@@ -126,6 +126,21 @@ public final class PanelControllerMetadata {
 
         sb.append("]");
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PanelControllerMetadata that = (PanelControllerMetadata) o;
+        return Objects.equals(getConfigurations(), that.getConfigurations())
+                && Objects.equals(getBreakPoints(), that.getBreakPoints())
+                && Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getConfigurations(), getBreakPoints(), getId());
     }
 
     @NonNull
