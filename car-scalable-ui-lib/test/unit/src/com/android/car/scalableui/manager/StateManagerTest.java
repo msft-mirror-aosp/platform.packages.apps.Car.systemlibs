@@ -34,6 +34,7 @@ import android.graphics.Rect;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.car.scalableui.model.Event;
+import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.PanelTransaction;
 import com.android.car.scalableui.model.Role;
@@ -120,6 +121,70 @@ public class StateManagerTest {
         verify(mockPanel, never()).setVisibility(any(Boolean.class));
         verify(mockPanel, never()).setAlpha(any(Float.class));
         verify(mockPanel, never()).setLayer(any(Integer.class));
+    }
+
+    @Test
+    public void testHandleEvent_noVariantChange() {
+        PanelState panelState = spy(new PanelState(TEST_PANEL_ID, DEFAULT_ROLE));
+        when(panelState.getTransition(any(Event.class))).thenReturn(mock(Transition.class));
+        Variant mockFromVariant = mock(Variant.class);
+        when(panelState.getCurrentVariant()).thenReturn(mockFromVariant);
+        Variant mockToVariant = mock(Variant.class);
+        when(mockToVariant.getId()).thenReturn(TO_VARIANT_ID);
+        panelState.addVariant(mockToVariant);
+        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, panelState);
+
+        Panel mockPanel = mock(Panel.class);
+        PanelPool.PanelCreatorDelegate delegate = mock(PanelPool.PanelCreatorDelegate.class);
+        PanelPool.getInstance().setDelegate(delegate);
+        when(delegate.createPanel(any())).thenReturn(mockPanel);
+        Transition mockTransition = mock(Transition.class);
+        when(mockTransition.getToVariant()).thenReturn(mockFromVariant);
+        when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
+        Animator mockAnimator = mock(Animator.class);
+        when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(
+                mockAnimator);
+
+        PanelTransaction panelTransaction = StateManager.handleEvent(TEST_EVENT);
+
+        verify(panelState, never()).setVariant(TO_VARIANT_ID, TEST_EVENT);
+        verify(panelState, never()).onAnimationStart(mockAnimator);
+        verify(mockAnimator, never()).removeAllListeners();
+        verify(mockAnimator, never()).addListener(any(AnimatorListenerAdapter.class));
+        assertThat(panelTransaction.getAnimators()).hasSize(/* expectedSize= */ 0);
+        assertThat(panelTransaction.getPanelTransactionStates()).hasSize(/* expectedSize= */ 0);
+    }
+
+    @Test
+    public void testHandleEvent_keyFrameVariant() {
+        PanelState panelState = spy(new PanelState(TEST_PANEL_ID, DEFAULT_ROLE));
+        when(panelState.getTransition(any(Event.class))).thenReturn(mock(Transition.class));
+        Variant mockFromVariant = mock(KeyFrameVariant.class);
+        when(panelState.getCurrentVariant()).thenReturn(mockFromVariant);
+        Variant mockToVariant = mock(Variant.class);
+        when(mockToVariant.getId()).thenReturn(TO_VARIANT_ID);
+        panelState.addVariant(mockToVariant);
+        StateManager.getInstance().getPanelStates().put(TEST_PANEL_ID, panelState);
+
+        Panel mockPanel = mock(Panel.class);
+        PanelPool.PanelCreatorDelegate delegate = mock(PanelPool.PanelCreatorDelegate.class);
+        PanelPool.getInstance().setDelegate(delegate);
+        when(delegate.createPanel(any())).thenReturn(mockPanel);
+        Transition mockTransition = mock(Transition.class);
+        when(mockTransition.getToVariant()).thenReturn(mockFromVariant);
+        when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
+        Animator mockAnimator = mock(Animator.class);
+        when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(
+                mockAnimator);
+
+        PanelTransaction panelTransaction = StateManager.handleEvent(TEST_EVENT);
+
+        verify(panelState).setVariant(TO_VARIANT_ID, TEST_EVENT);
+        verify(panelState).onAnimationStart(mockAnimator);
+        verify(mockAnimator).removeAllListeners();
+        verify(mockAnimator).addListener(any(AnimatorListenerAdapter.class));
+        assertThat(panelTransaction.getAnimators()).hasSize(/* expectedSize= */ 1);
+        assertThat(panelTransaction.getPanelTransactionStates()).hasSize(/* expectedSize= */ 1);
     }
 
     @Test
