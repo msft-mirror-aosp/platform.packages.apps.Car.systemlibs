@@ -15,11 +15,15 @@
  */
 package com.android.car.scalableui.panel;
 
+import android.content.Context;
 import android.graphics.Rect;
+import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.model.Blur;
+import com.android.car.scalableui.model.PanelControllerMetadata;
 
 /**
  * Represents a rectangular panel that can be displayed on the screen.
@@ -178,8 +182,12 @@ public interface Panel {
     void setRole(int role);
 
     /**
+     * Gets the role value of this panel.
+     */
+    int getRole();
+
+    /**
      * Sets the display ID of the panel.
-     * TODO(b/388021504):This api should move to role
      */
     void setDisplayId(int displayId);
 
@@ -217,4 +225,28 @@ public interface Panel {
      */
     @NonNull
     String getPanelId();
+
+    /**
+     * @return The associated leash {@link SurfaceControl}
+     */
+    @Nullable
+    default SurfaceControl getLeash() {
+        return null;
+    }
+
+    /**
+     * @return The Panel's Context
+     */
+    Context getContext();
+
+    /**
+     * Gets the {@link PanelControllerMetadata}
+     */
+    @Nullable
+    PanelControllerMetadata getPanelControllerMetadata();
+
+    /**
+     * Sets the {@link PanelControllerMetadata}
+     */
+    void setPanelControllerMetadata(@Nullable PanelControllerMetadata panelControllerMetadata);
 }

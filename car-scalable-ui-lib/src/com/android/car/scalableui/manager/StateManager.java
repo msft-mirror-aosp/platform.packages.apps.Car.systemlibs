@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.car.scalableui.model.Event;
+import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.PanelTransaction;
 import com.android.car.scalableui.model.Transition;
@@ -124,8 +125,11 @@ public class StateManager {
                 Log.e(TAG, "toVariant is null for " + panel.getPanelId() + ", transition="
                         + toVariant);
                 continue;
-            } else if (Objects.equals(fromVariant.getId(), (toVariant.getId()))) {
-                logIfDebuggable("fromVariant is the same as toVariant");
+            } else if (Objects.equals(fromVariant, toVariant)
+                    && !(toVariant instanceof KeyFrameVariant)) {
+                // Fraction in KeyFrameVariant is not updated at this point, cannot use for
+                // comparison.
+                logIfDebuggable("fromVariant is the same as toVariant, " + panelState.getId());
                 continue;
             }
 
@@ -158,6 +162,9 @@ public class StateManager {
                 applyState(panelState);
             }
             logIfDebuggable("add transition for " + panelState.getId());
+            if (toVariant instanceof KeyFrameVariant) {
+                panelTransactionBuilder.setHasWindowChanges(false);
+            }
             panelTransactionBuilder.addPanelTransaction(panelState.getId(), transition);
         }
         if (!changedPanelIds.isEmpty()) {
@@ -188,8 +195,12 @@ public class StateManager {
         panel.setLayer(variant.getLayer());
         panel.setDisplayId(panelState.getDisplayId());
         panel.setCornerRadius(variant.getCornerRadius());
-        panel.setSafeBounds(variant.getSafeBounds());
         panel.setBlur(variant.getBlur());
+        // KeyFrameVariant might not have safe bounds.
+        if (!(variant instanceof KeyFrameVariant)) {
+            panel.setSafeBounds(variant.getSafeBounds());
+        }
+        panel.setPanelControllerMetadata(panelState.getPanelControllerMetadata());
     }
 
     //TODO(b/390006880): make this part of configuration.
@@ -240,6 +251,7 @@ public class StateManager {
 
     /**
      * Add an observer to the panel state
+     *
      * @param observer the observer
      * @param panelIds the panel ids to observe
      */
@@ -272,7 +284,7 @@ public class StateManager {
     private void notifyPanelStateChange(Set<String> changedPanelIds,
             Map<String, PanelState> panelStates, boolean before) {
         try {
-            ExecutorService executorService =  Executors.newSingleThreadExecutor();
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
             executorService.execute(() -> {
                 synchronized (mObservers) {
                     for (PanelStateObserverData data : mObservers) {
@@ -311,15 +323,18 @@ public class StateManager {
     public interface PanelStateObserver {
         /**
          * Notify of a panel state change that has just started
+         *
          * @param changedPanelIds the panelIds that are changing
-         * @param toPanelStates the panel states from after the change
+         * @param toPanelStates   the panel states from after the change
          */
         void onBeforePanelStateChanged(Set<String> changedPanelIds,
                 Map<String, PanelState> toPanelStates);
+
         /**
          * Notify of a panel state change that has finished
+         *
          * @param changedPanelIds the panelIds that have changed
-         * @param toPanelStates the panel states from after the change
+         * @param toPanelStates   the panel states from after the change
          */
         void onPanelStateChanged(Set<String> changedPanelIds,
                 Map<String, PanelState> toPanelStates);
