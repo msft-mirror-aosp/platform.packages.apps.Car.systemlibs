@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * A {@link Variant} that interpolates between different variants based on a fraction value.
@@ -139,6 +140,12 @@ public class KeyFrameVariant extends Variant {
         return getBounds(mFraction);
     }
 
+    @NonNull
+    @Override
+    public Insets getInsets() {
+        return getInsets(mFraction);
+    }
+
     /**
      * Returns the interpolated visibility for the current fraction.
      *
@@ -238,15 +245,35 @@ public class KeyFrameVariant extends Variant {
     @NonNull
     private Rect getBounds(float fraction) {
         if (mKeyFrames.isEmpty()) return new Rect();
-        KeyFrame keyFrame1 = before(fraction);
-        Rect bounds1 = Objects.requireNonNull(keyFrame1).mVariant.getBounds();
-        KeyFrame keyFrame2 = after(fraction);
-        Rect bounds2 = Objects.requireNonNull(keyFrame2).mVariant.getBounds();
+        Function<KeyFrame, Rect> rectFunction =
+                (KeyFrame keyFrame) -> keyFrame.mVariant.getBounds();
+        Rect rect = getFrameRect(rectFunction, fraction);
+        return new Rect(rect.left, rect.top, rect.right, rect.bottom);
+    }
+
+    /**
+     * Returns the interpolated insets for the given fraction.
+     *
+     * @param fraction The fraction value (between 0 and 1).
+     * @return The in[terpolated insets.
+     */
+    @NonNull
+    private Insets getInsets(float fraction) {
+        if (mKeyFrames.isEmpty()) return Insets.NONE;
+        Function<KeyFrame, Rect> rectFunction =
+                (KeyFrame keyFrame) -> keyFrame.mVariant.getInsets().toRect();
+        Rect rect = getFrameRect(rectFunction, fraction);
+        return Insets.of(rect);
+    }
+
+    private Rect getFrameRect(Function<KeyFrame, Rect> rectFunction, float fraction) {
+        KeyFrame keyFrame1 = Objects.requireNonNull(before(fraction));
+        KeyFrame keyFrame2 = Objects.requireNonNull(after(fraction));
         float fractionInBetween =
                 getKeyFrameFraction(
                         keyFrame1.mFramePosition, keyFrame2.mFramePosition, fraction);
-        Rect rect = mRectEvaluator.evaluate(fractionInBetween, bounds1, bounds2);
-        return new Rect(rect.left, rect.top, rect.right, rect.bottom);
+        return mRectEvaluator.evaluate(fractionInBetween, rectFunction.apply(keyFrame1),
+                rectFunction.apply(keyFrame2));
     }
 
     @NonNull
