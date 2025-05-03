@@ -17,6 +17,8 @@ package com.android.car.scalableui.model;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertTrue;
+
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -38,6 +40,7 @@ public class PanelStateTest {
     private static final String VARIANT1 = "variant1";
     private static final String VARIANT2 = "variant2";
     private static final Event TEST_EVENT = new Event("TEST_EVENT");
+    private static final Role DEFAULT_ROLE = new Role.Builder().setLayoutId(1).build();
 
     private Context mContext;
 
@@ -48,9 +51,10 @@ public class PanelStateTest {
 
     @Test
     public void testPanelStateCreation() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID, new Role(1));
+        Role defaultRole = new Role.Builder().setIsDefault(true).build();
+        PanelState panelState = new PanelState(TEST_PANEL_ID, defaultRole);
         assertThat(panelState.getId()).isEqualTo(TEST_PANEL_ID);
-        assertThat(panelState.getRole().getValue()).isEqualTo(1);
+        assertTrue(panelState.getRole().isDefault());
     }
 
     @Test
@@ -59,8 +63,7 @@ public class PanelStateTest {
         PanelState panelState = loader.createPanelState(R.xml.panel_test);
 
         assertThat(panelState.getId()).isEqualTo("panel_id");
-        assertThat(panelState.getRole().getValue()).isEqualTo(
-                R.string.default_config);
+        assertTrue(panelState.getRole().isDefault());
         assertThat(panelState.getCurrentVariant().getId()).isEqualTo(VARIANT1);
         Variant variant2 = panelState.getVariant(VARIANT2);
         assertThat(variant2.getLayer()).isEqualTo(100);
@@ -70,7 +73,7 @@ public class PanelStateTest {
 
     @Test
     public void testAddVariant() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID, new Role(1));
+        PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
         Variant variant = new Variant(VARIANT1);
         panelState.addVariant(variant);
         assertThat(panelState.getVariant(VARIANT1)).isEqualTo(variant);
@@ -78,7 +81,7 @@ public class PanelStateTest {
 
     @Test
     public void testAddTransition() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID, new Role(1));
+        PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
         Variant variant1 = new Variant(VARIANT1);
         Variant variant2 = new Variant(VARIANT2);
         Transition transition = new Transition(variant1, variant2, TEST_EVENT, null, 0,
@@ -93,7 +96,7 @@ public class PanelStateTest {
 
     @Test
     public void testSetVariant() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID, new Role(1));
+        PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
         Variant variant1 = new Variant(VARIANT1);
         Variant variant2 = new Variant(VARIANT2);
         panelState.addVariant(variant1);
@@ -105,7 +108,7 @@ public class PanelStateTest {
 
     @Test
     public void testResetVariant() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID, new Role(1));
+        PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
         Variant variant1 = new Variant(VARIANT1);
         Variant variant2 = new Variant(VARIANT2);
         panelState.addVariant(variant1);

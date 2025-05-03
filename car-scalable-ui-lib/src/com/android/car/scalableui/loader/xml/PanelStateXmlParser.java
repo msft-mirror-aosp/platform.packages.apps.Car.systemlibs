@@ -39,7 +39,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.model.Alpha;
-import com.android.car.scalableui.model.Blur;
 import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.BreakPoint;
 import com.android.car.scalableui.model.Corner;
@@ -71,6 +70,9 @@ public class PanelStateXmlParser {
     public static final String ID_ATTRIBUTE = "id";
     public static final String DEFAULT_VARIANT_ATTRIBUTE = "defaultVariant";
     public static final String ROLE_ATTRIBUTE = "role";
+    public static final String ROLE_TYPE_STRING = "string";
+    public static final String ROLE_TYPE_ARRAY = "array";
+    public static final String ROLE_TYPE_LAYOUT = "layout";
     public static final String DISPLAY_ID = "displayId";
     public static final String DEFAULT_LAYER_ATTRIBUTE = "defaultLayer";
     public static final String CONTROLLER = "controller";
@@ -122,13 +124,6 @@ public class PanelStateXmlParser {
     public static final String BOTTOM_ATTRIBUTE = "bottom";
     public static final String WIDTH_ATTRIBUTE = "width";
     public static final String HEIGHT_ATTRIBUTE = "height";
-
-    // --- Blur Tags ---
-    public static final String BLUR_TAG = "Blur";
-    public static final String CORNER_RADIUS_ATTRIBUTE = "cornerRadius";
-    public static final String BLUR_RADIUS_ATTRIBUTE = "blurRadius";
-    public static final String BACKGROUND_COLOR_ATTRIBUTE = "backgroundColor";
-    public static final String VAIL_ENABLED_ATTRIBUTE = "vailEnabled";
 
     // --- Corner Tags ---
     public static final String CORNER_TAG = "Corner";
@@ -201,7 +196,32 @@ public class PanelStateXmlParser {
             }
         }
 
-        PanelState.Builder builder = new PanelState.Builder(id, new Role(roleValue));
+        Role.Builder roleBuilder = new Role.Builder();
+        String roleTypeName = context.getResources().getResourceTypeName(roleValue);
+        switch (roleTypeName) {
+            case ROLE_TYPE_STRING:
+                String roleString = context.getResources().getString(roleValue);
+                if (PanelState.DEFAULT_ROLE.equals(roleString)) {
+                    roleBuilder.setIsDefault(true);
+                } else {
+                    roleBuilder.addPersistentActivity(roleString);
+                }
+                break;
+            case ROLE_TYPE_ARRAY:
+                String[] componentNames = context.getResources().getStringArray(roleValue);
+                for (String componentName : componentNames) {
+                    roleBuilder.addPersistentActivity(componentName);
+                }
+                break;
+            case ROLE_TYPE_LAYOUT:
+                roleBuilder.setLayoutId(roleValue);
+                break;
+            default: {
+                Log.e(TAG, "Role type is not supported " + roleTypeName);
+            }
+        }
+
+        PanelState.Builder builder = new PanelState.Builder(id, roleBuilder.build());
         builder.setDisplayId(displayId);
         builder.setDefaultVariant(defaultVariant);
         builder.setPanelControllerMetadata(panelControllerMetaData);
@@ -401,9 +421,6 @@ public class PanelStateXmlParser {
                 case INSETS_TAG:
                     variantBuilder.setInsets(parseInsets(context, parser));
                     break;
-                case BLUR_TAG:
-                    variantBuilder.setBlur(parseBlur(context, parser));
-                    break;
                 default:
                     XmlPullParserHelper.skip(parser); // Skip other nested tags
             }
@@ -533,27 +550,6 @@ public class PanelStateXmlParser {
         }
 
         return Insets.of(left, top, right, bottom);
-    }
-
-    private static Blur parseBlur(@NonNull Context context, @NonNull XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-
-        parser.require(XmlPullParser.START_TAG, null, BLUR_TAG);
-        AttributeSet attrs = Xml.asAttributeSet(parser);
-
-        float cornerRadius = attrs.getAttributeFloatValue(null, CORNER_RADIUS_ATTRIBUTE, 0f);
-        int blurRadius = attrs.getAttributeIntValue(null, BLUR_RADIUS_ATTRIBUTE, 0);
-        boolean vailEnabled = attrs.getAttributeBooleanValue(null, VAIL_ENABLED_ATTRIBUTE, false);
-
-        int resId = attrs.getAttributeResourceValue(null, BACKGROUND_COLOR_ATTRIBUTE, 0);
-        int backgroundColor = context.getColor(resId);
-
-        while (parser.next() != XmlPullParser.END_TAG) {
-            XmlPullParserHelper.skip(parser); // Skip any nested tags
-        }
-
-        return new Blur.Builder().setBlurRadius(blurRadius).setBackgroundColor(
-                backgroundColor).setCornerRadius(cornerRadius).setEnableVail(vailEnabled).build();
     }
 
     @NonNull

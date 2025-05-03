@@ -16,22 +16,19 @@
 
 package com.android.car.datasubscription;
 
-public interface DataSubscriptionViewActionListener {
+public interface DataSubscriptionMessageEventListener {
     /**
-     * Called when the message is dismissed
+     * Called when the car data subscription status changes.
      */
-    void onMessageDismissed();
+    boolean  onDataSubscriptionStatusChanged(boolean isUxrRequired,
+            String proactiveMessage, String uxrPrompt);
     /**
-     * Register the listeners
+     * Called when a task is moved to the front, indicating a change in the foreground app.
      */
-    void registerListeners();
+    boolean onAppForegrounded(boolean isUxrRequired, String reactiveMessage,
+            String uxrPrompt);
     /**
-     * Unregister the listeners
+     * Called when there is a UXR change.
      */
-    void unregisterListeners();
-    /**
-     * Set the network task event listener
-     */
-    void setDataSubscriptionMessageEventListener(DataSubscriptionMessageEventListener
-            dataSubscriptionMessageEventListener);
+    boolean onUxrChanged(boolean isUxrRequired, String uxrPrompt);
 }

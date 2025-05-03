@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2024 The Android Open Source Project
+  ~ Copyright (C) 2025 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,11 +13,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <resources>
-    <string name="connectivity_flow_app" translatable="false">com.android.car.datasubscription</string>
-    <string name="data_subscription_uxr_prompt">See plans when parked.</string>
-    <string name="data_subscription_non_uxr_prompt">Tap to see available plans.</string>
-    <string name="data_subscription_expiring_soon_proactive_prompt">Your internet plan expires in %s days.</string>
-    <string name="data_subscription_expiring_soon_reactive_prompt">%1$s needs internet. Plan ends in %2$s days.</string>
+  <integer name="app_grid_panel_layer">100</integer>
+  <item name="app_grid_panel_alpha" type="integer" format="float">0.8</item>
 </resources>

@@ -58,8 +58,6 @@ public class Variant {
     private Rect mSafeBounds;
     @NonNull
     private Insets mInsets;
-    @NonNull
-    private Blur mBlur;
 
     /**
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
@@ -98,7 +96,6 @@ public class Variant {
         mAlpha = base.getAlpha();
         mCornerRadius = base.getCornerRadius();
         mInsets = base.getInsets();
-        mBlur = base.getBlur();
     }
 
     /**
@@ -293,18 +290,6 @@ public class Variant {
     }
 
     /**
-     * @return {@link Blur}.
-     */
-    @Nullable
-    public Blur getBlur() {
-        return mBlur;
-    }
-
-    protected void setBlur(Blur blur) {
-        mBlur = blur;
-    }
-
-    /**
      * Sets insets.
      * This is essentially the panle's safe rectangle.
      */
@@ -355,10 +340,7 @@ public class Variant {
         @Nullable
         protected Insets mInsets;
         @Nullable
-        protected Blur mBlur;
-        @Nullable
         protected Variant mParent;
-
 
         public Builder(@NonNull String id) {
             mId = id;
@@ -409,12 +391,6 @@ public class Variant {
             return this;
         }
 
-        /** Sets insets */
-        public Builder setBlur(@NonNull Blur blur) {
-            mBlur = blur;
-            return this;
-        }
-
         /** Sets parent */
         public Builder setParent(@Nullable Variant parent) {
             mParent = parent;
@@ -454,9 +430,6 @@ public class Variant {
             if (mInsets != null) {
                 variant.setInsets(
                         Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
-            }
-            if (mBlur != null) {
-                variant.setBlur(mBlur);
             }
 
             return variant;

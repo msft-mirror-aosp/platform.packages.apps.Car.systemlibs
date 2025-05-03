@@ -14,21 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.car.datasubscription;
+package com.android.car.scalableui.designcompose;
 
-public interface NetworkTaskEventListener {
-    /**
-     * Called when the car data subscription status changes.
-     */
-    boolean  onDataSubscriptionStatusChanged(boolean isUxrRequired,
-            boolean shouldDisplayProactiveMsg);
-    /**
-     * Called when a task is moved to the front, indicating a change in the foreground app.
-     */
-    boolean onAppForeground(boolean isUxrRequired, boolean shouldDisplayReactiveMsg,
-            CharSequence appLabel);
-    /**
-     * Called when there is a UXR change.
-     */
-    boolean onUxrChange(boolean isUxrRequired);
+public class DocLoadException extends Exception {
+  public DocLoadException(String errorMessage) {
+    super(errorMessage);
+  }
 }
