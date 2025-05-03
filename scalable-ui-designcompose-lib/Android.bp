@@ -34,7 +34,7 @@ android_library {
 
 android_library_import {
     name: "designcompose-lib",
-    aars: ["designcompose-0.33.0-debug.aar"],
+    aars: ["designcompose-0.35.0-debug.aar"],
     sdk_version: "current",
     static_libs: [
         "designcompose-common-lib",
@@ -50,24 +50,28 @@ android_library_import {
         "guava",
         "androidx.tracing_tracing",
         "androidx.compose.runtime_runtime",
-        "libprotobuf-java-lite",
+        "protobuf-javalite",
     ],
 }
 
 java_import {
     name: "designcompose-common-lib",
-    jars: ["common-0.33.0.jar"],
+    jars: ["common-0.35.0.jar"],
     sdk_version: "current",
     static_libs: [
-        "libprotobuf-java-lite",
+        "protobuf-javalite",
         "javax_annotation-api_1.3.2",
     ],
 }
 
 java_import {
     name: "designcompose-annotation-lib",
-    jars: ["annotation-0.33.0.jar"],
+    jars: ["annotation-0.35.0.jar"],
     sdk_version: "current",
-    static_libs: [
-    ],
+}
+
+java_import {
+    name: "protobuf-javalite",
+    jars: ["protobuf-javalite-4.30.0.jar"],
+    sdk_version: "current",
 }
