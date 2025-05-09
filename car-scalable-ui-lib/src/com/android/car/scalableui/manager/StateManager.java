@@ -194,6 +194,7 @@ public class StateManager {
         panel.setAlpha(variant.getAlpha());
         panel.setLayer(variant.getLayer());
         panel.setDisplayId(panelState.getDisplayId());
+        panel.setInsets(variant.getInsets());
         panel.setCornerRadius(variant.getCornerRadius());
         panel.setBlur(variant.getBlur());
         // KeyFrameVariant might not have safe bounds.

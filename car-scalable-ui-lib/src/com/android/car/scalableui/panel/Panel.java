@@ -16,6 +16,7 @@
 package com.android.car.scalableui.panel;
 
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
 
@@ -228,6 +229,17 @@ public interface Panel {
      */
     @NonNull
     String getPanelId();
+
+    /**
+     * Sets the {@link Insets}
+     */
+    void setInsets(@NonNull Insets insets);
+
+    /**
+     * @return The {@link Insets}
+     */
+    @NonNull
+    Insets getInsets();
 
     /**
      * @return The associated leash {@link SurfaceControl}

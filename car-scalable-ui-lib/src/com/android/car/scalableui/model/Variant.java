@@ -137,6 +137,8 @@ public class Variant {
             Rect toBounds = new Rect(toVariant.getBounds());
             boolean isVisible = panel.isVisible() || toVariant.isVisible();
             int layer = toVariant.getLayer();
+            Rect fromInsets = panel.getInsets().toRect();
+            Rect toInsets = toVariant.getInsets().toRect();
             ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
             valueAnimator.setDuration(duration);
             valueAnimator.setInterpolator(interpolator);
@@ -152,6 +154,9 @@ public class Variant {
                         int radius = mIntEvaluator.evaluate(fraction, fromCornerRadius,
                                 toCornerRadius);
                         panel.setCornerRadius(radius);
+                        Rect insets = mRectEvaluator.evaluate(fraction, fromInsets,
+                                toInsets);
+                        panel.setInsets(Insets.of(insets));
                         if (DEBUG) {
                             Log.d(TAG, "Panel updated: " + panel);
                         }
