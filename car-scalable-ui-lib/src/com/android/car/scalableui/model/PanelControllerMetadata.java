@@ -15,6 +15,7 @@
  */
 package com.android.car.scalableui.model;
 
+import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -22,9 +23,8 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents immutable metadata associated with a panel controller.
@@ -44,27 +44,58 @@ public final class PanelControllerMetadata {
     public static final String EVENT_ID_TAG = "EventId";
     public static final String ORIENTATION_TAG = "Orientation";
     public static final String SNAPTHREADHOLD_TAG = "SnapThreadhold";
+    public static final String PERSISTENT_ACTIVITY = "PersistentActivity";
+    public static final String PERSISTENT_PACKAGE = "PersistentPackage";
+    public static final String DEFAULT_COMPONENT = "DefaultComponent";
+    public static final String UPDATABLE_INTENT_FILTER = "UpdateIntentFilter";
 
     @NonNull
-    private Map<String, String> mConfigurations;
+    private final Bundle mConfigurations;
     @NonNull
-    private List<BreakPoint> mBreakPoints;
+    private final List<BreakPoint> mBreakPoints;
     @NonNull
     private final String mId;
 
     public PanelControllerMetadata(String id, List<BreakPoint> breakPoints,
-            Map<String, String> configuration) {
+            Bundle bundle) {
         mId = id;
         mBreakPoints = new ArrayList<>(breakPoints);
-        mConfigurations = new HashMap<>(configuration);
+        mConfigurations = new Bundle(bundle);
     }
 
     /**
-     * Retrieves a configuration value associated with the specified key.
+     * Retrieves a String configuration value associated with the specified key or null if no
+     * mapping.
      */
     @Nullable
-    public String getConfiguration(@NonNull String key) {
-        return mConfigurations.getOrDefault(key, null);
+    public String getStringConfiguration(@NonNull String key) {
+        return mConfigurations.getString(key);
+    }
+
+    /**
+     * Retrieves a list configuration value associated with the specified key or null if no mapping.
+     */
+    @Nullable
+    public List<String> getListConfiguration(@NonNull String key) {
+        return mConfigurations.getStringArrayList(key);
+    }
+
+    /**
+     * Returns the bundle containing all configurations.
+     */
+    @NonNull
+    public Bundle getConfigurations() {
+        return mConfigurations;
+    }
+
+    /**
+     * Checks if a configuration with the given name exists.
+     *
+     * @param configName The name of the configuration to check for.
+     * @return {@code true} if the configuration exists, {@code false} otherwise.
+     */
+    public boolean hasConfiguration(String configName) {
+        return mConfigurations.containsKey(configName);
     }
 
     /**
@@ -89,10 +120,7 @@ public final class PanelControllerMetadata {
         sb.append(TAG);
         sb.append("[");
         sb.append("mId='").append(mId).append('\'');
-        sb.append(", mConfigurations=");
-        mConfigurations.forEach((key, value) ->
-                sb.append(key).append("=").append(value).append(";"));
-
+        sb.append(", mConfigurations=").append(mConfigurations);
         sb.append(", mBreakPoints=");
         mBreakPoints.forEach(breakPoint -> sb.append(breakPoint));
 
@@ -100,9 +128,24 @@ public final class PanelControllerMetadata {
         return sb.toString();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PanelControllerMetadata that = (PanelControllerMetadata) o;
+        return Objects.equals(getConfigurations(), that.getConfigurations())
+                && Objects.equals(getBreakPoints(), that.getBreakPoints())
+                && Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getConfigurations(), getBreakPoints(), getId());
+    }
+
     @NonNull
     public String getControllerName() {
-        return getConfiguration(CONTROLLER_NAME_TAG);
+        return getStringConfiguration(CONTROLLER_NAME_TAG);
     }
 
     /** Returns a {@link PanelControllerMetadata.Builder} objects. */
@@ -113,7 +156,7 @@ public final class PanelControllerMetadata {
     /** Builder for {@link PanelControllerMetadata} objects. */
     public static class Builder {
         private final String mId;
-        protected Map<String, String> mConfigurations = new HashMap<>();
+        protected Bundle mConfigurations = new Bundle();
         private List<BreakPoint> mBreakPoints = new ArrayList<>();
 
         private Builder(String id) {
@@ -128,7 +171,18 @@ public final class PanelControllerMetadata {
          * @return This {@link Builder} instance for fluent chaining.
          */
         public Builder addConfiguration(@NonNull String key, @NonNull String value) {
-            mConfigurations.put(key, value);
+            if (mConfigurations.containsKey(key)) {
+                ArrayList<String> list = mConfigurations.getStringArrayList(key);
+                if (list == null) {
+                    String oldValue = mConfigurations.getString(key);
+                    list = new ArrayList<>();
+                    list.add(oldValue);
+                }
+                list.add(value);
+                mConfigurations.putStringArrayList(key, list);
+            } else {
+                mConfigurations.putString(key, value);
+            }
             return this;
         }
 
@@ -140,7 +194,7 @@ public final class PanelControllerMetadata {
          * copy of the provided list's elements is made.
          *
          * @param breakPoints The list of {@link BreakPoint} objects to set. If null,
-         * the internal list will be cleared. (Consider disallowing null?)
+         *                    the internal list will be cleared. (Consider disallowing null?)
          * @return This {@link Builder} instance for fluent chaining.
          */
         public Builder addBreakPoints(List<BreakPoint> breakPoints) {
@@ -151,11 +205,9 @@ public final class PanelControllerMetadata {
 
         /** Returns the {@link PanelControllerMetadata} instance */
         public PanelControllerMetadata build() {
-            if (!mConfigurations.containsKey(CONTROLLER_NAME_TAG)
-                    || !mConfigurations.containsKey(VIEW_TAG)) {
+            if (!mConfigurations.containsKey(CONTROLLER_NAME_TAG)) {
                 Log.e(TAG, "Controller name or view name cannot be empty"
-                        + " controller = " + mConfigurations.getOrDefault(CONTROLLER_NAME_TAG, null)
-                        + " view = " + mConfigurations.getOrDefault(VIEW_TAG, null));
+                        + " controller = " + mConfigurations.getString(CONTROLLER_NAME_TAG, null));
             }
             if (mBreakPoints != null) {
                 mBreakPoints.sort(Comparator.comparing(
