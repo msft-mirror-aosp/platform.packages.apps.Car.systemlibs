@@ -77,6 +77,10 @@ public class Bounds {
         @Nullable private Integer mBottom;
         @Nullable private Integer mWidth;
         @Nullable private Integer mHeight;
+        @Nullable private Integer mLeftOffset;
+        @Nullable private Integer mTopOffset;
+        @Nullable private Integer mRightOffset;
+        @Nullable private Integer mBottomOffset;
 
         public Builder() {}
 
@@ -116,6 +120,30 @@ public class Bounds {
             return this;
         }
 
+        /** Sets leftOffset */
+        public Builder setLeftOffset(@Nullable Integer offset) {
+            mLeftOffset = offset;
+            return this;
+        }
+
+        /** Sets topOffset */
+        public Builder setTopOffset(@Nullable Integer offset) {
+            mTopOffset = offset;
+            return this;
+        }
+
+        /** Sets rightOffset */
+        public Builder setRightOffset(@Nullable Integer offset) {
+            mRightOffset = offset;
+            return this;
+        }
+
+        /** Sets bottomOffset */
+        public Builder setBottomOffset(@Nullable Integer offset) {
+            mBottomOffset = offset;
+            return this;
+        }
+
         /** Sets rect */
         public Builder setRect(@NonNull Rect rect) {
             mLeft = rect.left;
@@ -146,6 +174,20 @@ public class Bounds {
                 bottom = top + height;
             } else if (mTop == null && mHeight != null) {
                 top = bottom - height;
+            }
+
+            // Handle offsets
+            if (mLeftOffset != null) {
+                left += mLeftOffset;
+            }
+            if (mTopOffset != null) {
+                top += mTopOffset;
+            }
+            if (mRightOffset != null) {
+                right -= mRightOffset;
+            }
+            if (mBottomOffset != null) {
+                bottom -= mBottomOffset;
             }
 
             return new Bounds(left, top, right, bottom);
