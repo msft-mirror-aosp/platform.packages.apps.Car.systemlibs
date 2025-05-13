@@ -16,51 +16,18 @@
 
 package com.android.car.scalableui.designcompose
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Log
-import com.android.designcompose.DocContent
-import com.android.designcompose.common.DesignDocId
-import com.android.designcompose.common.FeedbackImpl
-import com.android.designcompose.common.FeedbackLevel
-import com.android.designcompose.common.GenericDocContent
-import com.android.designcompose.common.NodeQuery
-import com.android.designcompose.common.decodeDiskBaseDoc
-import com.android.designcompose.common.decodeServerBaseDoc
-import com.android.designcompose.common.views
 import com.android.designcompose.definition.DesignComposeDefinition
 import com.android.designcompose.definition.DesignComposeDefinitionHeader
 import com.android.designcompose.definition.element.Bounds
-import com.android.designcompose.definition.element.KeyframeVariant
+import com.android.designcompose.definition.element.ScalableDimension
 import com.android.designcompose.definition.element.ScalableUIComponentSet
 import com.android.designcompose.definition.element.ScalableUiVariant
-import com.android.designcompose.definition.element.bounds
-import com.android.designcompose.definition.element.copy
-import com.android.designcompose.definition.element.scalableDimension
-import com.android.designcompose.definition.element.setOrNull
-import com.android.designcompose.definition.element.variantOrNull
-import com.android.designcompose.definition.view.nodeStyleOrNull
-import com.android.designcompose.definition.view.scalableDataOrNull
-import com.android.designcompose.definition.view.styleOrNull
 import com.android.designcompose.definition.view.View
-import com.android.designcompose.live_update.ConvertResponse
-import com.android.designcompose.decodeDiskDoc
 import java.io.File
 import java.io.InputStream
 
 private const val TAG = "DC_ScalableUiDoc"
-
-object FeedbackLogger : FeedbackImpl() {
-    override fun logMessage(str: String, level: FeedbackLevel) {
-        when (level) {
-            FeedbackLevel.Debug -> Log.d(TAG, str)
-            FeedbackLevel.Info -> Log.i(TAG, str)
-            FeedbackLevel.Warn -> Log.w(TAG, str)
-            FeedbackLevel.Error -> Log.e(TAG, str)
-        }
-    }
-}
 
 private fun removeFileExtension(filename: String): String {
     val file = File(filename)
@@ -76,13 +43,64 @@ fun loadScalableUiDoc(fileStream: InputStream, docId: String): ScalableUiDoc? {
     }
 }
 
-class ScalableUiDoc(docStream: InputStream)  {
+private sealed class NodeQuery {
+    data class NodeId(val id: String) : NodeQuery()
+
+    data class NodeName(val name: String) : NodeQuery()
+
+    data class NodeVariant(val name: String, val parent: String) : NodeQuery()
+
+    data class NodeComponentSet(val name: String) : NodeQuery()
+
+    companion object {
+        const val QUERY_TYPE_ID = "id"
+        const val QUERY_TYPE_NAME = "name"
+        const val QUERY_TYPE_VARIANT = "variant"
+        const val QUERY_TYPE_COMPONENT_SET = "component_set"
+
+        fun id(id: String) = NodeId(id)
+
+        fun name(name: String) = NodeName(name)
+
+        fun variant(name: String, parent: String) = NodeVariant(name, parent)
+
+        fun componentSet(name: String) = NodeComponentSet(name)
+
+        fun decode(s: String): NodeQuery {
+            val parts = s.split(":", limit = 2)
+            val queryType = parts[0]
+            val queryValue = parts[1]
+
+            return when (queryType) {
+                QUERY_TYPE_ID -> NodeId(queryValue)
+                QUERY_TYPE_NAME -> NodeName(queryValue)
+                QUERY_TYPE_VARIANT -> {
+                    val variantParts = queryValue.split("\u001F")
+                    if (variantParts.size != 2) {
+                        throw IllegalArgumentException("Invalid variant query string: $s")
+                    }
+                    NodeVariant(variantParts[0], variantParts[1])
+                }
+                QUERY_TYPE_COMPONENT_SET -> NodeComponentSet(queryValue)
+                else -> throw IllegalArgumentException("Invalid query type: $queryType")
+            }
+        }
+    }
+}
+
+class ScalableUiDoc(docStream: InputStream) {
     // variant name -> scalable ui data
     val variantMap: HashMap<String, ScalableUiVariant> = HashMap()
+
     // variant id -> scalable ui data
     val variantIdMap: HashMap<String, ScalableUiVariant> = HashMap()
+
     // component set name -> { event name -> variant name }
     val componentSetMap: HashMap<String, ScalableUIComponentSet> = HashMap()
+
+    companion object {
+        const val CHILD_NAME_MAIN = "main"
+    }
 
     init {
         val designDefinition = parseDcfStream(docStream)
@@ -93,7 +111,7 @@ class ScalableUiDoc(docStream: InputStream)  {
             // Create a mapping of component set names to the scalable ui data for that set
             val componentSetQuery = NodeQuery.NodeComponentSet(setMap.key)
             val setView = allViews[componentSetQuery]
-            setView?.styleOrNull?.nodeStyleOrNull?.scalableDataOrNull?.setOrNull?.let { setData ->
+            setView?.style?.nodeStyle?.scalableData?.set?.let { setData ->
                 val setName = setData.name
                 componentSetMap[setName] = setData
             }
@@ -106,46 +124,37 @@ class ScalableUiDoc(docStream: InputStream)  {
                         // If the first child of this component is a child named "main", copy its
                         // visibility, alpha, and bounds to create a ScalableUiVariant.
                         val child = variant.data.container.getChildren(0)
-                        if (child.name == "main") {
+                        if (child.name == CHILD_NAME_MAIN) {
                             val layout = child.style.layoutStyle
-                            val scalableUiVariant =
-                                variant.styleOrNull
-                                    ?.nodeStyleOrNull
-                                    ?.scalableDataOrNull
-                                    ?.variantOrNull
-                                    ?.copy {
-                                        isVisible =
-                                            when (child.style.nodeStyle.displayType) {
-                                                com.android.designcompose.definition.view.Display
-                                                    .DISPLAY_NONE -> false
-                                                else -> true
-                                            }
-                                        alpha =
-                                            if (child.style.nodeStyle.hasOpacity())
-                                                child.style.nodeStyle.opacity
-                                            else 1f
-                                        bounds = bounds {
-                                            left = scalableDimension {
-                                                points = layout.margin.start.points
-                                            }
-                                            top = scalableDimension {
-                                                points = layout.margin.top.points
-                                            }
-                                            right = scalableDimension {
-                                                points = layout.margin.end.points
-                                            }
-                                            bottom = scalableDimension {
-                                                points = layout.margin.bottom.points
-                                            }
-                                            width = scalableDimension {
-                                                points = layout.width.points
-                                            }
-                                            height = scalableDimension {
-                                                points = layout.height.points
-                                            }
+                            val scalableUiVariant = ScalableUiVariant.newBuilder(
+                                variant.style?.nodeStyle?.scalableData?.variant
+                            )
+                                    .setIsVisible(
+                                        when (child.style.nodeStyle.displayType) {
+                                            com.android.designcompose.definition.view.Display
+                                                .DISPLAY_NONE -> false
+                                            else -> true
                                         }
-                                    }
-                            // Opulate the variant maps by name and id
+                                    )
+                                    .setAlpha(
+                                        if (child.style.nodeStyle.hasOpacity()) {
+                                            child.style.nodeStyle.opacity
+                                        } else {
+                                            1f
+                                        }
+                                    )
+                                    .setBounds(
+                                        Bounds.newBuilder()
+                                            .setLeft(dimPoints(layout.margin.start.points))
+                                            .setTop(dimPoints(layout.margin.top.points))
+                                            .setRight(dimPoints(layout.margin.end.points))
+                                            .setBottom(dimPoints(layout.margin.bottom.points))
+                                            .setWidth(dimPoints(layout.width.points))
+                                            .setHeight(dimPoints(layout.height.points))
+                                            .build()
+                                    )
+                                    .build()
+                            // Populate the variant maps by name and id
                             scalableUiVariant?.let {
                                 this.variantMap[variantMap.key] = it
                                 this.variantIdMap[variant.id] = it
@@ -156,18 +165,33 @@ class ScalableUiDoc(docStream: InputStream)  {
             }
 
             // Print out debugging data of what we parsed
-            setView?.styleOrNull?.nodeStyleOrNull?.scalableDataOrNull?.setOrNull?.let { setData ->
+            setView?.style?.nodeStyle?.scalableData?.set?.let { setData ->
                 val setName = setData.name
                 componentSetMap[setName] = setData
                 Log.i(TAG, "Set ${setData.name}, ${setData.id}")
                 setData.variantIdsList.forEach {
-                    Log.i(TAG,
+                    Log.i(
+                        TAG,
                         "  Variant $it: Default ${variantIdMap[it]?.isDefault} " +
                         "Visible ${variantIdMap[it]?.isVisible}"
                     )
                 }
             }
         }
+    }
+
+    private fun dimPoints(points: Float): ScalableDimension {
+        return ScalableDimension.newBuilder()
+            .setPoints(points)
+            .build()
+    }
+
+    private fun DesignComposeDefinition.views(): Map<NodeQuery, View> {
+        val views = mutableMapOf<NodeQuery, View>()
+        for ((key, value) in this.viewsMap) {
+            views[NodeQuery.decode(key)] = value
+        }
+        return views
     }
 
     private fun parseDcfStream(docStream: InputStream): DesignComposeDefinition {
@@ -211,20 +235,8 @@ class ScalableUiDoc(docStream: InputStream)  {
         return sortedProperties.joinToString(",")
     }
 
-    fun hasVariant(variantName: String): Boolean {
-        return variantMap.containsKey(variantName)
-    }
-
-    fun getVisible(variantName: String): Boolean {
-        return variantMap[variantName]?.isVisible == true
-    }
-
     fun getBounds(variantName: String): Bounds? {
         return variantMap[variantName]?.bounds
-    }
-
-    fun getKeyframeVariantList(componentSetName: String): List<KeyframeVariant>? {
-        return componentSetMap[componentSetName]?.keyframeVariantsList
     }
 
     fun getPanels(): List<ScalableUIComponentSet> {

@@ -28,50 +28,6 @@ android_library {
     },
     static_libs: [
         "car-scalable-ui-lib",
-        "designcompose-lib",
+        "libautomotive-design-compose-protos",
     ],
-}
-
-android_library_import {
-    name: "designcompose-lib",
-    aars: ["designcompose-0.35.0-debug.aar"],
-    sdk_version: "current",
-    static_libs: [
-        "designcompose-common-lib",
-        "designcompose-annotation-lib",
-        "androidx.compose.foundation_foundation",
-        "androidx.compose.runtime_runtime",
-        "androidx.compose.ui_ui",
-        "androidx.core_core",
-        "androidx.activity_activity",
-        "androidx.compose.material3_material3",
-        "androidx.datastore_datastore",
-        "androidx.lifecycle_lifecycle-runtime",
-        "guava",
-        "androidx.tracing_tracing",
-        "androidx.compose.runtime_runtime",
-        "protobuf-javalite",
-    ],
-}
-
-java_import {
-    name: "designcompose-common-lib",
-    jars: ["common-0.35.0.jar"],
-    sdk_version: "current",
-    static_libs: [
-        "protobuf-javalite",
-        "javax_annotation-api_1.3.2",
-    ],
-}
-
-java_import {
-    name: "designcompose-annotation-lib",
-    jars: ["annotation-0.35.0.jar"],
-    sdk_version: "current",
-}
-
-java_import {
-    name: "protobuf-javalite",
-    jars: ["protobuf-javalite-4.30.0.jar"],
-    sdk_version: "current",
 }
