@@ -32,7 +32,7 @@ import java.util.Map;
  */
 public class DataSubscription {
     public static final String DATA_SUBSCRIPTION_ACTION =
-            "android.intent.action.DATA_SUBSCRIPTION";
+            "com.android.car.datasubscription.action.DATA_SUBSCRIPTION";
     public static int DATA_SUBSCRIPTION_INVALID_STATUS = -1;
     private static final String SETTING = "extended_car_data_subscription_status";
 
