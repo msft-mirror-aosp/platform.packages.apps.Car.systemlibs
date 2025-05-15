@@ -39,6 +39,8 @@ import androidx.annotation.Nullable;
  * height.
  */
 public class Bounds {
+    public static final Rect DEFAULT_BOUNDS = new Rect();
+
     private final int mLeft;
     private final int mTop;
     private final int mRight;
@@ -71,18 +73,29 @@ public class Bounds {
 
     /** Builder for {@link Bounds} objects. */
     public static class Builder {
-        @Nullable private Integer mLeft;
-        @Nullable private Integer mTop;
-        @Nullable private Integer mRight;
-        @Nullable private Integer mBottom;
-        @Nullable private Integer mWidth;
-        @Nullable private Integer mHeight;
-        @Nullable private Integer mLeftOffset;
-        @Nullable private Integer mTopOffset;
-        @Nullable private Integer mRightOffset;
-        @Nullable private Integer mBottomOffset;
+        @Nullable
+        private Integer mLeft;
+        @Nullable
+        private Integer mTop;
+        @Nullable
+        private Integer mRight;
+        @Nullable
+        private Integer mBottom;
+        @Nullable
+        private Integer mWidth;
+        @Nullable
+        private Integer mHeight;
+        @Nullable
+        private Integer mLeftOffset;
+        @Nullable
+        private Integer mTopOffset;
+        @Nullable
+        private Integer mRightOffset;
+        @Nullable
+        private Integer mBottomOffset;
 
-        public Builder() {}
+        public Builder() {
+        }
 
         /** Sets left */
         public Builder setLeft(@Nullable Integer left) {
