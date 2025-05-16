@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2024 The Android Open Source Project
+// Copyright (C) 2025 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
 
 package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-android_library {
-    name: "car-scalable-ui-lib",
-    srcs: ["src/**/*.java"],
-    optimize: {
-        enabled: true,
-    },
-    static_libs: [
-        "androidx.annotation_annotation",
-        "com_android_car_scalableui_flags_lib",
+aconfig_declarations {
+    name: "com_android_car_scalableui_flags",
+    package: "com.android.car.scalableui",
+    container: "system_ext",
+    srcs: [
+        "*.aconfig",
     ],
+}
+
+java_aconfig_library {
+    name: "com_android_car_scalableui_flags_lib",
+    aconfig_declarations: "com_android_car_scalableui_flags",
 }
