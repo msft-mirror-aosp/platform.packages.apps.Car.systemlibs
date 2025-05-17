@@ -124,6 +124,10 @@ public class PanelStateXmlParser {
     public static final String BOTTOM_ATTRIBUTE = "bottom";
     public static final String WIDTH_ATTRIBUTE = "width";
     public static final String HEIGHT_ATTRIBUTE = "height";
+    public static final String LEFT_OFFSET_ATTRIBUTE = "leftOffset";
+    public static final String TOP_OFFSET_ATTRIBUTE = "topOffset";
+    public static final String RIGHT_OFFSET_ATTRIBUTE = "rightOffset";
+    public static final String BOTTOM_OFFSET_ATTRIBUTE = "bottomOffset";
 
     // --- Corner Tags ---
     public static final String CORNER_TAG = "Corner";
@@ -496,13 +500,28 @@ public class PanelStateXmlParser {
         }
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
-        Integer left = getDimensionPixelSize(context, attrs, LEFT_ATTRIBUTE, true);
-        Integer top = getDimensionPixelSize(context, attrs, TOP_ATTRIBUTE, false);
-        Integer right = getDimensionPixelSize(context, attrs, RIGHT_ATTRIBUTE, true);
-        Integer bottom = getDimensionPixelSize(context, attrs, BOTTOM_ATTRIBUTE, false);
+        Integer left = getDimensionPixelSize(context, attrs, LEFT_ATTRIBUTE,
+                /* isHorizontal= */ true);
+        Integer top = getDimensionPixelSize(context, attrs, TOP_ATTRIBUTE,
+                /* isHorizontal= */ false);
+        Integer right = getDimensionPixelSize(context, attrs, RIGHT_ATTRIBUTE,
+                /* isHorizontal= */ true);
+        Integer bottom = getDimensionPixelSize(context, attrs, BOTTOM_ATTRIBUTE,
+                /* isHorizontal= */ false);
 
-        Integer width = getDimensionPixelSize(context, attrs, WIDTH_ATTRIBUTE, true);
-        Integer height = getDimensionPixelSize(context, attrs, HEIGHT_ATTRIBUTE, false);
+        Integer width = getDimensionPixelSize(context, attrs, WIDTH_ATTRIBUTE,
+                /* isHorizontal= */ true);
+        Integer height = getDimensionPixelSize(context, attrs, HEIGHT_ATTRIBUTE,
+                /* isHorizontal= */ false);
+
+        Integer leftOffset = getDimensionPixelSize(context, attrs, LEFT_OFFSET_ATTRIBUTE,
+                /* isHorizontal= */ true);
+        Integer topOffset = getDimensionPixelSize(context, attrs, TOP_OFFSET_ATTRIBUTE,
+                /* isHorizontal= */ false);
+        Integer rightOffset = getDimensionPixelSize(context, attrs, RIGHT_OFFSET_ATTRIBUTE,
+                /* isHorizontal= */ true);
+        Integer bottomOffset = getDimensionPixelSize(context, attrs, BOTTOM_OFFSET_ATTRIBUTE,
+                /* isHorizontal= */ false);
 
         while (parser.next() != XmlPullParser.END_TAG) {
             XmlPullParserHelper.skip(parser); // Skip any nested tags
@@ -515,6 +534,10 @@ public class PanelStateXmlParser {
                 .setBottom(bottom)
                 .setWidth(width)
                 .setHeight(height)
+                .setLeftOffset(leftOffset)
+                .setTopOffset(topOffset)
+                .setRightOffset(rightOffset)
+                .setBottomOffset(bottomOffset)
                 .build();
     }
 
@@ -635,10 +658,29 @@ public class PanelStateXmlParser {
     private static Integer getDimensionPixelSize(@NonNull Context context,
             @NonNull AttributeSet attrs, @NonNull String name, boolean isHorizontal) {
         int resId = attrs.getAttributeResourceValue(null, name, 0);
+        String dimenStr;
         if (resId != 0) {
-            return context.getResources().getDimensionPixelSize(resId);
+            // Attempt to resolve resource - supports dimen, integer, fraction, and string types
+            String resType = context.getResources().getResourceTypeName(resId);
+            // dimen and integer values will be used directly as the pixel size
+            if (resType.equals("dimen")) {
+                return context.getResources().getDimensionPixelSize(resId);
+            }
+            if (resType.equals("integer")) {
+                return context.getResources().getInteger(resId);
+            }
+
+            // fraction and string types will be used as string to be parsed
+            dimenStr = switch (resType) {
+                case "fraction" -> String.format("%f%%",
+                        context.getResources().getFraction(resId, 100, 100));
+                case "string" -> context.getResources().getString(resId);
+                default -> throw new IllegalArgumentException("Invalid res type " + resType);
+            };
+        } else {
+            dimenStr = attrs.getAttributeValue(null, name);
         }
-        String dimenStr = attrs.getAttributeValue(null, name);
+
         if (dimenStr == null) {
             return null;
         }

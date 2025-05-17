@@ -25,5 +25,6 @@ android_library {
     },
     static_libs: [
         "androidx.annotation_annotation",
+        "com_android_car_scalableui_flags_lib",
     ],
 }
