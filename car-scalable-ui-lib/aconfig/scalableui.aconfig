@@ -1,0 +1,9 @@
+package: "com.android.car.scalableui"
+container: "system_ext"
+
+flag {
+    name: "enable_visual_data"
+    namespace: "car_sys_exp"
+    description: "This flag controls using VisiualData class to hold the properties."
+    bug: "415493921"
+}
