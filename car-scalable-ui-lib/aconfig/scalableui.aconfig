@@ -7,3 +7,10 @@ flag {
     description: "This flag controls using VisiualData class to hold the properties."
     bug: "415493921"
 }
+
+flag {
+    name: "enable_ext_panel_updates"
+    namespace: "car_sys_exp"
+    description: "This flag controls registering to PanelUpdates Consumer which allows Non-ScalableUIComponents to receive updates."
+    bug: "418775156"
+}
