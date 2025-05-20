@@ -26,14 +26,120 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 public class BoundsTest {
+    private static final int TEST_LEFT = 10;
+    private static final int TEST_TOP = 20;
+    private static final int TEST_RIGHT = 30;
+    private static final int TEST_BOTTOM = 40;
+    private static final int TEST_WIDTH = 20;
+    private static final int TEST_HEIGHT = 20;
+    private static final int TEST_LEFT_OFFSET = 1;
+    private static final int TEST_TOP_OFFSET = 2;
+    private static final int TEST_RIGHT_OFFSET = 3;
+    private static final int TEST_BOTTOM_OFFSET = 4;
 
     @Test
-    public void testBoundsCreation() {
-        Bounds bounds = new Bounds(10, 20, 30, 40);
+    public void testBoundsCreation_rect() {
+        Bounds bounds = new Bounds.Builder()
+                .setLeft(TEST_LEFT)
+                .setTop(TEST_TOP)
+                .setRight(TEST_RIGHT)
+                .setBottom(TEST_BOTTOM)
+                .build();
+
         Rect rect = bounds.getRect();
-        assertThat(rect.left).isEqualTo(10);
-        assertThat(rect.top).isEqualTo(20);
-        assertThat(rect.right).isEqualTo(30);
-        assertThat(rect.bottom).isEqualTo(40);
+
+        assertThat(rect.left).isEqualTo(TEST_LEFT);
+        assertThat(rect.top).isEqualTo(TEST_TOP);
+        assertThat(rect.right).isEqualTo(TEST_RIGHT);
+        assertThat(rect.bottom).isEqualTo(TEST_BOTTOM);
+    }
+
+    @Test
+    public void testBoundsCreation_width_withLeft() {
+        Bounds bounds = new Bounds.Builder()
+                .setLeft(TEST_LEFT)
+                .setTop(TEST_TOP)
+                .setBottom(TEST_BOTTOM)
+                .setWidth(TEST_WIDTH)
+                .build();
+
+        Rect rect = bounds.getRect();
+
+        assertThat(rect.left).isEqualTo(TEST_LEFT);
+        assertThat(rect.top).isEqualTo(TEST_TOP);
+        assertThat(rect.right).isEqualTo(TEST_RIGHT);
+        assertThat(rect.bottom).isEqualTo(TEST_BOTTOM);
+    }
+
+    @Test
+    public void testBoundsCreation_width_withRight() {
+        Bounds bounds = new Bounds.Builder()
+                .setRight(TEST_RIGHT)
+                .setTop(TEST_TOP)
+                .setBottom(TEST_BOTTOM)
+                .setWidth(TEST_WIDTH)
+                .build();
+
+        Rect rect = bounds.getRect();
+
+        assertThat(rect.left).isEqualTo(TEST_LEFT);
+        assertThat(rect.top).isEqualTo(TEST_TOP);
+        assertThat(rect.right).isEqualTo(TEST_RIGHT);
+        assertThat(rect.bottom).isEqualTo(TEST_BOTTOM);
+    }
+
+    @Test
+    public void testBoundsCreation_height_withTop() {
+        Bounds bounds = new Bounds.Builder()
+                .setLeft(TEST_LEFT)
+                .setTop(TEST_TOP)
+                .setRight(TEST_RIGHT)
+                .setHeight(TEST_HEIGHT)
+                .build();
+
+        Rect rect = bounds.getRect();
+
+        assertThat(rect.left).isEqualTo(TEST_LEFT);
+        assertThat(rect.top).isEqualTo(TEST_TOP);
+        assertThat(rect.right).isEqualTo(TEST_RIGHT);
+        assertThat(rect.bottom).isEqualTo(TEST_BOTTOM);
+    }
+
+    @Test
+    public void testBoundsCreation_height_withBottom() {
+        Bounds bounds = new Bounds.Builder()
+                .setLeft(TEST_LEFT)
+                .setRight(TEST_RIGHT)
+                .setBottom(TEST_BOTTOM)
+                .setHeight(TEST_HEIGHT)
+                .build();
+
+        Rect rect = bounds.getRect();
+
+        assertThat(rect.left).isEqualTo(TEST_LEFT);
+        assertThat(rect.top).isEqualTo(TEST_TOP);
+        assertThat(rect.right).isEqualTo(TEST_RIGHT);
+        assertThat(rect.bottom).isEqualTo(TEST_BOTTOM);
+    }
+
+    @Test
+    public void testBoundsCreation_withOffset() {
+        Bounds bounds = new Bounds.Builder()
+                .setLeft(TEST_LEFT)
+                .setTop(TEST_TOP)
+                .setRight(TEST_RIGHT)
+                .setBottom(TEST_BOTTOM)
+                .setLeftOffset(TEST_LEFT_OFFSET)
+                .setTopOffset(TEST_TOP_OFFSET)
+                .setRightOffset(TEST_RIGHT_OFFSET)
+                .setBottomOffset(TEST_BOTTOM_OFFSET)
+                .build();
+
+        Rect rect = bounds.getRect();
+
+        assertThat(rect.left).isEqualTo(TEST_LEFT + TEST_LEFT_OFFSET);
+        assertThat(rect.top).isEqualTo(TEST_TOP + TEST_TOP_OFFSET);
+        assertThat(rect.right).isEqualTo(TEST_RIGHT - TEST_RIGHT_OFFSET);
+        assertThat(rect.bottom).isEqualTo(TEST_BOTTOM - TEST_BOTTOM_OFFSET);
     }
 }
