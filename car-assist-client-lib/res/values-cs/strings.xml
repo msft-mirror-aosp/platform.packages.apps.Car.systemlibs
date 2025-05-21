@@ -16,6 +16,6 @@ limitations under the License.
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="assist_action_failed_toast" msgid="3250146468076483714">"Nebylo možné požádat Asistenta o akci."</string>
-    <string name="says" msgid="8575666015622916107">"říká"</string>
+    <string name="assist_action_failed_toast" msgid="3575871579522209384">"Nebylo možné požádat Asistenta o akci."</string>
+    <string name="says" msgid="8536587133006089394">"říká"</string>
 </resources>
