@@ -202,7 +202,6 @@ public class DataSubscriptionControllerTest {
                 .thenReturn("2025-01-15");
         when(mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
                 anyInt())).thenReturn("Valid Message");
-        mController.setWasProactiveMessageDisplayed(false);
         mController.setCurrentInterval(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_frequency) + 1);
 
@@ -218,7 +217,6 @@ public class DataSubscriptionControllerTest {
         when(mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
                 anyInt())).thenReturn("Valid Message");
 
-        mController.setWasProactiveMessageDisplayed(false);
         mController.setCurrentInterval(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_frequency));
         mController.setCurrentCycle(mContext.getResources()
@@ -238,7 +236,6 @@ public class DataSubscriptionControllerTest {
         when(mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
                 anyInt())).thenReturn("");
 
-        mController.setWasProactiveMessageDisplayed(false);
         mController.setCurrentInterval(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_frequency) - 1);
         mController.setCurrentCycle(mContext.getResources()
@@ -256,7 +253,6 @@ public class DataSubscriptionControllerTest {
         when(mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
                 anyInt())).thenReturn("");
 
-        mController.setWasProactiveMessageDisplayed(false);
         mController.setCurrentInterval(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_frequency));
         mController.setCurrentCycle(mContext.getResources()
@@ -276,7 +272,6 @@ public class DataSubscriptionControllerTest {
         when(mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
                 anyInt())).thenReturn("");
 
-        mController.setWasProactiveMessageDisplayed(false);
         mController.setCurrentInterval(mContext.getResources()
                 .getInteger(R.integer.data_subscription_pop_up_frequency));
         mController.setCurrentCycle(mContext.getResources()
