@@ -18,10 +18,6 @@ package com.android.car.datasubscription;
 
 public interface DataSubscriptionViewActionListener {
     /**
-     * Called when the message is dismissed
-     */
-    void onMessageDismissed();
-    /**
      * Register the listeners
      */
     void registerListeners();
