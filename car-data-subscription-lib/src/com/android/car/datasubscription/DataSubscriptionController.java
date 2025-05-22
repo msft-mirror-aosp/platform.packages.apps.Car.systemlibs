@@ -180,7 +180,6 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
             };
     private final DataSubscriptionMessageCreator mDataSubscriptionMessageCreator;
     // Determines whether a proactive message was already displayed
-    private boolean mWasProactiveMessageDisplayed;
     private boolean mIsDistractionOptimizationRequired;
     private boolean mShouldDisplayProactiveMessage;
 
@@ -244,11 +243,9 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     }
 
     void updateShouldDisplayProactiveMessage() {
-        if (mShouldDisplayProactiveMessage) {
-            return;
-        }
-        mShouldDisplayProactiveMessage = !mWasProactiveMessageDisplayed
-                && isValidTimeInterval()
+        // Check if all the configs are valid for this drive cycle, this value should remain
+        // the same until the next drive cycle
+        mShouldDisplayProactiveMessage = isValidTimeInterval()
                 && isValidCycle()
                 && isValidActiveDays();
         if (mShouldDisplayProactiveMessage && mDataSubscriptionMessageEventListener != null) {
@@ -330,15 +327,22 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     @Override
     public void onStatusChanged(int value) {
         updateCurrentStatus();
-        updateShouldDisplayProactiveMessage();
-    }
-
-    @Override
-    public void onMessageDismissed() {
-        if (!mWasProactiveMessageDisplayed) {
-            mWasProactiveMessageDisplayed = true;
+        // Check to display proactive message again. Since this is in the same cycle, we don't need
+        // to check for other configs but we need to keep track of the configs' latest updates
+        if (mShouldDisplayProactiveMessage && mDataSubscriptionMessageEventListener != null) {
+            String message = mDataSubscriptionMessageCreator.getProactiveMessageForStatus(
+                    mCurrentStatus);
+            boolean isMessageDisplayed =
+                    mDataSubscriptionMessageEventListener.onDataSubscriptionStatusChanged(
+                            mIsDistractionOptimizationRequired, message, mUxrPrompt);
+            if (isMessageDisplayed) {
+                writeLatestPopupDate();
+                writeLatestPopupCycle();
+                writeLatestPopupActiveDays();
+            }
         }
     }
+
 
     public class DataSubscriptionNetworkCallback extends ConnectivityManager.NetworkCallback {
         Network mNetwork;
@@ -511,11 +515,6 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     @VisibleForTesting
     void setCurrentActiveDays(int activeDays) {
         mCurrentActiveDays = activeDays;
-    }
-
-    @VisibleForTesting
-    void setWasProactiveMessageDisplayed(boolean value) {
-        mWasProactiveMessageDisplayed = value;
     }
 
     @VisibleForTesting
