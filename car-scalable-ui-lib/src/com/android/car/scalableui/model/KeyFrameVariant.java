@@ -94,6 +94,16 @@ public class KeyFrameVariant extends Variant {
     /**
      * Constructor for KeyFrameVariant. Package-private, use the Builder.
      *
+     * @param id   The ID of this variant.
+     * @param base The base variant to inherit properties from.
+     */
+    KeyFrameVariant(@NonNull String id, @NonNull Variant base) {
+        super(id, base);
+    }
+
+    /**
+     * Constructor for KeyFrameVariant. Package-private, use the Builder.
+     *
      * @param id The ID of this variant.
      */
     KeyFrameVariant(@NonNull String id) {
@@ -313,13 +323,11 @@ public class KeyFrameVariant extends Variant {
     }
 
     /** Builder for {@link KeyFrameVariant} objects. */
-    public static class Builder {
+    public static class Builder extends Variant.Builder {
         private List<KeyFrame> mKeyFrames = new ArrayList<>();
-        @NonNull
-        protected String mId;
 
         public Builder(@NonNull String id) {
-            mId = id;
+            super(id);
         }
 
         /** Adds keyframe */
@@ -335,9 +343,37 @@ public class KeyFrameVariant extends Variant {
         }
 
         /** Returns the {@link KeyFrameVariant} instance */
+        @Override
         @NonNull
         public KeyFrameVariant build() {
-            KeyFrameVariant variant = new KeyFrameVariant(mId);
+            KeyFrameVariant variant;
+            if (mParent != null) {
+                variant = new KeyFrameVariant(mId, mParent);
+            } else {
+                variant = new KeyFrameVariant(mId);
+            }
+
+            if (mAlpha != null) {
+                variant.setAlpha(mAlpha);
+            }
+            if (mIsVisible != null) {
+                variant.setVisibility(mIsVisible);
+            }
+            if (mLayer != null) {
+                variant.setLayer(mLayer);
+            }
+            if (mBounds != null) {
+                variant.setBounds(new Rect(mBounds)); // Defensive copy
+            }
+            if (mCornerRadius != null) {
+                variant.setCornerRadius(mCornerRadius);
+            }
+            variant.setSafeBounds(new Rect( (mSafeBounds != null) ? mSafeBounds : mBounds));
+            if (mInsets != null) {
+                variant.setInsets(
+                        Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
+            }
+
             // Sort keyframes by frame position after adding them all.
             mKeyFrames.sort(Comparator.comparingInt(o -> o.mFramePosition));
             for (KeyFrame keyFrame : mKeyFrames) {

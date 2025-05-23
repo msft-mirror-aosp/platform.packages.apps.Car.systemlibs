@@ -19,10 +19,7 @@ package {
 
 android_library {
     name: "car-scalable-ui-lib",
-    srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
-    ],
+    srcs: ["src/**/*.java"],
     optimize: {
         enabled: true,
     },
