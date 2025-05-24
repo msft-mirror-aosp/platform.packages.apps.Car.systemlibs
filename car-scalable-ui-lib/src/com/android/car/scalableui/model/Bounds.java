@@ -39,6 +39,8 @@ import androidx.annotation.Nullable;
  * height.
  */
 public class Bounds {
+    public static final Rect DEFAULT_BOUNDS = new Rect();
+
     private final int mLeft;
     private final int mTop;
     private final int mRight;
@@ -71,18 +73,29 @@ public class Bounds {
 
     /** Builder for {@link Bounds} objects. */
     public static class Builder {
-        @Nullable private Integer mLeft;
-        @Nullable private Integer mTop;
-        @Nullable private Integer mRight;
-        @Nullable private Integer mBottom;
-        @Nullable private Integer mWidth;
-        @Nullable private Integer mHeight;
-        @Nullable private Integer mLeftOffset;
-        @Nullable private Integer mTopOffset;
-        @Nullable private Integer mRightOffset;
-        @Nullable private Integer mBottomOffset;
+        @Nullable
+        private Integer mLeft;
+        @Nullable
+        private Integer mTop;
+        @Nullable
+        private Integer mRight;
+        @Nullable
+        private Integer mBottom;
+        @Nullable
+        private Integer mWidth;
+        @Nullable
+        private Integer mHeight;
+        @Nullable
+        private Integer mLeftOffset;
+        @Nullable
+        private Integer mTopOffset;
+        @Nullable
+        private Integer mRightOffset;
+        @Nullable
+        private Integer mBottomOffset;
 
-        public Builder() {}
+        public Builder() {
+        }
 
         /** Sets left */
         public Builder setLeft(@Nullable Integer left) {
@@ -164,6 +177,12 @@ public class Bounds {
             int width = (mWidth != null) ? mWidth : 0;
             int height = (mHeight != null) ? mHeight : 0;
 
+            // Handle offsets
+            left += (mLeftOffset != null) ? mLeftOffset : 0;
+            top += (mTopOffset != null) ? mTopOffset : 0;
+            right -= (mRightOffset != null) ? mRightOffset : 0;
+            bottom -= (mBottomOffset != null) ? mBottomOffset : 0;
+
             // Handle width/height combinations, prioritizing explicit left/right/top/bottom
             if (mRight == null && mWidth != null) {
                 right = left + width;
@@ -176,21 +195,11 @@ public class Bounds {
                 top = bottom - height;
             }
 
-            // Handle offsets
-            if (mLeftOffset != null) {
-                left += mLeftOffset;
-            }
-            if (mTopOffset != null) {
-                top += mTopOffset;
-            }
-            if (mRightOffset != null) {
-                right -= mRightOffset;
-            }
-            if (mBottomOffset != null) {
-                bottom -= mBottomOffset;
-            }
-
-            return new Bounds(left, top, right, bottom);
+            return new Bounds(
+                    Math.min(left, right),
+                    Math.min(top, bottom),
+                    Math.max(left, right),
+                    Math.max(top, bottom));
         }
     }
 }
