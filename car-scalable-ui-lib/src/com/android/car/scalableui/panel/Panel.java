@@ -22,6 +22,7 @@ import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
 import com.android.car.scalableui.model.Blur;
 import com.android.car.scalableui.model.PanelControllerMetadata;
 import com.android.car.scalableui.model.Role;
@@ -262,4 +263,9 @@ public interface Panel {
      * Sets the {@link PanelControllerMetadata}
      */
     void setPanelControllerMetadata(@Nullable PanelControllerMetadata panelControllerMetadata);
+
+    /**
+     * Refresh the panel theme.
+     */
+    void refreshTheme();
 }
