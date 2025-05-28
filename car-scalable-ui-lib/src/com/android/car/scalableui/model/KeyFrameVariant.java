@@ -73,9 +73,6 @@ public class KeyFrameVariant extends Variant {
 
             /** Returns the {@link KeyFrameVariant} instance */
             public KeyFrame build() {
-                if (mVariant == null) {
-                    throw new IllegalStateException("Variant must be set for KeyFrame");
-                }
                 return new KeyFrame(mFramePosition, mVariant);
             }
         }
@@ -156,6 +153,16 @@ public class KeyFrameVariant extends Variant {
         return getAlpha(mFraction);
     }
 
+    /**
+     * Returns the layer for the current fraction.
+     *
+     * @return The layer of the variant.
+     */
+    @Override
+    public int getLayer() {
+        return getLayer(mFraction);
+    }
+
     @Override
     public void updateFromEvent(@Nullable Event event) {
         if (event instanceof KeyFrameEvent keyFrameEvent) {
@@ -201,7 +208,7 @@ public class KeyFrameVariant extends Variant {
                 return keyFrame;
             }
         }
-        return mKeyFrames.get(mKeyFrames.size() - 1);
+        return mKeyFrames.getLast();
     }
 
     /**
@@ -254,6 +261,18 @@ public class KeyFrameVariant extends Variant {
                 (KeyFrame keyFrame) -> keyFrame.mVariant.getInsets().toRect();
         Rect rect = getFrameRect(rectFunction, fraction);
         return Insets.of(rect);
+    }
+
+    /**
+     * Returns the layer of the variant for the given fraction.
+     *
+     * @param fraction The fraction value (between 0 and 1).
+     * @return The layer of the variant.
+     */
+    public int getLayer(float fraction) {
+        if (mKeyFrames.isEmpty()) return Layer.DEFAULT_LAYER;
+        KeyFrame keyFrame = Objects.requireNonNull(after(fraction));
+        return keyFrame.mVariant.getLayer();
     }
 
     private Rect getFrameRect(Function<KeyFrame, Rect> rectFunction, float fraction) {
