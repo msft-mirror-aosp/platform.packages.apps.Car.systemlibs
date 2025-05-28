@@ -16,6 +16,7 @@
 package com.android.car.scalableui.model;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,13 +24,15 @@ import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 /**
  * Describes an event in the system. An event has an id and optionally tokens to match against
  * transitions.
  */
 public class Event {
-
+    private static final String TAG = Event.class.getSimpleName();
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     /** Id string associated with this event. */
     @NonNull
     protected final String mId;
@@ -80,23 +83,26 @@ public class Event {
      * @return true if this event matches the passed in parameters.
      */
     public boolean isMatch(@Nullable Event transitionEvent) {
+        logIfDebuggable("Match event " + transitionEvent + ", with " + this);
         if (transitionEvent == null) {
             return false;
         }
 
         if (!TextUtils.equals(mId, transitionEvent.getId())) {
             // ids don't match
+            logIfDebuggable("Event id doesn't match" + mId + " vs " + transitionEvent.getId());
             return false;
         }
 
         Map<String, String> transitionTokens = transitionEvent.getTokens();
-        if (transitionTokens == null || transitionTokens.isEmpty()) {
+        if (transitionTokens.isEmpty()) {
             // ids match and transition doesn't specify and additional tokens to match
             return true;
         }
 
         if (mTokens.isEmpty()) {
             // transition has tokens but event does not - not a match
+            logIfDebuggable("transition has tokens but event does not - not a match");
             return false;
         }
 
@@ -104,6 +110,7 @@ public class Event {
             if (!mTokens.containsKey(key)
                     || !TextUtils.equals(mTokens.get(key), transitionTokens.get(key))) {
                 // tokens don't match - not a match
+                logIfDebuggable("Token don't match " + key);
                 return false;
             }
         }
@@ -111,10 +118,22 @@ public class Event {
         return true;
     }
 
+    private static void logIfDebuggable(String msg) {
+        if (DEBUG) {
+            Log.d(TAG, msg);
+        }
+    }
+
     @Override
     @NonNull
     public String toString() {
-        return "Event{" + "mId='" + mId + "' mTokens='" + mTokens + "'}";
+        String tokenString = mTokens.isEmpty()
+                ? "empty"
+                : mTokens.entrySet()
+                        .stream()
+                        .map(entry -> entry.getKey() + "=" + entry.getValue())
+                        .collect(Collectors.joining(" , "));
+        return "Event{" + "mId='" + mId + "' mTokens='" + tokenString + "'}";
     }
 
     /** Builder for {@link Event} objects. */

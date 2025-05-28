@@ -38,10 +38,12 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.scalableui.R;
 import com.android.car.scalableui.model.Alpha;
 import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.BreakPoint;
 import com.android.car.scalableui.model.Corner;
+import com.android.car.scalableui.model.Decor;
 import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelControllerMetadata;
@@ -58,6 +60,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * A utility class that uses a {@link XmlPullParser} to create a {@link PanelState} object.
@@ -101,6 +104,11 @@ public class PanelStateXmlParser {
     private static final String KEY_FRAME_TAG = "KeyFrame";
     private static final String FRAME_ATTRIBUTE = "frame";
     private static final String VARIANT_ATTRIBUTE = "variant";
+
+    // --- Background Tags ---
+    public static final String BACKGROUND_TAG = "Background";
+    public static final String BACKGROUND_COLOR_ATTRIBUTE = "color";
+    public static final String BACKGROUND_ALPHA_ATTRIBUTE = "alpha";
 
     // --- Visibility Tags ---
     public static final String VISIBILITY_TAG = "Visibility";
@@ -425,11 +433,37 @@ public class PanelStateXmlParser {
                 case INSETS_TAG:
                     variantBuilder.setInsets(parseInsets(context, parser));
                     break;
+                case BACKGROUND_TAG:
+                    variantBuilder.addDecor(parseBackground(context, parser, panelState.getId()));
+                    break;
                 default:
                     XmlPullParserHelper.skip(parser); // Skip other nested tags
             }
         }
         return variantBuilder.build();
+    }
+
+    @NonNull
+    private static Decor parseBackground(
+            @NonNull Context context,
+            @NonNull XmlPullParser parser,
+            @NonNull String id)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, null, BACKGROUND_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        String decorId = id + "_" + BACKGROUND_TAG;
+        int colorRes = attrs.getAttributeResourceValue(null, BACKGROUND_COLOR_ATTRIBUTE, -1);
+        Decor.Builder decorBuilder = new Decor.Builder(decorId).setColor(colorRes).setContent(
+                R.layout.background_layout);
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) continue;
+            String name = parser.getName();
+            if (Objects.equals(name, BACKGROUND_ALPHA_ATTRIBUTE)) {
+                decorBuilder.setAlpha(parseAlpha(context, parser).getAlpha());
+            }
+        }
+
+        return decorBuilder.build();
     }
 
     @NonNull
