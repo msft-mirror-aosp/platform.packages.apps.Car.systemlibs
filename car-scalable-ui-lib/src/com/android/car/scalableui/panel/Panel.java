@@ -251,4 +251,13 @@ public interface Panel {
      * Sets the {@link PanelControllerMetadata}
      */
     void setPanelControllerMetadata(@Nullable PanelControllerMetadata panelControllerMetadata);
+
+    /**
+     * Gets the {@link PanelUpdatePublisher}
+     */
+    @Nullable
+    default PanelUpdatePublisher getPanelUpdateObserver() {
+        return null;
+    }
+
 }
