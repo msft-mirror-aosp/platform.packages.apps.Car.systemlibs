@@ -38,15 +38,14 @@ public class VariantTest {
 
     @Test
     public void testVariantCreation_withBaseVariant() {
-        Variant base = new Variant.Builder(VARIANT_ID)
-                .setBounds(new Rect(10, 20, 30, 40))
-                .setVisibility(false)
-                .setLayer(5)
-                .setAlpha(0.5f)
-                .setCornerRadius(2)
-                .build();
+        Variant base = new Variant(VARIANT_ID);
+        base.setBounds(new Rect(10, 20, 30, 40));
+        base.setVisibility(false);
+        base.setLayer(5);
+        base.setAlpha(0.5f);
+        base.setCornerRadius(2);
 
-        Variant variant = new Variant.Builder(VARIANT_ID).setParent(base).build();
+        Variant variant = new Variant(VARIANT_ID, base);
 
         assertThat(variant.getId()).isEqualTo(VARIANT_ID);
         assertThat(variant.getBounds()).isEqualTo(new Rect(10, 20, 30, 40));

@@ -160,7 +160,6 @@ public class StateManagerTest {
         PanelState panelState = spy(new PanelState(TEST_PANEL_ID, DEFAULT_ROLE));
         when(panelState.getTransition(any(Event.class))).thenReturn(mock(Transition.class));
         Variant mockFromVariant = mock(KeyFrameVariant.class);
-        when(mockFromVariant.getId()).thenReturn(FROM_VARIANT_ID);
         when(panelState.getCurrentVariant()).thenReturn(mockFromVariant);
         Variant mockToVariant = mock(Variant.class);
         when(mockToVariant.getId()).thenReturn(TO_VARIANT_ID);
@@ -174,13 +173,17 @@ public class StateManagerTest {
         Transition mockTransition = mock(Transition.class);
         when(mockTransition.getToVariant()).thenReturn(mockFromVariant);
         when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
+        Animator mockAnimator = mock(Animator.class);
         when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(
-                null);
+                mockAnimator);
 
         PanelTransaction panelTransaction = StateManager.handleEvent(TEST_EVENT);
 
-        assertThat(panelTransaction.hasWindowChanges()).isFalse();
-        assertThat(panelTransaction.getAnimators()).hasSize(/* expectedSize= */ 0);
+        verify(panelState).setVariant(TO_VARIANT_ID, TEST_EVENT);
+        verify(panelState).onAnimationStart(mockAnimator);
+        verify(mockAnimator).removeAllListeners();
+        verify(mockAnimator).addListener(any(AnimatorListenerAdapter.class));
+        assertThat(panelTransaction.getAnimators()).hasSize(/* expectedSize= */ 1);
         assertThat(panelTransaction.getPanelTransactionStates()).hasSize(/* expectedSize= */ 1);
     }
 
