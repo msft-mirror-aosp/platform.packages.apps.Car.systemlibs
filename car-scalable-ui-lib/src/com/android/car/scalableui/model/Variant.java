@@ -15,8 +15,6 @@
  */
 package com.android.car.scalableui.model;
 
-import static com.android.car.scalableui.Flags.enableVisualData;
-
 import android.animation.Animator;
 import android.animation.FloatEvaluator;
 import android.animation.IntEvaluator;
@@ -43,9 +41,11 @@ import com.android.car.scalableui.panel.Panel;
 public class Variant {
     private static final String TAG = Variant.class.getSimpleName();
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
+
     private final FloatEvaluator mFloatEvaluator = new FloatEvaluator();
     private final RectEvaluator mRectEvaluator = new RectEvaluator();
     private final IntEvaluator mIntEvaluator = new IntEvaluator();
+
     @NonNull
     protected final String mId;
     private float mAlpha;
@@ -58,8 +58,6 @@ public class Variant {
     private Rect mSafeBounds;
     @NonNull
     private Insets mInsets;
-    @NonNull
-    private VisualData mVisualData;
 
     /**
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
@@ -69,6 +67,7 @@ public class Variant {
      */
     Variant(@NonNull String id) {
         this.mId = id;
+
         // Initialize with default values
         mBounds = new Rect();
         mSafeBounds = new Rect();
@@ -77,7 +76,6 @@ public class Variant {
         mAlpha = Alpha.DEFAULT_ALPHA;
         mCornerRadius = Corner.DEFAULT_RADIUS;
         mInsets = Insets.NONE;
-        mVisualData = new VisualData.Builder().build();
     }
 
     /**
@@ -98,13 +96,6 @@ public class Variant {
         mAlpha = base.getAlpha();
         mCornerRadius = base.getCornerRadius();
         mInsets = base.getInsets();
-    }
-
-    protected void setVisualData(@NonNull VisualData visualData) {
-        if (!enableVisualData()) {
-            return;
-        }
-        mVisualData = visualData;
     }
 
     /**
@@ -177,10 +168,7 @@ public class Variant {
      * @return True if the variant is visible, false otherwise.
      */
     public boolean isVisible() {
-        if (!enableVisualData()) {
-            return mIsVisible;
-        }
-        return mVisualData.isVisible();
+        return mIsVisible;
     }
 
     /**
@@ -198,10 +186,7 @@ public class Variant {
      * @return The layer of the variant.
      */
     public int getLayer() {
-        if (!enableVisualData()) {
-            return mLayer;
-        }
-        return mVisualData.getLayer();
+        return mLayer;
     }
 
     /**
@@ -219,10 +204,7 @@ public class Variant {
      * @return The alpha of the variant.
      */
     public float getAlpha() {
-        if (!enableVisualData()) {
-            return mAlpha;
-        }
-        return mVisualData.getAlpha();
+        return mAlpha;
     }
 
     /**
@@ -241,10 +223,7 @@ public class Variant {
      */
     @NonNull
     public Rect getBounds() {
-        if (!enableVisualData()) {
-            return mBounds;
-        }
-        return mVisualData.getBounds();
+        return mBounds;
     }
 
     /**
@@ -263,10 +242,7 @@ public class Variant {
      */
     @NonNull
     public Rect getSafeBounds() {
-        if (!enableVisualData()) {
-            return mSafeBounds;
-        }
-        return mVisualData.getSafeBounds();
+        return mSafeBounds;
     }
 
     /**
@@ -284,10 +260,7 @@ public class Variant {
      * @return The corner radius of the variant.
      */
     public int getCornerRadius() {
-        if (!enableVisualData()) {
-            return mCornerRadius;
-        }
-        return mVisualData.getCornerRadius();
+        return mCornerRadius;
     }
 
     /**
@@ -313,15 +286,12 @@ public class Variant {
      */
     @NonNull
     public Insets getInsets() {
-        if (!enableVisualData()) {
-            return mInsets;
-        }
-        return mVisualData.getInsets();
+        return mInsets;
     }
 
     /**
      * Sets insets.
-     * This is essentially the panel's insets.
+     * This is essentially the panle's safe rectangle.
      */
     protected void setInsets(@NonNull Insets insets) {
         mInsets = insets;
@@ -330,21 +300,25 @@ public class Variant {
     @Override
     @NonNull
     public String toString() {
-        if (!enableVisualData()) {
-            return "Variant{"
-                    + "mId='" + mId
-                    + ", mAlpha=" + mAlpha
-                    + ", mIsVisible=" + mIsVisible
-                    + ", mLayer=" + mLayer
-                    + ", mBounds=" + mBounds
-                    + ", mSafeBounds=" + mSafeBounds
-                    + ", mCornerRadius=" + mCornerRadius
-                    + ", mInsets=" + mInsets
-                    + '}';
-        }
         return "Variant{"
-                + "mId='" + mId
-                + ", mVisualData" + mVisualData;
+                + "mId='"
+                + mId
+                + '\''
+                + ", mAlpha="
+                + mAlpha
+                + ", mIsVisible="
+                + mIsVisible
+                + ", mLayer="
+                + mLayer
+                + ", mBounds="
+                + mBounds
+                + ", mSafeBounds="
+                + mSafeBounds
+                + ", mCornerRadius="
+                + mCornerRadius
+                + ", mInsets="
+                + mInsets
+                + '}';
     }
 
     /** Builder for {@link Variant} objects. */
@@ -426,48 +400,13 @@ public class Variant {
         /** Returns the {@link Variant} instance */
         @NonNull
         public Variant build() {
-            if (!enableVisualData()) {
-                return buildLegacy();
-            }
-            Variant variant = new Variant(mId);
-            VisualData.Builder visualDataBuilder;
-            if (mParent != null) {
-                visualDataBuilder = new VisualData.Builder(mParent.mVisualData);
-            } else {
-                visualDataBuilder = new VisualData.Builder();
-            }
-            if (mBounds != null) {
-                visualDataBuilder.setBounds(mBounds);
-            }
-            if (mAlpha != null) {
-                visualDataBuilder.setAlpha(mAlpha);
-            }
-            if (mInsets != null) {
-                visualDataBuilder.setInsets(mInsets);
-            }
-            if (mIsVisible != null) {
-                visualDataBuilder.setIsVisible(mIsVisible);
-            }
-            if (mCornerRadius != null) {
-                visualDataBuilder.setCornerRadius(mCornerRadius);
-            }
-            if (mLayer != null) {
-                visualDataBuilder.setLayer(mLayer);
-            }
-            if (mSafeBounds != null) {
-                visualDataBuilder.setSafeBounds(mSafeBounds);
-            }
-            variant.setVisualData(visualDataBuilder.build());
-            return variant;
-        }
-
-        private Variant buildLegacy() {
             Variant variant;
             if (mParent != null) {
                 variant = new Variant(mId, mParent);
             } else {
                 variant = new Variant(mId);
             }
+
             if (mAlpha != null) {
                 variant.setAlpha(mAlpha);
             }
@@ -492,6 +431,7 @@ public class Variant {
                 variant.setInsets(
                         Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
             }
+
             return variant;
         }
     }

@@ -349,7 +349,12 @@ public class PanelStateXmlParser {
         parser.require(XmlPullParser.START_TAG, null, KEY_FRAME_VARIANT_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
         String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
+        String parentStr = attrs.getAttributeValue(null, PARENT_ATTRIBUTE);
+        Variant parent = panelState.getVariant(parentStr);
         KeyFrameVariant.Builder builder = new KeyFrameVariant.Builder(id);
+        if (parent != null) {
+            builder.setParent(parent);
+        }
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String name = parser.getName();

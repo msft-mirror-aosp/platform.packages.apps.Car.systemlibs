@@ -73,9 +73,6 @@ public class KeyFrameVariant extends Variant {
 
             /** Returns the {@link KeyFrameVariant} instance */
             public KeyFrame build() {
-                if (mVariant == null) {
-                    throw new IllegalStateException("Variant must be set for KeyFrame");
-                }
                 return new KeyFrame(mFramePosition, mVariant);
             }
         }
@@ -90,6 +87,16 @@ public class KeyFrameVariant extends Variant {
     }
 
     private final List<KeyFrame> mKeyFrames = new ArrayList<>();
+
+    /**
+     * Constructor for KeyFrameVariant. Package-private, use the Builder.
+     *
+     * @param id   The ID of this variant.
+     * @param base The base variant to inherit properties from.
+     */
+    KeyFrameVariant(@NonNull String id, @NonNull Variant base) {
+        super(id, base);
+    }
 
     /**
      * Constructor for KeyFrameVariant. Package-private, use the Builder.
@@ -156,6 +163,16 @@ public class KeyFrameVariant extends Variant {
         return getAlpha(mFraction);
     }
 
+    /**
+     * Returns the layer for the current fraction.
+     *
+     * @return The layer of the variant.
+     */
+    @Override
+    public int getLayer() {
+        return getLayer(mFraction);
+    }
+
     @Override
     public void updateFromEvent(@Nullable Event event) {
         if (event instanceof KeyFrameEvent keyFrameEvent) {
@@ -201,7 +218,7 @@ public class KeyFrameVariant extends Variant {
                 return keyFrame;
             }
         }
-        return mKeyFrames.get(mKeyFrames.size() - 1);
+        return mKeyFrames.getLast();
     }
 
     /**
@@ -254,6 +271,18 @@ public class KeyFrameVariant extends Variant {
                 (KeyFrame keyFrame) -> keyFrame.mVariant.getInsets().toRect();
         Rect rect = getFrameRect(rectFunction, fraction);
         return Insets.of(rect);
+    }
+
+    /**
+     * Returns the layer of the variant for the given fraction.
+     *
+     * @param fraction The fraction value (between 0 and 1).
+     * @return The layer of the variant.
+     */
+    public int getLayer(float fraction) {
+        if (mKeyFrames.isEmpty()) return Layer.DEFAULT_LAYER;
+        KeyFrame keyFrame = Objects.requireNonNull(after(fraction));
+        return keyFrame.mVariant.getLayer();
     }
 
     private Rect getFrameRect(Function<KeyFrame, Rect> rectFunction, float fraction) {
@@ -313,13 +342,11 @@ public class KeyFrameVariant extends Variant {
     }
 
     /** Builder for {@link KeyFrameVariant} objects. */
-    public static class Builder {
+    public static class Builder extends Variant.Builder {
         private List<KeyFrame> mKeyFrames = new ArrayList<>();
-        @NonNull
-        protected String mId;
 
         public Builder(@NonNull String id) {
-            mId = id;
+            super(id);
         }
 
         /** Adds keyframe */
@@ -335,9 +362,37 @@ public class KeyFrameVariant extends Variant {
         }
 
         /** Returns the {@link KeyFrameVariant} instance */
+        @Override
         @NonNull
         public KeyFrameVariant build() {
-            KeyFrameVariant variant = new KeyFrameVariant(mId);
+            KeyFrameVariant variant;
+            if (mParent != null) {
+                variant = new KeyFrameVariant(mId, mParent);
+            } else {
+                variant = new KeyFrameVariant(mId);
+            }
+
+            if (mAlpha != null) {
+                variant.setAlpha(mAlpha);
+            }
+            if (mIsVisible != null) {
+                variant.setVisibility(mIsVisible);
+            }
+            if (mLayer != null) {
+                variant.setLayer(mLayer);
+            }
+            if (mBounds != null) {
+                variant.setBounds(new Rect(mBounds)); // Defensive copy
+            }
+            if (mCornerRadius != null) {
+                variant.setCornerRadius(mCornerRadius);
+            }
+            variant.setSafeBounds(new Rect( (mSafeBounds != null) ? mSafeBounds : mBounds));
+            if (mInsets != null) {
+                variant.setInsets(
+                        Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
+            }
+
             // Sort keyframes by frame position after adding them all.
             mKeyFrames.sort(Comparator.comparingInt(o -> o.mFramePosition));
             for (KeyFrame keyFrame : mKeyFrames) {
