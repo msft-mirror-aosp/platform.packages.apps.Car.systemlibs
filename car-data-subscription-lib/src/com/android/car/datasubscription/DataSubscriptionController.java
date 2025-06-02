@@ -384,6 +384,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         }
     }
 
+    @VisibleForTesting
     @Override
     public void setUserId(int userId) {
         mUserId = userId;

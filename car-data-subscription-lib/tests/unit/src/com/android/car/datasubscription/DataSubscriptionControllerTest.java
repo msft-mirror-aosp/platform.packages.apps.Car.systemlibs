@@ -85,6 +85,7 @@ public class DataSubscriptionControllerTest {
         mController.setDataSubscriptionMessageEventListener(
                 mDataSubscriptionMessageEventListener);
         mController.setEditor(mEditor);
+        mController.setUserId(1000);
         mRunningTaskInfoMock = new ActivityManager.RunningTaskInfo();
         mRunningTaskInfoMock.topActivity = new ComponentName("testPkgName", "testClassName");
         mRunningTaskInfoMock.taskId = 1;
