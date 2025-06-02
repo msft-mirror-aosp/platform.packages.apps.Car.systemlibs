@@ -56,7 +56,9 @@ public class Variant {
     private final IntEvaluator mIntEvaluator = new IntEvaluator();
 
     @NonNull
-    protected final String mId;
+    protected String mId;
+
+    public String mIdName;
     private float mAlpha;
     private boolean mIsVisible;
     private int mLayer;
@@ -74,10 +76,13 @@ public class Variant {
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
      * intended to be used by the VariantBuilder.
      *
-     * @param id The ID of the variant.
+     * @param id     The ID of the variant.
+     * @param idName The name of res ID of this variant.
      */
-    Variant(@NonNull String id) {
-        mId = id;
+    Variant(@NonNull String id, String idName) {
+        this.mId = id;
+        this.mIdName = idName;
+
         mBounds = new Rect();
         mSafeBounds = new Rect();
         mIsVisible = Visibility.DEFAULT_VISIBILITY;
@@ -97,8 +102,8 @@ public class Variant {
      * @param id   The ID of the variant.
      * @param base The optional base variant to inherit properties from.
      */
-    Variant(@NonNull String id, @NonNull Variant base) {
-        this(id);
+    Variant(@NonNull String id, @NonNull Variant base, String idName) {
+        this(id, idName);
         mBounds = new Rect(base.getBounds());
         mSafeBounds = new Rect(base.getSafeBounds());
         mIsVisible = base.isVisible();
@@ -328,15 +333,23 @@ public class Variant {
                         .collect(Collectors.joining(" , "));
 
         return "Variant{"
-                + "mId='" + mId
-                + ", mAlpha=" + mAlpha
-                + ", mIsVisible=" + mIsVisible
-                + ", mLayer=" + mLayer
-                + ", mBounds=" + mBounds
-                + ", mSafeBounds=" + mSafeBounds
-                + ", mCornerRadius=" + mCornerRadius
-                + ", mInsets=" + mInsets
-                + ", mDecors" + decorString
+                + "mIdName='"
+                + mIdName
+                + '\''
+                + ", mAlpha="
+                + mAlpha
+                + ", mIsVisible="
+                + mIsVisible
+                + ", mLayer="
+                + mLayer
+                + ", mBounds="
+                + mBounds
+                + ", mSafeBounds="
+                + mSafeBounds
+                + ", mCornerRadius="
+                + mCornerRadius
+                + ", mInsets="
+                + mInsets
                 + '}';
     }
 
@@ -352,6 +365,8 @@ public class Variant {
     public static class Builder {
         @NonNull
         protected String mId;
+        @NonNull
+        protected String mIdName;
         @Nullable
         protected Float mAlpha;
         @Nullable
@@ -371,9 +386,10 @@ public class Variant {
         @NonNull
         private Set<Decor> mDecors;
 
-        public Builder(@NonNull String id) {
+        public Builder(@NonNull String id, @NonNull String idName) {
             mId = id;
             mDecors = new HashSet<>();
+            mIdName = idName;
         }
 
         /** Sets alpha */
@@ -440,9 +456,9 @@ public class Variant {
         public Variant build() {
             Variant variant;
             if (mParent != null) {
-                variant = new Variant(mId, mParent);
+                variant = new Variant(mId, mParent, mIdName);
             } else {
-                variant = new Variant(mId);
+                variant = new Variant(mId, mIdName);
             }
 
             if (mAlpha != null) {

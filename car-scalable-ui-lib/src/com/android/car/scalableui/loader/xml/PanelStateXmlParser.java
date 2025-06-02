@@ -248,7 +248,7 @@ public class PanelStateXmlParser {
                             parseVariant(context, panelState, defaultLayer, parser));
                     break;
                 case KEY_FRAME_VARIANT_TAG:
-                    panelState.addVariant(parseKeyFrameVariant(panelState, parser));
+                    panelState.addVariant(parseKeyFrameVariant(panelState, parser, context));
                     break;
                 case TRANSITIONS_TAG:
                     List<Transition> transitions = parseTransitions(context, panelState, parser);
@@ -353,13 +353,17 @@ public class PanelStateXmlParser {
     @NonNull
     private static Variant parseKeyFrameVariant(
             @NonNull PanelState panelState,
-            @NonNull XmlPullParser parser) throws IOException, XmlPullParserException {
+            @NonNull XmlPullParser parser, Context context)
+            throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, KEY_FRAME_VARIANT_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
         String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
+        int resourceId = Integer.parseInt(id.substring(1));
+        String idName = context.getResources().getResourceEntryName(
+                resourceId);
         String parentStr = attrs.getAttributeValue(null, PARENT_ATTRIBUTE);
         Variant parent = panelState.getVariant(parentStr);
-        KeyFrameVariant.Builder builder = new KeyFrameVariant.Builder(id);
+        KeyFrameVariant.Builder builder = new KeyFrameVariant.Builder(id, idName);
         if (parent != null) {
             builder.setParent(parent);
         }
@@ -402,10 +406,13 @@ public class PanelStateXmlParser {
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
         String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
+        int resourceId = Integer.parseInt(id.substring(1));
+        String idName = context.getResources().getResourceEntryName(
+                resourceId);
         String parentVariantId = attrs.getAttributeValue(null, PARENT_ATTRIBUTE);
         Variant parentVariant = panelState.getVariant(parentVariantId);
 
-        Variant.Builder variantBuilder = new Variant.Builder(id);
+        Variant.Builder variantBuilder = new Variant.Builder(id, idName);
         variantBuilder.setLayer(defaultLayer);
         variantBuilder.setParent(parentVariant);
         while (parser.next() != XmlPullParser.END_TAG) {

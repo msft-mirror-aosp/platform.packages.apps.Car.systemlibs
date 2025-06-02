@@ -36,13 +36,14 @@ import org.junit.runner.RunWith;
 public class TransitionTest {
 
     private static final String TO_VARIANT_ID = "TO_VARIANT_ID";
+    private static final String TO_VARIANT_NAME = "TO_VARIANT_NAME";
     private static final String FROM_VARIANT_ID = "FROM_VARIANT_ID";
     private static final Event TEST_EVENT = new Event("TEST_EVENT");
 
     @Test
     public void testTransitionCreation() {
-        Variant fromVariant = new Variant(FROM_VARIANT_ID);
-        Variant toVariant = new Variant(TO_VARIANT_ID);
+        Variant fromVariant = new Variant(FROM_VARIANT_ID, TO_VARIANT_NAME);
+        Variant toVariant = new Variant(TO_VARIANT_ID, TO_VARIANT_NAME);
         Transition transition = new Transition(fromVariant, toVariant, TEST_EVENT, null, 500,
                 new AccelerateDecelerateInterpolator());
 
@@ -56,8 +57,8 @@ public class TransitionTest {
     public void testGetAnimator_defaultAnimator() {
         Panel panel = mock(Panel.class);
         when(panel.getInsets()).thenReturn(mock(Insets.class));
-        Variant fromVariant = new Variant(FROM_VARIANT_ID);
-        Variant toVariant = new Variant(TO_VARIANT_ID);
+        Variant fromVariant = new Variant(FROM_VARIANT_ID, TO_VARIANT_NAME);
+        Variant toVariant = new Variant(TO_VARIANT_ID, TO_VARIANT_NAME);
         Transition transition = new Transition(fromVariant, toVariant, TEST_EVENT, null, 500,
                 new AccelerateDecelerateInterpolator());
 
@@ -69,7 +70,7 @@ public class TransitionTest {
     @Test
     public void testGetAnimator_sameFromAndToVariant() {
         Panel panel = mock(Panel.class);
-        Variant variant = new Variant(FROM_VARIANT_ID);
+        Variant variant = new Variant(FROM_VARIANT_ID, TO_VARIANT_NAME);
         Transition transition = new Transition(variant, variant, TEST_EVENT, null, 500,
                 new AccelerateDecelerateInterpolator());
 

@@ -69,17 +69,20 @@ public class KeyFrameVariantTest {
 
     private KeyFrameVariant createKeyFrameVariant() {
         final String keyFrameVariantId = "keyFrameVariantId";
+        final String keyFrameVariantIdName = "keyFrameVariantIdName";
         final String variantId1 = "variantId1";
+        final String variantId1Name = "variantId1Name";
         final String variantId2 = "variantId2";
+        final String variantId2Name = "variantId2Name";
 
-        KeyFrameVariant variant = new KeyFrameVariant(keyFrameVariantId);
-        Variant variant1 = new Variant(variantId1);
+        KeyFrameVariant variant = new KeyFrameVariant(keyFrameVariantId, keyFrameVariantIdName);
+        Variant variant1 = new Variant(variantId1, variantId1Name);
         variant1.setBounds(new Rect(0, 0, 10, 10));
         variant1.setInsets(Insets.of(0, 0, 0, 0));
         variant1.setVisibility(false);
         variant1.setAlpha(0.0f);
 
-        Variant variant2 = new Variant(variantId2);
+        Variant variant2 = new Variant(variantId2, variantId2Name);
         variant2.setBounds(new Rect(10, 20, 20, 30));
         variant2.setInsets(Insets.of(0, 10, 10, 20));
         variant2.setVisibility(true);
