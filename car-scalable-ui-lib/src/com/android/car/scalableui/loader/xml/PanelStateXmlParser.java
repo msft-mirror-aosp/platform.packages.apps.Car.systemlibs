@@ -462,18 +462,18 @@ public class PanelStateXmlParser {
         parser.require(XmlPullParser.START_TAG, null, BACKGROUND_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
         String decorId = id + "_" + BACKGROUND_TAG;
-        int colorRes = attrs.getAttributeResourceValue(null, BACKGROUND_COLOR_ATTRIBUTE, -1);
-        Decor.Builder decorBuilder = new Decor.Builder(decorId).setColor(colorRes).setContent(
-                R.layout.background_layout);
+        int colorRes = attrs.getAttributeResourceValue(/* namespace= */null,
+                BACKGROUND_COLOR_ATTRIBUTE, /* defaultValue= */-1);
+        float alpha = 1f;
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String name = parser.getName();
             if (Objects.equals(name, BACKGROUND_ALPHA_ATTRIBUTE)) {
-                decorBuilder.setAlpha(parseAlpha(context, parser).getAlpha());
+                alpha = parseAlpha(context, parser).getAlpha();
             }
         }
 
-        return decorBuilder.build();
+        return new Decor(decorId, /* layer= */ -1, colorRes, alpha, R.layout.background_layout);
     }
 
     @NonNull

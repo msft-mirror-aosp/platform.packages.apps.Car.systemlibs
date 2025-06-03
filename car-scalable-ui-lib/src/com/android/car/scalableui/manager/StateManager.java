@@ -123,7 +123,7 @@ public class StateManager {
             if (transition == null) {
                 Log.e(TAG, "transition is null for " + panelState.getId());
                 if (event instanceof KeyFrameEvent) {
-                    panelTransactionBuilder.addUnchangedPanelId(panelState.getId());
+                    panelTransactionBuilder.addLockedPanelId(panelState.getId());
                 }
                 continue;
             }
