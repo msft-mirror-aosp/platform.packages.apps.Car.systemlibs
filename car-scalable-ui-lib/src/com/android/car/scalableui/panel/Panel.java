@@ -260,4 +260,8 @@ public interface Panel {
         return null;
     }
 
+    /**
+     * Refresh the panel theme.
+     */
+    void refreshTheme();
 }
