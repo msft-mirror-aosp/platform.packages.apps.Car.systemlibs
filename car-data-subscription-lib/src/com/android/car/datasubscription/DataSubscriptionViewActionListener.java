@@ -30,4 +30,9 @@ public interface DataSubscriptionViewActionListener {
      */
     void setDataSubscriptionMessageEventListener(DataSubscriptionMessageEventListener
             dataSubscriptionMessageEventListener);
+
+    /**
+     * Set the current user id
+     */
+    void setUserId(int userId);
 }
