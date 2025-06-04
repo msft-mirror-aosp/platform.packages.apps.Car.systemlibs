@@ -74,7 +74,7 @@ public class PanelStateTest {
     @Test
     public void testAddVariant() {
         PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
-        Variant variant = new Variant(VARIANT1);
+        Variant variant = new Variant(VARIANT1, "");
         panelState.addVariant(variant);
         assertThat(panelState.getVariant(VARIANT1)).isEqualTo(variant);
     }
@@ -82,8 +82,8 @@ public class PanelStateTest {
     @Test
     public void testAddTransition() {
         PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
-        Variant variant1 = new Variant(VARIANT1);
-        Variant variant2 = new Variant(VARIANT2);
+        Variant variant1 = new Variant(VARIANT1, "");
+        Variant variant2 = new Variant(VARIANT2, "");
         Transition transition = new Transition(variant1, variant2, TEST_EVENT, null, 0,
                 null);
         panelState.addTransition(transition);
@@ -97,8 +97,8 @@ public class PanelStateTest {
     @Test
     public void testSetVariant() {
         PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
-        Variant variant1 = new Variant(VARIANT1);
-        Variant variant2 = new Variant(VARIANT2);
+        Variant variant1 = new Variant(VARIANT1, "");
+        Variant variant2 = new Variant(VARIANT2, "");
         panelState.addVariant(variant1);
         panelState.addVariant(variant2);
 
@@ -109,8 +109,8 @@ public class PanelStateTest {
     @Test
     public void testResetVariant() {
         PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
-        Variant variant1 = new Variant(VARIANT1);
-        Variant variant2 = new Variant(VARIANT2);
+        Variant variant1 = new Variant(VARIANT1, "");
+        Variant variant2 = new Variant(VARIANT2, "");
         panelState.addVariant(variant1);
         panelState.addVariant(variant2);
         panelState.setDefaultVariant(VARIANT1);

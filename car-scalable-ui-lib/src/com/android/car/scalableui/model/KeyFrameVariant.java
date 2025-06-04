@@ -91,20 +91,22 @@ public class KeyFrameVariant extends Variant {
     /**
      * Constructor for KeyFrameVariant. Package-private, use the Builder.
      *
-     * @param id   The ID of this variant.
-     * @param base The base variant to inherit properties from.
+     * @param id     The ID of this variant.
+     * @param idName The name of res ID of this variant.
+     * @param base   The base variant to inherit properties from.
      */
-    KeyFrameVariant(@NonNull String id, @NonNull Variant base) {
-        super(id, base);
+    KeyFrameVariant(@NonNull String id, @NonNull Variant base, @NonNull String idName) {
+        super(id, base, idName);
     }
 
     /**
      * Constructor for KeyFrameVariant. Package-private, use the Builder.
      *
-     * @param id The ID of this variant.
+     * @param id     The ID of this variant.
+     * @param idName The name of res ID of this variant.
      */
-    KeyFrameVariant(@NonNull String id) {
-        super(id);
+    KeyFrameVariant(@NonNull String id, @NonNull String idName) {
+        super(id, idName);
     }
 
     /**
@@ -299,7 +301,7 @@ public class KeyFrameVariant extends Variant {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("KeyFrameVariant{ mid=")
-                .append(mId)
+                .append(mIdName)
                 .append(", mFraction=")
                 .append(mFraction);
         for (KeyFrame keyFrame : mKeyFrames) {
@@ -345,8 +347,8 @@ public class KeyFrameVariant extends Variant {
     public static class Builder extends Variant.Builder {
         private List<KeyFrame> mKeyFrames = new ArrayList<>();
 
-        public Builder(@NonNull String id) {
-            super(id);
+        public Builder(@NonNull String id, @NonNull String idName) {
+            super(id, idName);
         }
 
         /** Adds keyframe */
@@ -367,9 +369,9 @@ public class KeyFrameVariant extends Variant {
         public KeyFrameVariant build() {
             KeyFrameVariant variant;
             if (mParent != null) {
-                variant = new KeyFrameVariant(mId, mParent);
+                variant = new KeyFrameVariant(mId, mParent, mIdName);
             } else {
-                variant = new KeyFrameVariant(mId);
+                variant = new KeyFrameVariant(mId, mIdName);
             }
 
             if (mAlpha != null) {
@@ -387,7 +389,7 @@ public class KeyFrameVariant extends Variant {
             if (mCornerRadius != null) {
                 variant.setCornerRadius(mCornerRadius);
             }
-            variant.setSafeBounds(new Rect( (mSafeBounds != null) ? mSafeBounds : mBounds));
+            variant.setSafeBounds(new Rect((mSafeBounds != null) ? mSafeBounds : mBounds));
             if (mInsets != null) {
                 variant.setInsets(
                         Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));

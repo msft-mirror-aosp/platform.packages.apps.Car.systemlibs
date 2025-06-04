@@ -15,6 +15,8 @@
  */
 package com.android.car.scalableui.model;
 
+import static com.android.car.scalableui.Flags.enableDecor;
+
 import android.animation.Animator;
 import android.animation.FloatEvaluator;
 import android.animation.IntEvaluator;
@@ -30,6 +32,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.panel.Panel;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 /**
  * Represents a specific visual state or variant of a {@code Panel}.
@@ -47,7 +56,9 @@ public class Variant {
     private final IntEvaluator mIntEvaluator = new IntEvaluator();
 
     @NonNull
-    protected final String mId;
+    protected String mId;
+
+    public String mIdName;
     private float mAlpha;
     private boolean mIsVisible;
     private int mLayer;
@@ -58,17 +69,20 @@ public class Variant {
     private Rect mSafeBounds;
     @NonNull
     private Insets mInsets;
+    @NonNull
+    private final Map<String, Decor> mDecors;
 
     /**
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
      * intended to be used by the VariantBuilder.
      *
-     * @param id The ID of the variant.
+     * @param id     The ID of the variant.
+     * @param idName The name of res ID of this variant.
      */
-    Variant(@NonNull String id) {
+    Variant(@NonNull String id, String idName) {
         this.mId = id;
+        this.mIdName = idName;
 
-        // Initialize with default values
         mBounds = new Rect();
         mSafeBounds = new Rect();
         mIsVisible = Visibility.DEFAULT_VISIBILITY;
@@ -76,6 +90,7 @@ public class Variant {
         mAlpha = Alpha.DEFAULT_ALPHA;
         mCornerRadius = Corner.DEFAULT_RADIUS;
         mInsets = Insets.NONE;
+        mDecors = new HashMap<>();
     }
 
     /**
@@ -87,8 +102,8 @@ public class Variant {
      * @param id   The ID of the variant.
      * @param base The optional base variant to inherit properties from.
      */
-    Variant(@NonNull String id, @NonNull Variant base) {
-        this(id);
+    Variant(@NonNull String id, @NonNull Variant base, String idName) {
+        this(id, idName);
         mBounds = new Rect(base.getBounds());
         mSafeBounds = new Rect(base.getSafeBounds());
         mIsVisible = base.isVisible();
@@ -273,15 +288,6 @@ public class Variant {
     }
 
     /**
-     * Update the variant with data from an event.
-     *
-     * @param event the event that was executed.
-     */
-    protected void updateFromEvent(@Nullable Event event) {
-        // no-op
-    }
-
-    /**
      * @return {@link Insets}.
      */
     @NonNull
@@ -291,18 +297,44 @@ public class Variant {
 
     /**
      * Sets insets.
-     * This is essentially the panle's safe rectangle.
+     * This is essentially the panel's insets.
      */
     protected void setInsets(@NonNull Insets insets) {
         mInsets = insets;
     }
 
+    private void setDecors(@NonNull Set<Decor> decors) {
+        if (!enableDecor()) {
+            return;
+        }
+        mDecors.clear();
+        decors.forEach(decor -> {
+            mDecors.put(decor.getId(), decor);
+        });
+    }
+
+    /**
+     * Update the variant with data from an event.
+     *
+     * @param event the event that was executed.
+     */
+    protected void updateFromEvent(@Nullable Event event) {
+        // no-op
+    }
+
     @Override
     @NonNull
     public String toString() {
+        String decorString = mDecors.isEmpty()
+                ? "empty"
+                : mDecors.entrySet()
+                        .stream()
+                        .map(entry -> entry.getKey() + "=" + entry.getValue())
+                        .collect(Collectors.joining(" , "));
+
         return "Variant{"
-                + "mId='"
-                + mId
+                + "mIdName='"
+                + mIdName
                 + '\''
                 + ", mAlpha="
                 + mAlpha
@@ -321,10 +353,20 @@ public class Variant {
                 + '}';
     }
 
+    /**
+     * Returns a map of id to {@code Decor} pair.
+     */
+    @NonNull
+    public Map<String, Decor> getDecors() {
+        return mDecors;
+    }
+
     /** Builder for {@link Variant} objects. */
     public static class Builder {
         @NonNull
         protected String mId;
+        @NonNull
+        protected String mIdName;
         @Nullable
         protected Float mAlpha;
         @Nullable
@@ -341,9 +383,13 @@ public class Variant {
         protected Insets mInsets;
         @Nullable
         protected Variant mParent;
+        @NonNull
+        private Set<Decor> mDecors;
 
-        public Builder(@NonNull String id) {
+        public Builder(@NonNull String id, @NonNull String idName) {
             mId = id;
+            mDecors = new HashSet<>();
+            mIdName = idName;
         }
 
         /** Sets alpha */
@@ -397,14 +443,22 @@ public class Variant {
             return this;
         }
 
+        /** Adds decor */
+        public Builder addDecor(Decor decor) {
+            if (enableDecor()) {
+                mDecors.add(decor);
+            }
+            return this;
+        }
+
         /** Returns the {@link Variant} instance */
         @NonNull
         public Variant build() {
             Variant variant;
             if (mParent != null) {
-                variant = new Variant(mId, mParent);
+                variant = new Variant(mId, mParent, mIdName);
             } else {
-                variant = new Variant(mId);
+                variant = new Variant(mId, mIdName);
             }
 
             if (mAlpha != null) {
@@ -431,7 +485,9 @@ public class Variant {
                 variant.setInsets(
                         Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
             }
-
+            if (!mDecors.isEmpty()) {
+                variant.setDecors(mDecors);
+            }
             return variant;
         }
     }

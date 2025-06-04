@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,15 +33,17 @@ public class PanelTransaction {
 
     /** A map of panel IDs to panel {@link Animator}s. */
     private final HashMap<String, Animator> mAnimatorMap;
+    private final HashSet<String> mUnchangedPanelIdSet;
     private boolean mHasWindowChanges;
 
     private Runnable mAnimationStartCallbackRunnable;
     private Runnable mAnimationEndCallbackRunnable;
 
     public PanelTransaction(Map<String, Transition> transactionMap,
-            Map<String, Animator> animatorMap) {
+            Map<String, Animator> animatorMap, Set<String> unchangedPanelIdSet) {
         mTransactionMap = new HashMap<>(transactionMap);
         mAnimatorMap = new HashMap<>(animatorMap);
+        mUnchangedPanelIdSet = new HashSet<>(unchangedPanelIdSet);
     }
 
     /** Returns a set of entries representing the transactions in this object. */
@@ -53,6 +56,11 @@ public class PanelTransaction {
     @NonNull
     public Set<Map.Entry<String, Animator>> getAnimators() {
         return mAnimatorMap.entrySet();
+    }
+
+    @NonNull
+    public Set<String> getUnchangedPanelIdSet() {
+        return mUnchangedPanelIdSet;
     }
 
     /**
@@ -118,10 +126,12 @@ public class PanelTransaction {
         private Runnable mAnimationStartCallbackRunnable;
         private Runnable mAnimationEndCallbackRunnable;
         private boolean mHasWindowChanges = true;
+        private Set<String> mUnchangedPanelIdSet;
 
         public Builder() {
             mTransactionMap = new HashMap<>();
             mAnimatorMap = new HashMap<>();
+            mUnchangedPanelIdSet = new HashSet<>();
         }
 
         /**
@@ -180,13 +190,23 @@ public class PanelTransaction {
         }
 
         /**
+         * Adds the ID of a panel that should remain unchanged during this transaction.
+         */
+        @NonNull
+        public Builder addUnchangedPanelId(@NonNull String id) {
+            mUnchangedPanelIdSet.add(id);
+            return this;
+        }
+
+        /**
          * Builds the {@link PanelTransaction} object.
          *
          * @return The built {@link PanelTransaction} object.
          */
         @NonNull
         public PanelTransaction build() {
-            PanelTransaction panelTransaction = new PanelTransaction(mTransactionMap, mAnimatorMap);
+            PanelTransaction panelTransaction = new PanelTransaction(mTransactionMap, mAnimatorMap,
+                    mUnchangedPanelIdSet);
             panelTransaction.setHasWindowChanges(mHasWindowChanges);
             if (mAnimationStartCallbackRunnable != null) {
                 panelTransaction.setAnimationStartCallbackRunnable(mAnimationStartCallbackRunnable);

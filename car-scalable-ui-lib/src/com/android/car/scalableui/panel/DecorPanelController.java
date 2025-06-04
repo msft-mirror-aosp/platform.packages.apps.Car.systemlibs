@@ -25,4 +25,9 @@ public interface DecorPanelController {
      * Returns a {@link View} to show in the decor panel.
      */
     View getView();
+
+    /**
+     * Refreshes the theme.
+     */
+    void refreshTheme();
 }

@@ -103,4 +103,11 @@ public class PanelPool {
         }
         return null;
     }
+
+    /**
+     * Refresh all the panels contents, see {@link Panel#refreshTheme()}.
+     */
+    public void refreshTheme() {
+        mPanels.forEach((id, panel) -> panel.refreshTheme());
+    }
 }

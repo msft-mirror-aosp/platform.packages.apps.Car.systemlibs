@@ -54,6 +54,7 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 public class StateManagerTest {
     private static final String TEST_PANEL_ID = "panel_id";
+    private static final String TEST_PANEL_NAME = "panel_name";
     private static final String TO_VARIANT_ID = "TO_VARIANT_ID";
     private static final String FROM_VARIANT_ID = "FROM_VARIANT_ID";
     private static final Event TEST_EVENT = new Event.Builder("TEST_EVENT").build();
@@ -86,7 +87,8 @@ public class StateManagerTest {
         PanelPool.getInstance().setDelegate(delegate);
         when(delegate.createPanel(any())).thenReturn(mockPanel);
         Transition mockTransition = mock(Transition.class);
-        when(mockTransition.getToVariant()).thenReturn(new Variant.Builder(TO_VARIANT_ID).build());
+        when(mockTransition.getToVariant()).thenReturn(
+                new Variant.Builder(TO_VARIANT_ID, TEST_PANEL_NAME).build());
         when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
         Animator mockAnimator = mock(Animator.class);
         when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(
@@ -203,7 +205,8 @@ public class StateManagerTest {
         PanelPool.getInstance().setDelegate(delegate);
         when(delegate.createPanel(any())).thenReturn(mockPanel);
         Transition mockTransition = mock(Transition.class);
-        when(mockTransition.getToVariant()).thenReturn(new Variant.Builder(TO_VARIANT_ID).build());
+        when(mockTransition.getToVariant()).thenReturn(
+                new Variant.Builder(TO_VARIANT_ID, TEST_PANEL_NAME).build());
         when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
         when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(null);
 
@@ -291,7 +294,8 @@ public class StateManagerTest {
         PanelPool.getInstance().setDelegate(delegate);
         when(delegate.createPanel(any())).thenReturn(mockPanel);
         Transition mockTransition = mock(Transition.class);
-        when(mockTransition.getToVariant()).thenReturn(new Variant.Builder(TO_VARIANT_ID).build());
+        when(mockTransition.getToVariant()).thenReturn(
+                new Variant.Builder(TO_VARIANT_ID, TEST_PANEL_NAME).build());
         when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
         Animator mockAnimator = mock(Animator.class);
         when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(
@@ -326,7 +330,8 @@ public class StateManagerTest {
         when(delegate.createPanel(any())).thenReturn(mockPanel);
         when(PanelPool.getInstance().getPanel(anyString())).thenReturn(mockPanel);
         Transition mockTransition = mock(Transition.class);
-        when(mockTransition.getToVariant()).thenReturn(new Variant.Builder(TO_VARIANT_ID).build());
+        when(mockTransition.getToVariant()).thenReturn(
+                new Variant.Builder(TO_VARIANT_ID, TEST_PANEL_NAME).build());
         when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
         when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(null);
 
