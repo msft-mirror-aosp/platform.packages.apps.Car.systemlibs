@@ -67,6 +67,10 @@ public final class PanelControllerMetadata {
         mConfigurations = new Bundle(bundle);
     }
 
+    public PanelControllerMetadata(Bundle bundle) {
+        this(/* id= */ "", new ArrayList<>(), bundle);
+    }
+
     /**
      * Retrieves a String configuration value associated with the specified key or null if no
      * mapping.

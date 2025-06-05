@@ -43,6 +43,7 @@ public class PanelState implements Cloneable {
     private int mDisplayId;
 
     private final String mId;
+    @Nullable
     private final Role mRole;
     private final List<Variant> mVariants = new ArrayList<>();
     private final List<Transition> mTransitions = new ArrayList<>();
@@ -161,7 +162,7 @@ public class PanelState implements Cloneable {
     }
 
     /** Returns the role */
-    @NonNull
+    @Nullable
     public Role getRole() {
         return mRole;
     }
@@ -302,9 +303,14 @@ public class PanelState implements Cloneable {
         private List<Transition> mTransitions = new ArrayList<>();
         private PanelControllerMetadata mPanelControllerMetadata;
 
-        public Builder(@NonNull String id, @NonNull Role role) {
+        public Builder(@NonNull String id) {
             mId = id;
+        }
+
+        /** Sets role */
+        public Builder setRole(@NonNull Role role) {
             mRole = role;
+            return this;
         }
 
         /** Sets default variant */
