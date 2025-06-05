@@ -19,8 +19,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.scalableui.loader.xml.PanelStateXmlParser;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,11 +30,5 @@ public class CornerTest {
         final int expectedRadius = 2;
         Corner corner = new Corner(expectedRadius);
         assertThat(corner.getRadius()).isEqualTo(expectedRadius);
-    }
-
-    @Test
-    public void testCornerConstants() {
-        assertThat(PanelStateXmlParser.CORNER_TAG).isEqualTo("Corner");
-        assertThat(Corner.DEFAULT_RADIUS).isEqualTo(0);
     }
 }

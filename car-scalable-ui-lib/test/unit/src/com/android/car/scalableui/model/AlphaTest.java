@@ -19,8 +19,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.scalableui.loader.xml.PanelStateXmlParser;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,12 +30,5 @@ public class AlphaTest {
         final float testAlpha = 0.5f;
         Alpha alpha = new Alpha(testAlpha);
         assertThat(alpha.getAlpha()).isEqualTo(testAlpha);
-    }
-
-    @Test
-    public void testAlphaConstants() {
-        assertThat(PanelStateXmlParser.ALPHA_TAG).isEqualTo("Alpha");
-        assertThat(PanelStateXmlParser.ALPHA_VALUE_ATTRIBUTE).isEqualTo("alpha");
-        assertThat(Alpha.DEFAULT_ALPHA).isEqualTo(1f);
     }
 }

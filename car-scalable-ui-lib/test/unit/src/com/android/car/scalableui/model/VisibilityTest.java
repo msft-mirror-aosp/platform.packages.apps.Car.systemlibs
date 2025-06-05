@@ -19,8 +19,6 @@ import static com.google.common.truth.Truth.assertThat;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.android.car.scalableui.loader.xml.PanelStateXmlParser;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -44,11 +42,5 @@ public class VisibilityTest {
         Visibility original = new Visibility(true);
         Visibility copy = new Visibility(original);
         assertThat(copy.isVisible()).isTrue();
-    }
-
-    @Test
-    public void testVisibilityConstants() {
-        assertThat(PanelStateXmlParser.VISIBILITY_TAG).isEqualTo("Visibility");
-        assertThat(Visibility.DEFAULT_VISIBILITY).isTrue();
     }
 }

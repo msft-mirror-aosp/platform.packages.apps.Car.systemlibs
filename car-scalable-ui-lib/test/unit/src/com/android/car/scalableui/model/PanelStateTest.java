@@ -15,11 +15,20 @@
  */
 package com.android.car.scalableui.model;
 
+import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.BAR_Z_ORDER_ATTRIBUTE;
+import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_BOTTOM_ID;
+import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_LEFT_ID;
+import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_RIGHT_ID;
+import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_TOP_ID;
+import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.TYPE_ATTRIBUTE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -30,9 +39,6 @@ import com.android.car.scalableui.unit.R;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
 
 @RunWith(AndroidJUnit4.class)
 public class PanelStateTest {
@@ -58,16 +64,112 @@ public class PanelStateTest {
     }
 
     @Test
-    public void testLoadFromXmlResource() throws XmlPullParserException, IOException {
+    public void testLoadFromXmlResource_panel() {
         XmlModelLoader loader = new XmlModelLoader(mContext);
         PanelState panelState = loader.createPanelState(R.xml.panel_test);
 
         assertThat(panelState.getId()).isEqualTo("panel_id");
         assertTrue(panelState.getRole().isDefault());
-        assertThat(panelState.getCurrentVariant().getId()).isEqualTo(VARIANT1);
-        Variant variant2 = panelState.getVariant(VARIANT2);
+        assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
+        Variant variant2 = panelState.getVariant("@" + R.id.variant2);
         assertThat(variant2.getLayer()).isEqualTo(100);
         assertThat(variant2.getAlpha()).isEqualTo(0.8f);
+        assertThat(variant2.getInsets()).isNotNull();
+    }
+
+    @Test
+    public void testLoadFromXmlResource_systemBar_top() {
+        XmlModelLoader loader = new XmlModelLoader(mContext);
+        PanelState panelState = loader.createPanelState(R.xml.system_bar_top_test);
+
+        DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
+        assertThat(panelState.getId()).isEqualTo(SYSTEM_BAR_PANEL_TOP_ID);
+        assertThat(panelState.getRole()).isNull();
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
+                BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(11);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
+                TYPE_ATTRIBUTE)).isEqualTo(3);
+        assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
+        assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(0);
+        assertThat(panelState.getCurrentVariant().getBounds().right).isEqualTo(
+                displayMetrics.widthPixels);
+        assertThat(panelState.getCurrentVariant().getBounds().bottom).isEqualTo(50);
+        assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
+        Variant variant2 = panelState.getVariant("@" + R.id.variant2);
+        assertThat(variant2.getAlpha()).isEqualTo(1.0f);
+        assertThat(variant2.getInsets()).isNotNull();
+    }
+
+    @Test
+    public void testLoadFromXmlResource_systemBar_bottom() {
+        XmlModelLoader loader = new XmlModelLoader(mContext);
+        PanelState panelState = loader.createPanelState(R.xml.system_bar_bottom_test);
+
+        DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
+        assertThat(panelState.getId()).isEqualTo(SYSTEM_BAR_PANEL_BOTTOM_ID);
+        assertThat(panelState.getRole()).isNull();
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
+                BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(0);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
+                TYPE_ATTRIBUTE)).isEqualTo(0);
+        assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(
+                displayMetrics.heightPixels - 50);
+        assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(0);
+        assertThat(panelState.getCurrentVariant().getBounds().right).isEqualTo(
+                displayMetrics.widthPixels);
+        assertThat(panelState.getCurrentVariant().getBounds().bottom).isEqualTo(
+                displayMetrics.heightPixels);
+        assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
+        Variant variant2 = panelState.getVariant("@" + R.id.variant2);
+        assertThat(variant2.getAlpha()).isEqualTo(1.0f);
+        assertThat(variant2.getInsets()).isNotNull();
+    }
+
+    @Test
+    public void testLoadFromXmlResource_systemBar_left() {
+        XmlModelLoader loader = new XmlModelLoader(mContext);
+        PanelState panelState = loader.createPanelState(R.xml.system_bar_left_test);
+
+        DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
+        assertThat(panelState.getId()).isEqualTo(SYSTEM_BAR_PANEL_LEFT_ID);
+        assertThat(panelState.getRole()).isNull();
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
+                BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(10);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
+                TYPE_ATTRIBUTE)).isEqualTo(1);
+        assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
+        assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(0);
+        assertThat(panelState.getCurrentVariant().getBounds().right).isEqualTo(50);
+        assertThat(panelState.getCurrentVariant().getBounds().bottom).isEqualTo(
+                displayMetrics.heightPixels);
+        assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
+        Variant variant2 = panelState.getVariant("@" + R.id.variant2);
+        assertThat(variant2.getAlpha()).isEqualTo(1.0f);
+        assertThat(variant2.getInsets()).isNotNull();
+    }
+
+    @Test
+    public void testLoadFromXmlResource_systemBar_right() {
+        XmlModelLoader loader = new XmlModelLoader(mContext);
+        PanelState panelState = loader.createPanelState(R.xml.system_bar_right_test);
+
+        DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
+        assertThat(panelState.getId()).isEqualTo(SYSTEM_BAR_PANEL_RIGHT_ID);
+        assertThat(panelState.getRole()).isNull();
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
+                BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(2);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
+                TYPE_ATTRIBUTE)).isEqualTo(2);
+        assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
+        assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(
+                displayMetrics.widthPixels - 50);
+        assertThat(panelState.getCurrentVariant().getBounds().right).isEqualTo(
+                displayMetrics.widthPixels);
+        assertThat(panelState.getCurrentVariant().getBounds().bottom).isEqualTo(
+                displayMetrics.heightPixels);
+        assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
+        Variant variant2 = panelState.getVariant("@" + R.id.variant2);
+        assertThat(variant2.getAlpha()).isEqualTo(1.0f);
         assertThat(variant2.getInsets()).isNotNull();
     }
 

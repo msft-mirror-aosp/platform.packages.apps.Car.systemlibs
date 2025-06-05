@@ -13,21 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.scalableui.model;
+package com.android.car.scalableui.loader.xml;
 
-import static com.google.common.truth.Truth.assertThat;
+import android.content.Context;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
+import com.android.car.scalableui.model.Variant;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
-@RunWith(AndroidJUnit4.class)
-public class LayerTest {
+import java.io.IOException;
 
-    @Test
-    public void testGetLayer() {
-        Layer layer = new Layer(10);
-        assertThat(layer.getLayer()).isEqualTo(10);
-    }
+/**
+ * Defines an object that parses a particular TAG to add it to the {@link Variant.Builder}
+ */
+interface VariantPropertyParser {
+    /**
+     * Parser for a given Variant Tag
+     */
+    Variant.Builder parse(Context context, XmlPullParser parser, Variant.Builder builder)
+            throws XmlPullParserException, IOException;
 }
