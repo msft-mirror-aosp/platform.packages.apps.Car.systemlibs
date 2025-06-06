@@ -44,7 +44,7 @@ public class TransitionTest {
     public void testTransitionCreation() {
         Variant fromVariant = new Variant(FROM_VARIANT_ID, TO_VARIANT_NAME);
         Variant toVariant = new Variant(TO_VARIANT_ID, TO_VARIANT_NAME);
-        Transition transition = new Transition(fromVariant, toVariant, TEST_EVENT, null, 500,
+        Transition transition = new Transition(fromVariant, toVariant, TEST_EVENT, null, 500, 0,
                 new AccelerateDecelerateInterpolator());
 
         assertThat(transition.getFromVariant()).isEqualTo(fromVariant);
@@ -59,7 +59,7 @@ public class TransitionTest {
         when(panel.getInsets()).thenReturn(mock(Insets.class));
         Variant fromVariant = new Variant(FROM_VARIANT_ID, TO_VARIANT_NAME);
         Variant toVariant = new Variant(TO_VARIANT_ID, TO_VARIANT_NAME);
-        Transition transition = new Transition(fromVariant, toVariant, TEST_EVENT, null, 500,
+        Transition transition = new Transition(fromVariant, toVariant, TEST_EVENT, null, 500, 0,
                 new AccelerateDecelerateInterpolator());
 
         Animator animator = transition.getAnimator(panel, fromVariant);
@@ -71,7 +71,7 @@ public class TransitionTest {
     public void testGetAnimator_sameFromAndToVariant() {
         Panel panel = mock(Panel.class);
         Variant variant = new Variant(FROM_VARIANT_ID, TO_VARIANT_NAME);
-        Transition transition = new Transition(variant, variant, TEST_EVENT, null, 500,
+        Transition transition = new Transition(variant, variant, TEST_EVENT, null, 500, 0,
                 new AccelerateDecelerateInterpolator());
 
         Animator animator = transition.getAnimator(panel, variant);

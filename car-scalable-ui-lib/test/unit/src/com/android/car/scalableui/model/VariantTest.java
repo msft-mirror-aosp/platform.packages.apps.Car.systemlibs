@@ -77,7 +77,7 @@ public class VariantTest {
         Variant toVariant = new Variant(toVariantId, "");
         Interpolator interpolator = mock(Interpolator.class);
 
-        Animator animator = fromVariant.getAnimator(panel, toVariant, 1000, interpolator);
+        Animator animator = fromVariant.getAnimator(panel, toVariant, 1000, 0, interpolator);
 
         assertThat(animator).isNotNull();
     }
