@@ -84,7 +84,7 @@ public class PanelStateTest {
         PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
         Variant variant1 = new Variant(VARIANT1, "");
         Variant variant2 = new Variant(VARIANT2, "");
-        Transition transition = new Transition(variant1, variant2, TEST_EVENT, null, 0,
+        Transition transition = new Transition(variant1, variant2, TEST_EVENT, null, 0, 0,
                 null);
         panelState.addTransition(transition);
         panelState.addVariant(variant1);

@@ -93,6 +93,7 @@ public class PanelStateXmlParser {
     public static final String ON_EVENT_TOKENS_ATTRIBUTE = "onEventTokens";
     public static final String ANIMATOR_ATTRIBUTE = "animator";
     public static final String DURATION_ATTRIBUTE = "duration";
+    public static final String DELAY_ATTRIBUTE = "delay";
     public static final String INTERPOLATOR_ATTRIBUTE = "interpolator";
 
     // --- Variant Tags ---
@@ -666,6 +667,7 @@ public class PanelStateXmlParser {
         Animator animator =
                 animatorId == 0 ? null : AnimatorInflater.loadAnimator(context, animatorId);
         int duration = attrs.getAttributeIntValue(null, DURATION_ATTRIBUTE, (int) defaultDuration);
+        int delay = attrs.getAttributeIntValue(null, DELAY_ATTRIBUTE, 0);
         int interpolatorRef = attrs.getAttributeResourceValue(null, INTERPOLATOR_ATTRIBUTE, 0);
         Interpolator interpolator =
                 interpolatorRef == 0
@@ -682,6 +684,7 @@ public class PanelStateXmlParser {
                 .setOnEvent(onEvent, onEventTokens)
                 .setAnimator(animator)
                 .setDefaultDuration(duration)
+                .setDelay(delay)
                 .setDefaultInterpolator(interpolator)
                 .build();
     }

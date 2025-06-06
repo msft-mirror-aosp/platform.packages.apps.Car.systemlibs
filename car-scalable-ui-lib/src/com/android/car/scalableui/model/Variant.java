@@ -124,6 +124,14 @@ public class Variant {
     }
 
     /**
+     * Returns the res ID name of the variant.
+     */
+    @NonNull
+    public String getIdName() {
+        return mIdName;
+    }
+
+    /**
      * Creates an animator to transition from the current state of a panel to this variant.
      *
      * @param panel        The panel to animate.
@@ -137,6 +145,7 @@ public class Variant {
             @NonNull Panel panel,
             @NonNull Variant toVariant,
             long duration,
+            long delay,
             @Nullable Interpolator interpolator) {
         if (toVariant instanceof KeyFrameVariant) {
             return null;
@@ -153,6 +162,7 @@ public class Variant {
             Rect toInsets = toVariant.getInsets().toRect();
             ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
             valueAnimator.setDuration(duration);
+            valueAnimator.setStartDelay(delay);
             valueAnimator.setInterpolator(interpolator);
             valueAnimator.addUpdateListener(
                     animator -> {
