@@ -317,6 +317,11 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     @Override
     public void unregisterListeners() {
         mSubscription.removeDataSubscriptionListener();
+        try {
+            ActivityTaskManager.getService().unregisterTaskStackListener(mTaskStackListener);
+        } catch (Exception e) {
+            Log.e(TAG, "error while unregistering TaskStackListener " + e);
+        }
         if (mIsUxRestrictionsListenerRegistered) {
             CarUxRestrictionsUtil.getInstance(mContext).unregister(
                     mUxRestrictionsChangedListener);
@@ -384,6 +389,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         }
     }
 
+    @VisibleForTesting
     @Override
     public void setUserId(int userId) {
         mUserId = userId;
