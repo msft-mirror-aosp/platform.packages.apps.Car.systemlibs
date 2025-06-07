@@ -46,6 +46,7 @@ public class Transition {
     @Nullable private final Animator mAnimator;
     @NonNull private final Interpolator mDefaultInterpolator;
     private final long mDefaultDuration;
+    private final long mDelay;
 
     /**
      * Constructor for Transition. Package-private; use the Builder.
@@ -63,11 +64,13 @@ public class Transition {
             @Nullable Event onEvent,
             @Nullable Animator animator,
             long defaultDuration,
+            long delay,
             @Nullable Interpolator defaultInterpolator) {
         mFromVariant = fromVariant;
         mToVariant = toVariant;
         mAnimator = animator;
         mOnEvent = onEvent;
+        mDelay = delay;
         mDefaultDuration = defaultDuration >= 0 ? defaultDuration : DEFAULT_DURATION;
         mDefaultInterpolator =
                 defaultInterpolator != null
@@ -122,7 +125,7 @@ public class Transition {
             return animator;
         }
         return fromVariant.getAnimator(
-                panel, mToVariant, mDefaultDuration, mDefaultInterpolator);
+                panel, mToVariant, mDefaultDuration, mDelay, mDefaultInterpolator);
     }
 
     /**
@@ -145,6 +148,7 @@ public class Transition {
                 + ", mAnimator=" + mAnimator
                 + ", mDefaultInterpolator=" + mDefaultInterpolator
                 + ", mDefaultDuration=" + mDefaultDuration
+                + ", mDelay=" + mDelay
                 + '}';
     }
 
@@ -156,6 +160,7 @@ public class Transition {
         @Nullable private Animator mAnimator;
         @Nullable private Interpolator mDefaultInterpolator;
         @Nullable private Long mDefaultDuration; // Use boxed type Long
+        private long mDelay;
 
         public Builder(@Nullable Variant fromVariant, @NonNull Variant toVariant) {
             mFromVariant = fromVariant;
@@ -198,6 +203,12 @@ public class Transition {
             return this;
         }
 
+        /** Sets delay */
+        public Builder setDelay(long delay) {
+            mDelay = delay;
+            return this;
+        }
+
         /** Sets default interpolator */
         public Builder setDefaultInterpolator(@Nullable Interpolator interpolator) {
             mDefaultInterpolator = interpolator;
@@ -213,6 +224,7 @@ public class Transition {
                     mOnEvent,
                     mAnimator,
                     mDefaultDuration != null ? mDefaultDuration : DEFAULT_DURATION,
+                    mDelay,
                     mDefaultInterpolator);
         }
     }
