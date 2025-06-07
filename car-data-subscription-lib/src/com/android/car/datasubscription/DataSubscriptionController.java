@@ -24,6 +24,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.car.drivingstate.CarUxRestrictions;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -34,6 +35,7 @@ import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -95,33 +97,35 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
             if (taskInfo.topActivity == null || mConnectivityManager == null) {
                 return;
             }
+            if (mUserId == -1) {
+                throw new IllegalArgumentException("User id is not set");
+            }
+            ComponentName topActivityComponent = taskInfo.topActivity;
 
-            mTopPackage = taskInfo.topActivity.getPackageName();
-
-            if (mPackagesBlocklist.contains(mTopPackage)) {
-                return;
+            if (isMediaComponent(topActivityComponent)) {
+                ComponentName mediaComponentName = getMediaComponentName(taskInfo);
+                if (mediaComponentName == null) {
+                    return;
+                }
+                mTopPackage = mediaComponentName.getPackageName();
+                mTopActivity = mediaComponentName.flattenToString();
+            } else {
+                mTopPackage = taskInfo.topActivity.getPackageName();
+                mTopActivity = taskInfo.topActivity.flattenToString();
             }
 
-            mTopActivity = taskInfo.topActivity.flattenToString();
-
-            if (mActivitiesBlocklist.contains(mTopActivity)) {
+            if (mPackagesBlocklist.contains(mTopPackage)
+                    || mActivitiesBlocklist.contains(mTopActivity)) {
                 return;
             }
 
             PackageInfo packageInfo;
             ApplicationInfo appInfo;
             try {
-                if (mUserId != -1) {
-                    packageInfo = mContext.getPackageManager().getPackageInfoAsUser(mTopPackage,
-                            PackageManager.GET_PERMISSIONS, mUserId);
-                    appInfo = mContext.getPackageManager().getApplicationInfoAsUser(
-                            mTopPackage, 0, mUserId);
-                } else {
-                    packageInfo = mContext.getPackageManager().getPackageInfo(mTopPackage,
-                            PackageManager.GET_PERMISSIONS);
-                    appInfo = mContext.getPackageManager().getApplicationInfo(
-                            mTopPackage, 0);
-                }
+                packageInfo = mContext.getPackageManager().getPackageInfoAsUser(mTopPackage,
+                        PackageManager.GET_PERMISSIONS, mUserId);
+                appInfo = mContext.getPackageManager().getApplicationInfoAsUser(
+                        mTopPackage, 0, mUserId);
                 if (packageInfo != null) {
                     String[] permissions = packageInfo.requestedPermissions;
                     boolean appReqInternet = Arrays.asList(permissions).contains(
@@ -196,6 +200,18 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     private int mCurrentActiveDays;
     private int mCurrentStatus;
     private String mUxrPrompt;
+
+    static final ComponentName CAR_MEDIA_ACTIVITY = new ComponentName(
+            "com.android.car.media",
+            "com.android.car.media.MediaActivity"
+    );
+
+    static final ComponentName CAR_MEDIA_DISPATCHER_ACTIVITY = new ComponentName(
+            "com.android.car.media",
+            "com.android.car.media.MediaDispatcherActivity"
+    );
+
+    static final String CAR_MEDIA_DATA_SCHEME = "custom";
 
     @VisibleForTesting
     static final String KEY_PREV_POPUP_DATE =
@@ -301,6 +317,11 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     @Override
     public void unregisterListeners() {
         mSubscription.removeDataSubscriptionListener();
+        try {
+            ActivityTaskManager.getService().unregisterTaskStackListener(mTaskStackListener);
+        } catch (Exception e) {
+            Log.e(TAG, "error while unregistering TaskStackListener " + e);
+        }
         if (mIsUxRestrictionsListenerRegistered) {
             CarUxRestrictionsUtil.getInstance(mContext).unregister(
                     mUxRestrictionsChangedListener);
@@ -368,6 +389,8 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         }
     }
 
+    @VisibleForTesting
+    @Override
     public void setUserId(int userId) {
         mUserId = userId;
     }
@@ -520,5 +543,29 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     @VisibleForTesting
     void setEditor(SharedPreferences.Editor editor) {
         mEditor = editor;
+    }
+
+    private ComponentName getMediaComponentName(ActivityManager.RunningTaskInfo taskInfo) {
+        Uri data = taskInfo.baseIntent.getData();
+        if (data == null) {
+            if (DEBUG) Log.d(TAG, "No data attached to the base intent");
+            return null;
+        }
+        if (!CAR_MEDIA_DATA_SCHEME.equals(data.getScheme())) {
+            if (DEBUG) Log.d(TAG, "Data scheme doesn't match");
+            return null;
+        }
+        // should drop the first backslash that is part of the schemeSpecificPart
+        String ssp = data.getSchemeSpecificPart();
+        String mediaComponentString = ssp.startsWith("/") ? ssp.substring(1) : ssp;
+        ComponentName mediaComponent = ComponentName.unflattenFromString(mediaComponentString);
+
+        if (DEBUG) Log.d(TAG, "Media component found: " + mediaComponent);
+        return mediaComponent;
+    }
+
+    private boolean isMediaComponent(ComponentName component) {
+        return CAR_MEDIA_ACTIVITY.equals(component)
+                || CAR_MEDIA_DISPATCHER_ACTIVITY.equals(component);
     }
 }

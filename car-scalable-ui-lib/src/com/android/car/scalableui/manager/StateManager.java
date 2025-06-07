@@ -26,6 +26,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.car.scalableui.metrics.MetricsHelper;
 import com.android.car.scalableui.model.Event;
+import com.android.car.scalableui.model.KeyFrameEvent;
 import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.PanelTransaction;
@@ -122,6 +123,9 @@ public class StateManager {
             Transition transition = panelState.getTransition(event);
             if (transition == null) {
                 Log.e(TAG, "transition is null for " + panelState.getId());
+                if (event instanceof KeyFrameEvent) {
+                    panelTransactionBuilder.addLockedPanelId(panelState.getId());
+                }
                 continue;
             }
             Panel panel = PanelPool.getInstance().getPanel(panelState.getId());

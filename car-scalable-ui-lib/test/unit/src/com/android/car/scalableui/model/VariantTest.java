@@ -38,14 +38,14 @@ public class VariantTest {
 
     @Test
     public void testVariantCreation_withBaseVariant() {
-        Variant base = new Variant(VARIANT_ID);
+        Variant base = new Variant(VARIANT_ID, "");
         base.setBounds(new Rect(10, 20, 30, 40));
         base.setVisibility(false);
         base.setLayer(5);
         base.setAlpha(0.5f);
         base.setCornerRadius(2);
 
-        Variant variant = new Variant(VARIANT_ID, base);
+        Variant variant = new Variant(VARIANT_ID, base, "");
 
         assertThat(variant.getId()).isEqualTo(VARIANT_ID);
         assertThat(variant.getBounds()).isEqualTo(new Rect(10, 20, 30, 40));
@@ -57,7 +57,7 @@ public class VariantTest {
 
     @Test
     public void testVariantCreation_withoutBaseVariant() {
-        Variant variant = new Variant(VARIANT_ID);
+        Variant variant = new Variant(VARIANT_ID, "");
 
         assertThat(variant.getId()).isEqualTo(VARIANT_ID);
         assertThat(variant.getBounds()).isEqualTo(new Rect()); // Default Rect
@@ -73,11 +73,11 @@ public class VariantTest {
         final String fromVariantId = "fromVariantId";
         Panel panel = mock(Panel.class);
         when(panel.getInsets()).thenReturn(mock(Insets.class));
-        Variant fromVariant = new Variant(fromVariantId);
-        Variant toVariant = new Variant(toVariantId);
+        Variant fromVariant = new Variant(fromVariantId, "");
+        Variant toVariant = new Variant(toVariantId, "");
         Interpolator interpolator = mock(Interpolator.class);
 
-        Animator animator = fromVariant.getAnimator(panel, toVariant, 1000, interpolator);
+        Animator animator = fromVariant.getAnimator(panel, toVariant, 1000, 0, interpolator);
 
         assertThat(animator).isNotNull();
     }

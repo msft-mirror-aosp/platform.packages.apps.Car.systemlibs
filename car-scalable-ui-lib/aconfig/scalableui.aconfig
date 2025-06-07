@@ -14,3 +14,17 @@ flag {
     description: "This flag controls registering to PanelUpdates Consumer which allows Non-ScalableUIComponents to receive updates."
     bug: "418775156"
 }
+
+flag {
+    name: "enable_decor"
+    namespace: "car_sys_exp"
+    description: "This flag controls enabling optional decor on task panel."
+    bug: "415493921"
+}
+
+flag {
+    name: "enable_animation_end_event"
+    namespace: "car_sys_exp"
+    description: "This flag controls dispatching events when panel animation ends."
+    bug: "420700472"
+}

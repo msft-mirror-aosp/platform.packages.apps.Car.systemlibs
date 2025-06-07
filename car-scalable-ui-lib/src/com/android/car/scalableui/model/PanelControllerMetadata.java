@@ -45,6 +45,7 @@ public final class PanelControllerMetadata {
     public static final String DRAG_DEC_EVENT_ID_TAG = "dragDecreaseEventId";
     public static final String DRAG_INC_EVENT_ID_TAG = "dragIncreaseEventId";
     public static final String OVERLAY_PANEL_ID = "overlayPanelId";
+    public static final String BACKGROUND_COLOR = "backgroundColor";
     public static final String ORIENTATION_TAG = "Orientation";
     public static final String SNAPTHREADHOLD_TAG = "SnapThreadhold";
     public static final String PERSISTENT_ACTIVITY = "PersistentActivity";
