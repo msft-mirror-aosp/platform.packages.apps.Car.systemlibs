@@ -15,7 +15,16 @@
  */
 package com.android.car.scalableui.panel;
 
+import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
+import android.view.SurfaceControl;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import com.android.car.scalableui.model.Blur;
+import com.android.car.scalableui.model.PanelControllerMetadata;
+import com.android.car.scalableui.model.Role;
 
 /**
  * Represents a rectangular panel that can be displayed on the screen.
@@ -27,6 +36,7 @@ public interface Panel {
      *
      * @return The bounding rectangle.
      */
+    @NonNull
     Rect getBounds();
 
     /**
@@ -34,7 +44,36 @@ public interface Panel {
      *
      * @param bounds The new bounding rectangle.
      */
-    void setBounds(Rect bounds);
+    void setBounds(@NonNull Rect bounds);
+
+    /**
+     * Gets safe bounds. This is an area generally not overlapped by display cutouts or insets
+     * for display compatibility apps to be drawn within.
+     *
+     * @return The bounding safe rectangle.
+     */
+    @NonNull
+    Rect getSafeBounds();
+
+    /**
+     * Sets safe bounds. This is an area generally not overlapped by display cutouts or insets
+     * for display compatibility apps to be drawn within.
+     *
+     * @param safeBounds The new bounding safe rectangle.
+     */
+    void setSafeBounds(@NonNull Rect safeBounds);
+
+    /**
+     * Sets the blur properties for the Panel. This is used only with the decor panel as a surface.
+     *
+     * @param blur properties to set on surface
+     */
+    void setBlur(Blur blur);
+
+    /**
+     * Gets the Blur properties for a surface
+     */
+    Blur getBlur();
 
     /**
      * Gets the layer of this panel.
@@ -142,13 +181,23 @@ public interface Panel {
      *
      * @param role The new role of this panel.
      */
-    void setRole(int role);
+    void setRole(@NonNull Role role);
+
+    /**
+     * Gets the role value of this panel.
+     */
+    @NonNull
+    Role getRole();
 
     /**
      * Sets the display ID of the panel.
-     * TODO(b/388021504):This api should move to role
      */
     void setDisplayId(int displayId);
+
+    /**
+     * Gets the display ID of the panel.
+     */
+    int getDisplayId();
 
     /**
      * Initializes the panel.
@@ -173,4 +222,44 @@ public interface Panel {
      * @return The corner radius
      */
     int getCornerRadius();
+
+    /**
+     * Returns the ID of the panel.
+     */
+    @NonNull
+    String getPanelId();
+
+    /**
+     * Sets the {@link Insets}
+     */
+    void setInsets(@NonNull Insets insets);
+
+    /**
+     * @return The {@link Insets}
+     */
+    @NonNull
+    Insets getInsets();
+
+    /**
+     * @return The associated leash {@link SurfaceControl}
+     */
+    @Nullable
+    default SurfaceControl getLeash() {
+        return null;
+    }
+
+    /**
+     * @return The Panel's Context
+     */
+    Context getContext();
+    /**
+     * Gets the {@link PanelControllerMetadata}
+     */
+    @Nullable
+    PanelControllerMetadata getPanelControllerMetadata();
+
+    /**
+     * Sets the {@link PanelControllerMetadata}
+     */
+    void setPanelControllerMetadata(@Nullable PanelControllerMetadata panelControllerMetadata);
 }

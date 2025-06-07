@@ -17,36 +17,40 @@
 package com.android.car.datasubscription;
 
 
-import static com.android.car.datasubscription.DataSubscriptionStatus.PAID;
-
 import android.content.Context;
 import android.database.ContentObserver;
 import android.provider.Settings;
 
 import androidx.annotation.GuardedBy;
 
+import com.android.car.datasubscription.DataSubscriptionConfig.DataSubscriptionStatusType;
+
+import java.util.Map;
+
 /**
- * This class provides a mechanism to indicate if a data plan is provided on a trial vs paid basis.
+ * This class provides a mechanism to indicate the current status of the data subscription
  */
 public class DataSubscription {
     public static final String DATA_SUBSCRIPTION_ACTION =
-            "android.intent.action.DATA_SUBSCRIPTION";
-    private static final String SETTING = "car_data_subscription_status";
-    private static final int MIN_VALUE = 1;
-    private static final int MAX_VALUE = 3;
-
-    @DataSubscriptionStatus private static final int DEFAULT_VALUE = PAID;
+            "com.android.car.datasubscription.action.DATA_SUBSCRIPTION";
+    public static int DATA_SUBSCRIPTION_INVALID_STATUS = -1;
+    private static final String SETTING = "extended_car_data_subscription_status";
 
     @GuardedBy("this")
     private DataSubscriptionChangeListener mDataSubscriptionChangeListener;
     private final Context mContext;
+
+    // A mapping from config id to the DataSubscriptionConfig in config.xml
+    private final Map<Integer, DataSubscriptionConfig> mConfigData;
+
     private final ContentObserver mContentObserver =
             new ContentObserver(/*  handler= */ null) {
                 @Override
                 public void onChange(boolean selfChange) {
                     synchronized (DataSubscription.this) {
                         if (mDataSubscriptionChangeListener != null) {
-                            mDataSubscriptionChangeListener.onChange(getDataSubscriptionStatus());
+                            mDataSubscriptionChangeListener.onStatusChanged(
+                                    getDataSubscriptionStatus());
                         }
                     }
                 }
@@ -54,17 +58,20 @@ public class DataSubscription {
 
     public DataSubscription(Context context) {
         mContext = context;
-
+        mConfigData = DataSubscriptionConfigParser.loadConfig(context);
     }
 
-    /** Returns the data subscription status of the vehicle. */
-    @DataSubscriptionStatus
+    /** Returns the data subscription status of the vehicle, -1
+     * if the status is not specified or out of range */
     public int getDataSubscriptionStatus() {
-        int subscriptionStatus =
-                Settings.Global.getInt(mContext.getContentResolver(), SETTING, DEFAULT_VALUE);
-        return (subscriptionStatus < MIN_VALUE || subscriptionStatus > MAX_VALUE)
-                ? DEFAULT_VALUE
-                : subscriptionStatus;
+        int status = Settings.Global.getInt(
+                mContext.getContentResolver(), SETTING,
+                /* def= */ DATA_SUBSCRIPTION_INVALID_STATUS);
+        if (status == DATA_SUBSCRIPTION_INVALID_STATUS
+                || status >= mConfigData.size()) {
+            return DATA_SUBSCRIPTION_INVALID_STATUS;
+        }
+        return status;
     }
 
     /**
@@ -102,7 +109,12 @@ public class DataSubscription {
      * Checks if the data subscription status is inactive
      */
     public boolean isDataSubscriptionInactive() {
-        return getDataSubscriptionStatus() == DataSubscriptionStatus.INACTIVE;
+        int status = getDataSubscriptionStatus();
+        if (status == DATA_SUBSCRIPTION_INVALID_STATUS) {
+            return false;
+        }
+        DataSubscriptionStatusType statusType = mConfigData.get(status).getType();
+        return statusType == DataSubscriptionStatusType.INACTIVE;
     }
 
     /**
@@ -112,6 +124,6 @@ public class DataSubscription {
         /**
          * Receive the Data Subscription status changes.
          */
-        void onChange(@DataSubscriptionStatus int value);
+        void onStatusChanged(int value);
     }
 }

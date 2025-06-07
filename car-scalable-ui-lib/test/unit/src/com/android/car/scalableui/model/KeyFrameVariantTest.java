@@ -17,6 +17,7 @@ package com.android.car.scalableui.model;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.graphics.Insets;
 import android.graphics.Rect;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -35,6 +36,17 @@ public class KeyFrameVariantTest {
 
         // Expected bounds are the average of the two keyframe bounds
         assertThat(bounds).isEqualTo(new Rect(5, 10, 15, 20));
+    }
+
+    @Test
+    public void testGetInsets() {
+        KeyFrameVariant variant = createKeyFrameVariant();
+        variant.setFraction(0.5f); // Interpolate halfway
+
+        Insets insets = variant.getInsets();
+
+        // Expected insets are the average of the two keyframe insets
+        assertThat(insets).isEqualTo(Insets.of(0, 5, 5, 10));
     }
 
     @Test
@@ -63,11 +75,13 @@ public class KeyFrameVariantTest {
         KeyFrameVariant variant = new KeyFrameVariant(keyFrameVariantId);
         Variant variant1 = new Variant(variantId1);
         variant1.setBounds(new Rect(0, 0, 10, 10));
+        variant1.setInsets(Insets.of(0, 0, 0, 0));
         variant1.setVisibility(false);
         variant1.setAlpha(0.0f);
 
         Variant variant2 = new Variant(variantId2);
         variant2.setBounds(new Rect(10, 20, 20, 30));
+        variant2.setInsets(Insets.of(0, 10, 10, 20));
         variant2.setVisibility(true);
         variant2.setAlpha(1.0f);
 

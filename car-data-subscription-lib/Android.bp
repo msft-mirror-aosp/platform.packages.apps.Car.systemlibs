@@ -26,9 +26,12 @@ android_library {
     static_libs: [
         "androidx.annotation_annotation",
         "car-resource-common",
+        "car-ui-lib-no-overlayable",
         "data_subscription_flags_java_lib",
     ],
-    sdk_version: "current",
+    libs: [
+        "android.car",
+    ],
 }
 
 aconfig_declarations {

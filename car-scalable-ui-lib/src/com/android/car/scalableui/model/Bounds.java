@@ -77,6 +77,10 @@ public class Bounds {
         @Nullable private Integer mBottom;
         @Nullable private Integer mWidth;
         @Nullable private Integer mHeight;
+        @Nullable private Integer mLeftOffset;
+        @Nullable private Integer mTopOffset;
+        @Nullable private Integer mRightOffset;
+        @Nullable private Integer mBottomOffset;
 
         public Builder() {}
 
@@ -116,6 +120,30 @@ public class Bounds {
             return this;
         }
 
+        /** Sets leftOffset */
+        public Builder setLeftOffset(@Nullable Integer offset) {
+            mLeftOffset = offset;
+            return this;
+        }
+
+        /** Sets topOffset */
+        public Builder setTopOffset(@Nullable Integer offset) {
+            mTopOffset = offset;
+            return this;
+        }
+
+        /** Sets rightOffset */
+        public Builder setRightOffset(@Nullable Integer offset) {
+            mRightOffset = offset;
+            return this;
+        }
+
+        /** Sets bottomOffset */
+        public Builder setBottomOffset(@Nullable Integer offset) {
+            mBottomOffset = offset;
+            return this;
+        }
+
         /** Sets rect */
         public Builder setRect(@NonNull Rect rect) {
             mLeft = rect.left;
@@ -136,6 +164,12 @@ public class Bounds {
             int width = (mWidth != null) ? mWidth : 0;
             int height = (mHeight != null) ? mHeight : 0;
 
+            // Handle offsets
+            left += (mLeftOffset != null) ? mLeftOffset : 0;
+            top += (mTopOffset != null) ? mTopOffset : 0;
+            right -= (mRightOffset != null) ? mRightOffset : 0;
+            bottom -= (mBottomOffset != null) ? mBottomOffset : 0;
+
             // Handle width/height combinations, prioritizing explicit left/right/top/bottom
             if (mRight == null && mWidth != null) {
                 right = left + width;
@@ -148,7 +182,11 @@ public class Bounds {
                 top = bottom - height;
             }
 
-            return new Bounds(left, top, right, bottom);
+            return new Bounds(
+                    Math.min(left, right),
+                    Math.min(top, bottom),
+                    Math.max(left, right),
+                    Math.max(top, bottom));
         }
     }
 }

@@ -17,6 +17,7 @@
 package com.android.car.scalableui.model;
 
 import android.animation.Animator;
+import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
@@ -24,6 +25,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.panel.Panel;
+
+import java.util.Objects;
 
 /**
  * Represents a transition between two {@link Variant}s in the Scalable UI system.
@@ -34,6 +37,8 @@ import com.android.car.scalableui.panel.Panel;
  */
 public class Transition {
     public static final long DEFAULT_DURATION = 300;
+    private static final String TAG = Transition.class.getSimpleName();
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.VERBOSE);
 
     @Nullable private final Variant mFromVariant;
     @NonNull private final Variant mToVariant;
@@ -103,7 +108,11 @@ public class Transition {
      */
     @Nullable
     public Animator getAnimator(@NonNull Panel panel, @NonNull Variant fromVariant) {
-        if (fromVariant.getId().equals(mToVariant.getId())) {
+        if (DEBUG) {
+            Log.d(TAG, "panel=" + panel.getPanelId() + "fromVariant=" + fromVariant + ", toVariant"
+                    + mToVariant);
+        }
+        if (Objects.equals(fromVariant.getId(), mToVariant.getId())) {
             return null;
         }
 
@@ -130,8 +139,8 @@ public class Transition {
     @NonNull
     public String toString() {
         return "Transition{"
-                + "mFromVariant=" + (mFromVariant != null ? mFromVariant.getId() : "null")
-                + ", mToVariant=" + (mToVariant != null ? mToVariant.getId() : "null")
+                + "mFromVariant=" + (mFromVariant != null ? mFromVariant : "null")
+                + ", mToVariant=" + (mToVariant != null ? mToVariant : "null")
                 + ", mOnEvent=" + mOnEvent
                 + ", mAnimator=" + mAnimator
                 + ", mDefaultInterpolator=" + mDefaultInterpolator

@@ -33,10 +33,11 @@ import java.util.stream.Collectors;
  * transitions between those variants. It also manages the current variant and any running
  * animations.
  */
-public class PanelState {
+public class PanelState implements Cloneable {
     private static final String TAG = PanelState.class.getSimpleName();
 
     public static final String DEFAULT_ROLE = "DEFAULT";
+    public static final String DECOR_PANEL_ID_PREFIX = "decor";
 
     private String mDefaultVariant;
     private int mDisplayId;
@@ -46,19 +47,37 @@ public class PanelState {
     private final List<Variant> mVariants = new ArrayList<>();
     private final List<Transition> mTransitions = new ArrayList<>();
 
-    @Nullable private Animator mRunningAnimator;
-    @Nullable private Variant mCurrentVariant;
+    @Nullable
+    private Animator mRunningAnimator;
+    @Nullable
+    private Variant mCurrentVariant;
+    @Nullable
+    private PanelControllerMetadata mPanelControllerMetadata;
 
     /**
      * Constructor for PanelState.
      *
-     * @param id The ID of the panel.
+     * @param id   The ID of the panel.
      * @param role The role of the panel.
      */
     public PanelState(@NonNull String id, @NonNull Role role) {
         mId = id;
         mRole = role;
         mDisplayId = DEFAULT_DISPLAY;
+    }
+
+    /**
+     * Constructor to copy a PanelState
+     */
+    public PanelState(@NonNull PanelState other) {
+        mId = other.mId;
+        mRole = other.mRole;
+        mDisplayId = other.mDisplayId;
+        mDefaultVariant = other.mDefaultVariant;
+        mVariants.addAll(other.mVariants);
+        mTransitions.addAll(other.mTransitions);
+        mRunningAnimator = other.mRunningAnimator;
+        mCurrentVariant = other.mCurrentVariant;
     }
 
     /** Returns id */
@@ -113,7 +132,7 @@ public class PanelState {
     /**
      * Sets variant
      *
-     * @param id The ID of the variant to set.
+     * @param id    The ID of the variant to set.
      * @param event The event that triggered the variant change.
      */
     public void setVariant(@NonNull String id, @Nullable Event event) {
@@ -220,6 +239,16 @@ public class PanelState {
         mTransitions.addAll(transitions);
     }
 
+    @Nullable
+    public PanelControllerMetadata getPanelControllerMetadata() {
+        return mPanelControllerMetadata;
+    }
+
+    private void setPanelControllerMetadata(
+            @Nullable PanelControllerMetadata panelControllerMetadata) {
+        mPanelControllerMetadata = panelControllerMetadata;
+    }
+
     @Override
     @NonNull
     public String toString() {
@@ -229,15 +258,25 @@ public class PanelState {
                 + ", mDefaultVariant='" + mDefaultVariant + '\''
                 + ", mDisplayId=" + mDisplayId
                 + ", mVariants=" + mVariants.stream()
-                    .map(Variant::toString)
-                    .collect(Collectors.joining(", ", "[", "]"))
+                .map(Variant::toString)
+                .collect(Collectors.joining(", ", "[", "]"))
                 + ", mTransitions=" + mTransitions.stream()
-                    .map(Transition::toString)
-                    .collect(Collectors.joining(", ", "[", "]"))
+                .map(Transition::toString)
+                .collect(Collectors.joining(", ", "[", "]"))
                 + ", mRunningAnimator=" + mRunningAnimator
                 + ", mCurrentVariant="
                 + (mCurrentVariant != null ? mCurrentVariant.getId() : "null")
                 + '}';
+    }
+
+    @Override
+    public PanelState clone() {
+        try {
+            // shallow copy is sufficient, mVariants and mTransitions might remain the same.
+            return (PanelState) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 
     /** Builder for {@link PanelState} objects. */
@@ -248,6 +287,7 @@ public class PanelState {
         private Integer mDisplayId;
         private List<Variant> mVariants = new ArrayList<>();
         private List<Transition> mTransitions = new ArrayList<>();
+        private PanelControllerMetadata mPanelControllerMetadata;
 
         public Builder(@NonNull String id, @NonNull Role role) {
             mId = id;
@@ -290,6 +330,10 @@ public class PanelState {
             return this;
         }
 
+        public void setPanelControllerMetadata(PanelControllerMetadata panelControllerMetaData) {
+            mPanelControllerMetadata = panelControllerMetaData;
+        }
+
         /** Returns the {@link PanelState} instance */
         @NonNull
         public PanelState build() {
@@ -300,6 +344,7 @@ public class PanelState {
             }
             panelState.setVariants(mVariants);
             panelState.setTransitions(mTransitions);
+            panelState.setPanelControllerMetadata(mPanelControllerMetadata);
             return panelState;
         }
     }
