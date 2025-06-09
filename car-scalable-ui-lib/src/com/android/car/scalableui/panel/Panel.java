@@ -79,6 +79,20 @@ public interface Panel {
     void setLayer(int layer);
 
     /**
+     * Returns the focus on transition state.
+     *
+     * @return Whether focus on transition is allowed.
+     */
+    boolean canFocusOnTransition();
+
+    /**
+     * Sets focus on transition value
+     *
+     * @param focusOnTransition The focus value to set.
+     */
+    void setCanFocusOnTransition(boolean focusOnTransition);
+
+    /**
      * Gets the x-coordinate of the left edge of this panel.
      *
      * @return The x-coordinate of the left edge.
