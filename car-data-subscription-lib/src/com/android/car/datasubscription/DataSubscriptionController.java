@@ -151,7 +151,6 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                 // default network by UID, we need to set a timeout period to make sure the network
                 // from the callback is updated correctly before deciding to display the message
                 //TODO: b/336869328 use the synchronous call to update network status
-                mLatch = new CountDownLatch(CALLBACK_TIMEOUT_MS);
                 mBackgroundExecutor.execute(() -> {
                     try {
                         mLatch.await(CALLBACK_TIMEOUT_MS, TimeUnit.MILLISECONDS);
@@ -260,6 +259,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         mUxrPrompt = mDataSubscriptionMessageCreator.getUxrPrompt(
             CarUxRestrictionsUtil.getInstance(mContext).getCurrentRestrictions()
                 .isRequiresDistractionOptimization());
+        mLatch = new CountDownLatch(CALLBACK_TIMEOUT_MS);
     }
 
     void updateShouldDisplayProactiveMessage() {
