@@ -16,4 +16,8 @@
   -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.car.scalableui">
+    <permission
+        android:name="com.android.car.scalableui.permission.ACTION_BROADCAST"
+        android:protectionLevel="signatureOrSystem"
+        android:label="ScalableUI Secure Action Broadcast Permission" />
 </manifest>

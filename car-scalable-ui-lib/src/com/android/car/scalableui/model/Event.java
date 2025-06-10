@@ -33,6 +33,11 @@ import java.util.stream.Collectors;
 public class Event {
     private static final String TAG = Event.class.getSimpleName();
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final String PANEL_ID_TOKEN_ID = "panelId";
+    private static final String COMPONENT_NAME_TOKEN_ID = "component";
+    private static final String PACKAGE_NAME_TOKEN_ID = "package";
+    private static final String TO_VARIANT_ID_TOKEN_ID = "panelToVariantId";
+
     /** Id string associated with this event. */
     @NonNull
     protected final String mId;
@@ -74,6 +79,12 @@ public class Event {
     public Map<String, String> getTokens() {
         // Return a copy to prevent external modification
         return new HashMap<>(mTokens);
+    }
+
+    /** Return the panel id associated with this event or null if none exists. */
+    @Nullable
+    public String getPanelId() {
+        return mTokens.get(PANEL_ID_TOKEN_ID);
     }
 
     /**
@@ -124,6 +135,7 @@ public class Event {
         }
     }
 
+    /** Creates a string representation of the Event. */
     @Override
     @NonNull
     public String toString() {
@@ -163,6 +175,30 @@ public class Event {
                     } // else:  Ignore malformed tokens.
                 }
             }
+            return this;
+        }
+
+        /** Sets a token for panelId. */
+        public Builder setPanelId(@NonNull String panelId) {
+            mTokens.put(PANEL_ID_TOKEN_ID, panelId);
+            return this;
+        }
+
+        /** Sets a token for package name. */
+        public Builder setPackageName(@NonNull String packageName) {
+            mTokens.put(PACKAGE_NAME_TOKEN_ID, packageName);
+            return this;
+        }
+
+        /** Sets a token for component name. */
+        public Builder setComponentName(@NonNull String componentName) {
+            mTokens.put(COMPONENT_NAME_TOKEN_ID, componentName);
+            return this;
+        }
+
+        /** Sets a token for toVariant. */
+        public Builder setToVariantId(@NonNull String toVariantId) {
+            mTokens.put(TO_VARIANT_ID_TOKEN_ID, toVariantId);
             return this;
         }
 
