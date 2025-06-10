@@ -170,6 +170,8 @@ public class StateManagerTest {
         verify(mockPanel).setVisibility(mockVariant.isVisible());
         verify(mockPanel).setAlpha(mockVariant.getAlpha());
         verify(mockPanel).setLayer(mockVariant.getLayer());
+        verify(mockPanel).setCanFocusOnTransition(mockVariant.canFocusOnTransition());
+        verify(mockPanel).setCanFocusOnTransition(mockVariant.canFocusOnTransition());
         verify(mockPanel).setDisplayId(0);
         verify(mockPanel).setCornerRadius(mockVariant.getCornerRadius());
     }

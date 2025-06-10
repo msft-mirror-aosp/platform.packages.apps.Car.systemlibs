@@ -58,6 +58,7 @@ public class Variant {
     private float mAlpha;
     private boolean mIsVisible;
     private int mLayer;
+    private boolean mCanFocusOnTransition;
     private int mCornerRadius;
     @NonNull
     private Rect mBounds;
@@ -82,6 +83,7 @@ public class Variant {
         mSafeBounds = new Rect();
         mIsVisible = Visibility.DEFAULT_VISIBILITY;
         mLayer = Layer.DEFAULT_LAYER;
+        mCanFocusOnTransition = Focus.DEFAULT_FOCUS_ON_TRANSITION;
         mAlpha = Alpha.DEFAULT_ALPHA;
         mCornerRadius = Corner.DEFAULT_RADIUS;
         mInsets = Insets.NONE;
@@ -103,6 +105,7 @@ public class Variant {
         mSafeBounds = new Rect(base.getSafeBounds());
         mIsVisible = base.isVisible();
         mLayer = base.getLayer();
+        mCanFocusOnTransition = base.canFocusOnTransition();
         mAlpha = base.getAlpha();
         mCornerRadius = base.getCornerRadius();
         mInsets = base.getInsets();
@@ -145,6 +148,7 @@ public class Variant {
             Rect toBounds = new Rect(toVariant.getBounds());
             boolean isVisible = panel.isVisible() || toVariant.isVisible();
             int layer = toVariant.getLayer();
+            boolean canFocusOnTransition = toVariant.canFocusOnTransition();
             Rect fromInsets = panel.getInsets().toRect();
             Rect toInsets = toVariant.getInsets().toRect();
             ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
@@ -154,6 +158,7 @@ public class Variant {
                     animator -> {
                         panel.setVisibility(isVisible);
                         panel.setLayer(layer);
+                        panel.setCanFocusOnTransition(canFocusOnTransition);
                         float fraction = animator.getAnimatedFraction();
                         Rect bounds = mRectEvaluator.evaluate(fraction, fromBounds, toBounds);
                         panel.setBounds(bounds);
@@ -201,12 +206,30 @@ public class Variant {
     }
 
     /**
+     * Returns the focus on transition state.
+     *
+     * @return Whether focus on transition is allowed.
+     */
+    public boolean canFocusOnTransition() {
+        return mCanFocusOnTransition;
+    }
+
+    /**
      * Sets the layer of the variant.
      *
      * @param layer The layer value to set.
      */
     protected void setLayer(int layer) {
         mLayer = layer;
+    }
+
+    /**
+     * Sets focus on transition value
+     *
+     * @param focusOnTransition The focus value to set.
+     */
+    protected void setCanFocusOnTransition(boolean focusOnTransition) {
+        mCanFocusOnTransition = focusOnTransition;
     }
 
     /**
@@ -345,6 +368,7 @@ public class Variant {
                 + ", mAlpha=" + mAlpha
                 + ", mIsVisible=" + mIsVisible
                 + ", mLayer=" + mLayer
+                + ", mCanFocusOnTransition=" + mCanFocusOnTransition
                 + ", mBounds=" + mBounds
                 + ", mSafeBounds=" + mSafeBounds
                 + ", mCornerRadius=" + mCornerRadius
@@ -371,6 +395,8 @@ public class Variant {
         protected Boolean mIsVisible;
         @Nullable
         protected Integer mLayer;
+        @Nullable
+        protected Boolean mCanFocusOnTransition;
         @Nullable
         protected Rect mBounds;
         @Nullable
@@ -406,6 +432,12 @@ public class Variant {
         /** Sets layer */
         public Builder setLayer(@Nullable Integer layer) {
             mLayer = layer;
+            return this;
+        }
+
+        /** Sets focus allowed on transition */
+        public Builder setCanFocusOnTransition(@Nullable Boolean canFocusOnTransition) {
+            mCanFocusOnTransition = canFocusOnTransition;
             return this;
         }
 
@@ -474,6 +506,9 @@ public class Variant {
             }
             if (mLayer != null) {
                 variant.setLayer(mLayer);
+            }
+            if (mCanFocusOnTransition != null) {
+                variant.setCanFocusOnTransition(mCanFocusOnTransition);
             }
             if (mBounds != null) {
                 variant.setBounds(new Rect(mBounds)); // Defensive copy
