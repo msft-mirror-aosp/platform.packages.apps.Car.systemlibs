@@ -28,3 +28,10 @@ flag {
     description: "This flag controls dispatching events when panel animation ends."
     bug: "420700472"
 }
+
+flag {
+    name: "scalable_ui_task_focus"
+    namespace: "car_sys_exp"
+    description: "This flag controls enabling task focus logic for ScalableUI."
+    bug: "422571603"
+}

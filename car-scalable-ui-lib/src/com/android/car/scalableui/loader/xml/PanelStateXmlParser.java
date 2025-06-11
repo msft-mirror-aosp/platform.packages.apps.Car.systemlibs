@@ -18,6 +18,7 @@ package com.android.car.scalableui.loader.xml;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.car.scalableui.model.Alpha.DEFAULT_ALPHA;
+import static com.android.car.scalableui.model.Focus.DEFAULT_FOCUS_ON_TRANSITION;
 import static com.android.car.scalableui.model.Layer.DEFAULT_LAYER;
 import static com.android.car.scalableui.model.Transition.DEFAULT_DURATION;
 import static com.android.car.scalableui.model.Visibility.DEFAULT_VISIBILITY;
@@ -44,6 +45,7 @@ import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.BreakPoint;
 import com.android.car.scalableui.model.Corner;
 import com.android.car.scalableui.model.Decor;
+import com.android.car.scalableui.model.Focus;
 import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelControllerMetadata;
@@ -122,6 +124,10 @@ public class PanelStateXmlParser {
     // --- Layer Tags ---
     public static final String LAYER_TAG = "Layer";
     public static final String LAYER_VALUE_ATTRIBUTE = "layer";
+
+    // --- Focus Tags ---
+    public static final String FOCUS_TAG = "Focus";
+    public static final String FOCUS_ON_TRANSITION_ATTRIBUTE = "onTransition";
 
     // --- Bounds Tags ---
     public static final String BOUNDS_TAG = "Bounds";
@@ -429,6 +435,10 @@ public class PanelStateXmlParser {
                 case LAYER_TAG:
                     variantBuilder.setLayer(parseLayer(context, parser).getLayer());
                     break;
+                case FOCUS_TAG:
+                    variantBuilder.setCanFocusOnTransition(
+                            parseFocus(context, parser).canFocusOnTransition());
+                    break;
                 case BOUNDS_TAG:
                     variantBuilder.setBounds(parseBounds(context, parser).getRect());
                     break;
@@ -528,6 +538,28 @@ public class PanelStateXmlParser {
         }
 
         return new Layer.Builder().setLayer(layer).build();
+    }
+
+    @NonNull
+    private static Focus parseFocus(@NonNull Context context, @NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, null, FOCUS_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+
+        boolean focusOnTransition = DEFAULT_FOCUS_ON_TRANSITION;
+        int resId = attrs.getAttributeResourceValue(null, FOCUS_ON_TRANSITION_ATTRIBUTE, 0);
+        if (resId != 0) {
+            focusOnTransition = context.getResources().getBoolean(resId);
+        } else {
+            focusOnTransition = attrs.getAttributeBooleanValue(null, FOCUS_ON_TRANSITION_ATTRIBUTE,
+                    DEFAULT_FOCUS_ON_TRANSITION);
+        }
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.skip(parser); // Skip any nested tags
+        }
+
+        return new Focus(focusOnTransition);
     }
 
     @NonNull

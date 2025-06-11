@@ -173,7 +173,7 @@ public class StateManagerTest {
         PanelPool.getInstance().setDelegate(delegate);
         when(delegate.createPanel(any())).thenReturn(mockPanel);
         Transition mockTransition = mock(Transition.class);
-        when(mockTransition.getToVariant()).thenReturn(mockFromVariant);
+        when(mockTransition.getToVariant()).thenReturn(mockToVariant);
         when(panelState.getTransition(any(Event.class))).thenReturn(mockTransition);
         Animator mockAnimator = mock(Animator.class);
         when(mockTransition.getAnimator(any(Panel.class), any(Variant.class))).thenReturn(
@@ -237,6 +237,7 @@ public class StateManagerTest {
         verify(mockPanel).setVisibility(mockVariant.isVisible());
         verify(mockPanel).setAlpha(mockVariant.getAlpha());
         verify(mockPanel).setLayer(mockVariant.getLayer());
+        verify(mockPanel).setCanFocusOnTransition(mockVariant.canFocusOnTransition());
         verify(mockPanel).setDisplayId(0);
         verify(mockPanel).setCornerRadius(mockVariant.getCornerRadius());
     }
