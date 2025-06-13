@@ -91,6 +91,8 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         @Override
         public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
             if (mIsNetworkCallbackRegistered && mConnectivityManager != null) {
+                mNetworkCallback.mNetwork = null;
+                mNetworkCapabilities = null;
                 mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
                 mIsNetworkCallbackRegistered = false;
             }
