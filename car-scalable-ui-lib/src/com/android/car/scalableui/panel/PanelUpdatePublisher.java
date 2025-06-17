@@ -16,9 +16,11 @@
 package com.android.car.scalableui.panel;
 
 import android.annotation.FlaggedApi;
+import android.graphics.Insets;
 import android.graphics.Rect;
 
 import com.android.car.scalableui.Flags;
+import com.android.car.scalableui.model.PanelControllerMetadata;
 
 /**
  * Interface for components that can publish updates about a panel's state.
@@ -30,13 +32,56 @@ public interface PanelUpdatePublisher {
     /**
      * Posts an update about a panel's bounds.
      *
-     * <p>This method is called when a panel's dimensions or position have changed,
-     * allowing interested observers to react to the new bounds.
-     *
-     * @param panelId The unique identifier of the panel whose bounds have changed.
+     * @param panelId The unique identifier of the panel whose bounds has changed.
      * @param bounds  A {@link android.graphics.Rect} object representing the new bounds of the
      *                panel.
      */
     @FlaggedApi(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
     void postBounds(String panelId, Rect bounds);
+
+    /**
+     * Posts an update about a panel's alpha.
+     *
+     * @param panelId The unique identifier of the panel whose alpha has changed.
+     * @param alpha   Represent the new alpha of the panel.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    void postAlpha(String panelId, float alpha);
+
+    /**
+     * Posts an update about a panel's corner radius.
+     *
+     * @param panelId The unique identifier of the panel whose corner radius has changed.
+     * @param radius  Represents the new corner radius of the panel.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    void postCornerRadius(String panelId, int radius);
+
+    /**
+     * Posts an update about a panel's visibility.
+     *
+     * @param panelId   The unique identifier of the panel whose visibility have changed.
+     * @param isVisible Represents the new visibility of the panel.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    void postVisibility(String panelId, boolean isVisible);
+
+    /**
+     * Posts an update about a panel's insets.
+     *
+     * @param panelId The unique identifier of the panel whose insets has changed.
+     * @param insets  A {@link Insets} object representing the new insets of the panel.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    void postInsets(String panelId, Insets insets);
+
+    /**
+     * Posts an update about a panel's controller metadata.
+     *
+     * @param panelId  The unique identifier of the panel whose controller metadata has changed.
+     * @param metadata A {@link PanelControllerMetadata} object representing the new controller
+     *                 metadata of the panel.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    void postControllerMetadata(String panelId, PanelControllerMetadata metadata);
 }
