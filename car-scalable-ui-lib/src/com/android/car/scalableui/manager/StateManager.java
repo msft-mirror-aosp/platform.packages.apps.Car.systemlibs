@@ -35,6 +35,7 @@ import com.android.car.scalableui.panel.Panel;
 import com.android.car.scalableui.panel.PanelPool;
 import com.android.internal.jank.InteractionJankMonitor;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -250,6 +251,15 @@ public class StateManager {
     @Nullable
     public static PanelState getPanelState(String id) {
         return getInstance().mPanelStates.getOrDefault(id, null);
+    }
+
+    /**
+     * Dump all the current PanelStates to the output stream.
+     */
+    public static void dumpPanelStates(PrintWriter pw) {
+        for (PanelState panelState : getInstance().mPanelStates.values()) {
+            pw.println(panelState.toString());
+        }
     }
 
     @VisibleForTesting
