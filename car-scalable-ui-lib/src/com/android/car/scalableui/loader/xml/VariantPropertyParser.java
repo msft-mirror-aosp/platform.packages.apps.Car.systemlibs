@@ -31,6 +31,6 @@ interface VariantPropertyParser {
     /**
      * Parser for a given Variant Tag
      */
-    Variant.Builder parse(Context context, XmlPullParser parser, Variant.Builder builder)
-            throws XmlPullParserException, IOException;
+    Variant.Builder parse(Context context, XmlPullParser parser, Variant.Builder builder,
+            int displayId) throws XmlPullParserException, IOException;
 }
