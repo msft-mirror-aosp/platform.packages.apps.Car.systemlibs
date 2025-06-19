@@ -92,6 +92,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo) {
             if (mIsNetworkCallbackRegistered && mConnectivityManager != null) {
                 mNetworkCallback.mNetwork = null;
+                mNetworkCallback.mTopActivity = null;
                 mNetworkCapabilities = null;
                 mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
                 mIsNetworkCallbackRegistered = false;
@@ -103,6 +104,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                 throw new IllegalArgumentException("User id is not set");
             }
             ComponentName topActivityComponent = taskInfo.topActivity;
+            String topActivity;
 
             if (isMediaComponent(topActivityComponent)) {
                 ComponentName mediaComponentName = getMediaComponentName(taskInfo);
@@ -110,14 +112,14 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                     return;
                 }
                 mTopPackage = mediaComponentName.getPackageName();
-                mTopActivity = mediaComponentName.flattenToString();
+                topActivity = mediaComponentName.flattenToString();
             } else {
                 mTopPackage = taskInfo.topActivity.getPackageName();
-                mTopActivity = taskInfo.topActivity.flattenToString();
+                topActivity = taskInfo.topActivity.flattenToString();
             }
 
             if (mPackagesBlocklist.contains(mTopPackage)
-                    || mActivitiesBlocklist.contains(mTopActivity)) {
+                    || mActivitiesBlocklist.contains(topActivity)) {
                 return;
             }
 
@@ -134,13 +136,14 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                             ACCESS_NETWORK_STATE)
                             && Arrays.asList(permissions).contains(INTERNET);
                     if (!appReqInternet) {
-                        mActivitiesBlocklist.add(mTopActivity);
+                        mActivitiesBlocklist.add(topActivity);
                         return;
                     }
                 }
 
                 mTopLabel = appInfo.loadLabel(mContext.getPackageManager());
                 int uid = appInfo.uid;
+                mNetworkCallback.mTopActivity = topActivity;
                 mConnectivityManager.registerDefaultNetworkCallbackForUid(uid, mNetworkCallback,
                         mMainHandler);
                 mIsNetworkCallbackRegistered = true;
@@ -156,7 +159,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                     } finally {
                         if (mNetworkCallback.mNetwork == null) {
                             mNetworkCapabilities = null;
-                            updateShouldDisplayReactiveMessageForApp(mTopLabel);
+                            updateShouldDisplayReactiveMessageForApp(mTopLabel, topActivity);
                         }
                     }
                 });
@@ -189,7 +192,6 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     private boolean mShouldDisplayProactiveMessage;
 
     private boolean mShouldDisplayReactiveMessage;
-    private String mTopActivity;
     private String mTopPackage;
     private CharSequence mTopLabel;
     private NetworkCapabilities mNetworkCapabilities;
@@ -280,7 +282,8 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         }
     }
 
-    private void updateShouldDisplayReactiveMessageForApp(CharSequence appLabel) {
+    private void updateShouldDisplayReactiveMessageForApp(CharSequence appLabel,
+                                                          String topActivity) {
         mShouldDisplayReactiveMessage = mNetworkCapabilities == null
                 || (!isSuspendedNetwork() && !isValidNetwork());
         if (mShouldDisplayReactiveMessage && mDataSubscriptionMessageEventListener != null) {
@@ -289,7 +292,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
             boolean isMessageDisplayed = mDataSubscriptionMessageEventListener.onAppForegrounded(
                     mIsDistractionOptimizationRequired, message, mUxrPrompt);
             if (isMessageDisplayed) {
-                mActivitiesBlocklist.add(mTopActivity);
+                mActivitiesBlocklist.add(topActivity);
             }
         }
     }
@@ -369,6 +372,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
 
     public class DataSubscriptionNetworkCallback extends ConnectivityManager.NetworkCallback {
         Network mNetwork;
+        String mTopActivity;
 
         @Override
         public void onAvailable(@NonNull Network network) {
@@ -387,7 +391,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
             }
             mNetwork = network;
             mNetworkCapabilities = networkCapabilities;
-            updateShouldDisplayReactiveMessageForApp(mTopLabel);
+            updateShouldDisplayReactiveMessageForApp(mTopLabel, mTopActivity);
         }
     }
 
