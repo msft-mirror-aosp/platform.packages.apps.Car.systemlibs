@@ -17,6 +17,8 @@ package com.android.car.scalableui.panel;
 
 import android.view.View;
 
+import com.android.car.scalableui.model.PanelControllerMetadata;
+
 /**
  * Interface for DecorPanel controller
  */
@@ -30,4 +32,16 @@ public interface DecorPanelController {
      * Refreshes the theme.
      */
     void refreshTheme();
+
+    /**
+     * Factory for creating an implementation of the DecorPanelController.
+     * @param <T> the type of the DecorPanelController implementation
+     */
+    interface Factory<T extends DecorPanelController> {
+        /**
+         * Create an instance of the DecorPanelController implementation using the provided
+         * {@link PanelControllerMetadata}.
+         */
+        T create(PanelControllerMetadata metadata);
+    }
 }
