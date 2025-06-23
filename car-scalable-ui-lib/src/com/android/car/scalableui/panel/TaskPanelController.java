@@ -21,6 +21,8 @@ import android.content.Intent;
 
 import androidx.annotation.Nullable;
 
+import com.android.car.scalableui.model.PanelControllerMetadata;
+
 import java.util.Set;
 
 /**
@@ -69,4 +71,16 @@ public interface TaskPanelController {
      * @return {@code true} if this panel controller handles the component, {@code false} otherwise.
      */
     boolean handles(ComponentName componentName);
+
+    /**
+     * Factory for creating an implementation of the TaskPanelController.
+     * @param <T> the type of the TaskPanelController implementation
+     */
+    interface Factory<T extends TaskPanelController> {
+        /**
+         * Create an instance of the TaskPanelController implementation using the provided
+         * {@link PanelControllerMetadata}.
+         */
+        T create(PanelControllerMetadata metadata);
+    }
 }
