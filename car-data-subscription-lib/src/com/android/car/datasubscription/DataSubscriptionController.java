@@ -73,6 +73,8 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
             "com.android.car.systemui.car.qc.DataSubscriptionController";
     // Timeout for network callback in ms
     private static final int CALLBACK_TIMEOUT_MS = 1000;
+    // Latch count for network callback
+    private static final int NETWORK_CALLBACK_LATCH_COUNT = 1;
     private final Context mContext;
     private DataSubscription mSubscription;
     private final Intent mIntent;
@@ -144,6 +146,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                 mTopLabel = appInfo.loadLabel(mContext.getPackageManager());
                 int uid = appInfo.uid;
                 mNetworkCallback.mTopActivity = topActivity;
+                mLatch = new CountDownLatch(NETWORK_CALLBACK_LATCH_COUNT);
                 mConnectivityManager.registerDefaultNetworkCallbackForUid(uid, mNetworkCallback,
                         mMainHandler);
                 mIsNetworkCallbackRegistered = true;
@@ -259,7 +262,6 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         mUxrPrompt = mDataSubscriptionMessageCreator.getUxrPrompt(
             CarUxRestrictionsUtil.getInstance(mContext).getCurrentRestrictions()
                 .isRequiresDistractionOptimization());
-        mLatch = new CountDownLatch(CALLBACK_TIMEOUT_MS);
     }
 
     void updateShouldDisplayProactiveMessage() {
