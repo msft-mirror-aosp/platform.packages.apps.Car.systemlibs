@@ -15,5 +15,5 @@
   ~ limitations under the License
   -->
 <resources>
-    <bool name="scalable_ui_enable_task_focus">false</bool>
+    <bool name="scalable_ui_enable_task_focus">true</bool>
 </resources>
