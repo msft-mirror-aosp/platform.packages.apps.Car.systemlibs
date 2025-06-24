@@ -73,6 +73,8 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
             "com.android.car.systemui.car.qc.DataSubscriptionController";
     // Timeout for network callback in ms
     private static final int CALLBACK_TIMEOUT_MS = 1000;
+    // Latch count for network callback
+    private static final int NETWORK_CALLBACK_LATCH_COUNT = 1;
     private final Context mContext;
     private DataSubscription mSubscription;
     private final Intent mIntent;
@@ -144,6 +146,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                 mTopLabel = appInfo.loadLabel(mContext.getPackageManager());
                 int uid = appInfo.uid;
                 mNetworkCallback.mTopActivity = topActivity;
+                mLatch = new CountDownLatch(NETWORK_CALLBACK_LATCH_COUNT);
                 mConnectivityManager.registerDefaultNetworkCallbackForUid(uid, mNetworkCallback,
                         mMainHandler);
                 mIsNetworkCallbackRegistered = true;
@@ -151,7 +154,6 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                 // default network by UID, we need to set a timeout period to make sure the network
                 // from the callback is updated correctly before deciding to display the message
                 //TODO: b/336869328 use the synchronous call to update network status
-                mLatch = new CountDownLatch(CALLBACK_TIMEOUT_MS);
                 mBackgroundExecutor.execute(() -> {
                     try {
                         mLatch.await(CALLBACK_TIMEOUT_MS, TimeUnit.MILLISECONDS);
