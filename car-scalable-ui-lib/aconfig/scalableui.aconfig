@@ -35,3 +35,10 @@ flag {
     description: "This flag controls enabling task focus logic for ScalableUI."
     bug: "422571603"
 }
+
+flag {
+    name: "scalable_ui_task_auto_restart"
+    namespace: "car_sys_exp"
+    description: "This flag controls restarting last task automatically when removed by shell."
+    bug: "427231933"
+}
