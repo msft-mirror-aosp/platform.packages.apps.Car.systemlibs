@@ -16,4 +16,5 @@
   -->
 <resources>
     <bool name="scalable_ui_enable_task_focus">true</bool>
+    <bool name="scalable_ui_enable_auto_restart">true</bool>
 </resources>

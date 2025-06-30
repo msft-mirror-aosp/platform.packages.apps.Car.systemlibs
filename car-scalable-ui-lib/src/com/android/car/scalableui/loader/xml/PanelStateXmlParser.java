@@ -50,6 +50,7 @@ import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelControllerMetadata;
 import com.android.car.scalableui.model.PanelState;
+import com.android.car.scalableui.model.Restart;
 import com.android.car.scalableui.model.Role;
 import com.android.car.scalableui.model.Transition;
 import com.android.car.scalableui.model.Variant;
@@ -86,6 +87,11 @@ public class PanelStateXmlParser {
     public static final String TRANSITIONS_TAG = "Transitions";
     public static final String DEFAULT_DURATION_ATTRIBUTE = "defaultDuration";
     public static final String DEFAULT_INTERPOLATOR_ATTRIBUTE = "defaultInterpolator";
+
+    // --- Restart Tags ---
+    public static final String RESTART_TAG = "Restart";
+    public static final String POLICY_ATTRIBUTE = "policy";
+    public static final String MAX_RETRY_ATTRIBUTE = "maxRetry";
 
     // --- Transition Tags ---
     public static final String TRANSITION_TAG = "Transition";
@@ -262,12 +268,27 @@ public class PanelStateXmlParser {
                         panelState.addTransition(transition);
                     }
                     break;
+                case RESTART_TAG:
+                    panelState.addRestart(parseRestart(parser));
+                    break;
                 default:
                     XmlPullParserHelper.skip(parser);
             }
         }
         panelState.setVariant(defaultVariant); // Set the initial variant
         return panelState;
+    }
+
+    private static Restart parseRestart(@NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, null, RESTART_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        String policy = attrs.getAttributeValue(null, POLICY_ATTRIBUTE);
+        int maxRetry = attrs.getAttributeIntValue(null, MAX_RETRY_ATTRIBUTE, 0);
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.skip(parser); // Skip any nested tags
+        }
+        return new Restart(policy, maxRetry);
     }
 
     private static PanelControllerMetadata createController(@NonNull Context context, int xmlId)
