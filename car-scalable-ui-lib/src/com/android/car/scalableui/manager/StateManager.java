@@ -37,7 +37,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,6 +76,19 @@ public class StateManager {
     }
 
     /**
+     * Get shallow copy of the current PanelStates {@link StateManager#mPanelStates}
+     * @return Snapshot of the current Map of PanelState.
+     *
+     */
+    private static Map<String, PanelState> getCurrentPanelStatesCopy() {
+        return sInstance.mPanelStates.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().clone()
+                ));
+    }
+
+    /**
      * Returns the singleton instance of the StateManager.
      *
      * @return The singleton instance of the StateManager.
@@ -111,9 +123,7 @@ public class StateManager {
         PanelTransaction.Builder panelTransactionBuilder = new PanelTransaction.Builder();
         HashSet<String> changedPanelIds = new HashSet<>();
         // Make a ShallowCopy of the currentPanelStates.
-        Collection<PanelState> initialState = sInstance.mPanelStates.values()
-                .stream()
-                .map(PanelState::clone).collect(Collectors.toList());
+        Map<String, PanelState> currentPanelStatesCopy = getCurrentPanelStatesCopy();
         for (PanelState panelState : sInstance.mPanelStates.values()) {
             if (panelState == null) {
                 Log.e(TAG, "panel state is null");
@@ -186,7 +196,8 @@ public class StateManager {
         }
         PanelTransaction panelTransaction = panelTransactionBuilder.build();
         if (sMetricsHelper != null) {
-            sMetricsHelper.recordJankCuj(event, panelTransaction.getAnimators(), initialState);
+            sMetricsHelper.recordJankCuj(event, panelTransaction.getAnimators(),
+                    currentPanelStatesCopy, sInstance.mPanelStates);
         }
         return panelTransactionBuilder.build();
     }
