@@ -15,15 +15,30 @@
  */
 package com.android.car.scalableui.panel
 
-import java.util.Collections
+import com.android.car.scalableui.loader.xml.SystemBarTagXmlParser
+import java.util.stream.Collectors
+import java.util.stream.Stream
 
 /**
  * A class that provides reserved panel IDs.
  */
 data object ReservedIdProvider {
     /**
+     * Reserved System Bar IDs
+     */
+    @JvmField val SYSTEM_BAR_IDS: Set<String> = java.util.Set.copyOf(
+        listOf(
+            SystemBarTagXmlParser.SYSTEM_BAR_PANEL_LEFT_ID,
+            SystemBarTagXmlParser.SYSTEM_BAR_PANEL_TOP_ID,
+            SystemBarTagXmlParser.SYSTEM_BAR_PANEL_RIGHT_ID,
+            SystemBarTagXmlParser.SYSTEM_BAR_PANEL_BOTTOM_ID
+        )
+    )
+
+    /**
      * Reserved System Panel IDs
      */
-    @JvmField
-    val SYSTEM_PANEL_IDS: Set<String> = Collections.unmodifiableSet(HashSet())
+    @JvmField val SYSTEM_PANEL_IDS: Set<String> = Stream.of(SYSTEM_BAR_IDS)
+        .flatMap { obj: Set<String> -> obj.stream() }
+        .collect(Collectors.toUnmodifiableSet())
 }
