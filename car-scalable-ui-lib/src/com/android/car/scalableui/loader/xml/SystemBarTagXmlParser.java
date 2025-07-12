@@ -15,10 +15,13 @@
  */
 package com.android.car.scalableui.loader.xml;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.ALPHA_TAG;
 import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.BOUNDS_TAG;
 import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.CORNER_TAG;
 import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.DEFAULT_VARIANT_ATTRIBUTE;
+import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.DISPLAY_ID;
 import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.ID_ATTRIBUTE;
 import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.INSETS_TAG;
 import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.KEY_FRAME_VARIANT_TAG;
@@ -86,6 +89,8 @@ public class SystemBarTagXmlParser {
         parser.require(XmlPullParser.START_TAG, null, SYSTEM_BAR_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
         String defaultVariant = attrs.getAttributeValue(null, DEFAULT_VARIANT_ATTRIBUTE);
+        String displayIdStr = attrs.getAttributeValue(null, DISPLAY_ID);
+        int displayId = (displayIdStr == null) ? DEFAULT_DISPLAY : Integer.parseInt(displayIdStr);
         String side = attrs.getAttributeValue(null, SIDE_ATTRIBUTE);
         int type = attrs.getAttributeIntValue(null, TYPE_ATTRIBUTE, -1);
         if (type < 0 || type > 3) {
@@ -122,6 +127,7 @@ public class SystemBarTagXmlParser {
         PanelControllerMetadata panelControllerMetaData = new PanelControllerMetadata(bundle);
 
         PanelState.Builder builder = new PanelState.Builder(id);
+        builder.setDisplayId(displayId);
         builder.setDefaultVariant(defaultVariant);
         builder.setPanelControllerMetadata(panelControllerMetaData);
         PanelState panelState = builder.build();
@@ -139,7 +145,7 @@ public class SystemBarTagXmlParser {
             switch (name) {
                 case VARIANT_TAG:
                     panelState.addVariant(parseVariant(context, panelState,
-                            /* defaultLayer= */ null, parser, variantParserMap));
+                            /* defaultLayer= */ null, parser, variantParserMap, displayId));
                     break;
                 case KEY_FRAME_VARIANT_TAG:
                     panelState.addVariant(parseKeyFrameVariant(panelState, parser, context));
@@ -216,13 +222,13 @@ public class SystemBarTagXmlParser {
     }
 
     private static VariantPropertyParser getVariantSystemBarBoundsParser(String id) {
-        return (context, parser, builder) -> builder.setBounds(
-                parseSystemBarBounds(context, parser, id).getRect());
+        return (context, parser, builder, displayId) -> builder.setBounds(
+                parseSystemBarBounds(context, parser, id, displayId).getRect());
     }
 
     @NonNull
     private static Bounds parseSystemBarBounds(@NonNull Context context,
-            @NonNull XmlPullParser parser, @NonNull String id)
+            @NonNull XmlPullParser parser, @NonNull String id, int displayId)
             throws IOException, XmlPullParserException {
         if (XmlPullParser.START_TAG != parser.getEventType() || !BOUNDS_TAG.equals(
                 parser.getName())) {
@@ -233,7 +239,7 @@ public class SystemBarTagXmlParser {
         AttributeSet attrs = Xml.asAttributeSet(parser);
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
 
-        Integer girth = getDimensionPixelSize(context, attrs, GIRTH_ATTRIBUTE,
+        Integer girth = getDimensionPixelSize(context, attrs, GIRTH_ATTRIBUTE, displayId,
                 id.equals(SYSTEM_BAR_PANEL_TOP_ID) || id.equals(SYSTEM_BAR_PANEL_BOTTOM_ID));
         if (girth == null) {
             throw new XmlPullParserException(

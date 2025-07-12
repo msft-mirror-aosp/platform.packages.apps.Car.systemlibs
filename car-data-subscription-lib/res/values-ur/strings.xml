@@ -19,8 +19,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="data_subscription_uxr_prompt" msgid="5193649388140182481">"پارک ہونے پر پلانز دیکھیں۔"</string>
     <string name="data_subscription_non_uxr_prompt" msgid="1057691358030888113">"دستیاب پلانز دیکھنے کے لیے تھپتھپائیں۔"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for data_subscription_expiring_soon_proactive_prompt (8401642708194844399) -->
-    <skip />
+    <string name="data_subscription_expiring_soon_proactive_prompt" msgid="8401642708194844399">"آپ کے انٹرنیٹ پلان کی میعاد %s دن میں ختم ہو جائے گی۔"</string>
     <string name="data_subscription_expiring_soon_reactive_prompt" msgid="5175499184629921473">"‫%1$s کو انٹرنیٹ درکار ہے۔ پلان کی میعاد ‎%2$s دن میں ختم ہو جائے گی۔"</string>
 </resources>
