@@ -27,9 +27,7 @@ import com.android.car.scalableui.panel.PanelPool;
 import com.android.internal.jank.Cuj;
 import com.android.internal.jank.InteractionJankMonitor;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -70,13 +68,16 @@ public class MetricsHelper {
      * @param event          The {@link Event} that triggered the potential CUJ.
      * @param panelAnimators A Set of PanelId {@link  String} to Animator {@link Animator} pairs
      *                       associated with the UI transition for this event.
-     * @param initialState   A collection representing the {@link PanelState} of relevant UI panels
+     * @param stateBefore    A collection representing the {@link PanelState} of relevant UI panels
      *                       *before* the event occurred. Used for CUJ mapping.
+     * @param stateAfter    A collection representing the {@link PanelState} of relevant UI panels
+     *                       *after* the event occurred. Used for CUJ mapping.
      */
     public void recordJankCuj(Event event,
             Set<Map.Entry<String, Animator>> panelAnimators,
-            Collection<PanelState> initialState) {
-        Pair<Panel, Integer> cuj = mMetricsCujMapping.getMappedCuj(event, initialState);
+            Map<String, PanelState> stateBefore,
+            Map<String, PanelState> stateAfter) {
+        Pair<Panel, Integer> cuj = mMetricsCujMapping.getMappedCuj(event, stateBefore, stateAfter);
         if (cuj == null || cuj.first.getLeash() == null) {
             // No CUJ found
             return;
@@ -156,40 +157,29 @@ public class MetricsHelper {
         }
 
         /**
-         * Gets the associated integer identifier for a CUJ ({@link Cuj.CujType}) based on the
-         * triggering event and the state of panels before the event.
-         * <p>
-         * Currently, this implementation has a very basic mapping, primarily identifying
-         * the transition from the app grid panel to the home screen.
-         * TODO (b/409561895): Improve the mapping functionality once we have more use-cases.
+         * Gets the associated integer identifier for a CUJ by matching the event and
+         * state changes against a central registry of CUJ definitions.
          *
-         * @param event             The current {@link Event} that triggered the UI change.
-         * @param currentPanelState A collection of {@link PanelState} representing the state
-         *                          of panels at the start of the event.
-         * @return Returns a {@link Pair} containing the relevant {@link Panel} and the integer
-         * {@link Cuj.CujType} identifier if a mapping is found, otherwise returns
-         * {@code null}.
+         * @param event       The {@link Event} that triggered the UI change.
+         * @param stateBefore A map of Panel ID to {@link PanelState} before the event.
+         * @param stateAfter  A map of Panel ID to {@link PanelState} after the event.
+         * @return A {@link Pair} containing the relevant {@link Panel} and the integer
+         * {@link Cuj.CujType} identifier if a match is found; otherwise, {@code null}.
          */
         @Nullable
-        Pair<Panel, Integer> getMappedCuj(Event event, Collection<PanelState> currentPanelState) {
-            // Currently we have a very rudimentary approach to track only one CUJ, and ignore
-            // all other events. Check if the event is the system "Home" event.
-            if (!event.getId().equals("_System_OnHomeEvent")) {
-                return null;
+        Pair<Panel, Integer> getMappedCuj(Event event, Map<String, PanelState> stateBefore,
+                Map<String, PanelState> stateAfter) {
+            // Iterate through all known CUJ definitions.
+            for (CujDefinition definition : CujRegistry.getDefinitions()) {
+                if (definition.matches(event, stateBefore, stateAfter)) {
+                    // We found a matching CUJ.
+                    Panel relevantPanel = mPanelPool.getPanel(definition.getRelevantPanelId());
+                    if (relevantPanel != null) {
+                        return Pair.create(relevantPanel, definition.getCujType());
+                    }
+                }
             }
-            // Check if the App Grid panel was visible before the Home event occurred.
-            Optional<PanelState> appGridPanelState = currentPanelState.stream().filter(
-                    panelState -> panelState.getId().equals("panel_app_grid")
-                            && panelState.getCurrentVariant() != null
-                            && panelState.getCurrentVariant().isVisible()
-            ).findFirst();
-            if (appGridPanelState.isPresent()) {
-                Panel appGridPanel = mPanelPool.getPanel(
-                        appGridPanelState.get().getId());
-
-                return Pair.create(appGridPanel, Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
-            }
-            // Check if the App Grid panel was visible before the Home event occurred.
+            // No CUJ definition matched the current situation.
             return null;
         }
 
