@@ -34,6 +34,8 @@ public class PanelTransaction {
     /** A map of panel IDs to panel {@link Animator}s. */
     private final HashMap<String, Animator> mAnimatorMap;
     private final HashSet<String> mLockededPanelIdSet;
+    /** A set of panel ids who's animations should be merged with the next transaction. */
+    private final HashSet<String> mMergeAnimationPanelIds = new HashSet<>();
     private boolean mHasWindowChanges;
 
     private Runnable mAnimationStartCallbackRunnable;
@@ -65,6 +67,20 @@ public class PanelTransaction {
     @NonNull
     public Set<String> getLockededPanelIdSet() {
         return mLockededPanelIdSet;
+    }
+
+    /**
+     * Add panel id to set of panels that are to be merged with the next PanelTransaction.
+     */
+    public void addPanelIdToAnimationMerge(@NonNull String panelId) {
+        mMergeAnimationPanelIds.add(panelId);
+    }
+
+    /**
+     * Check if a panel id should be merged with the next PanelTransaction.
+     */
+    public boolean shouldMergePanelAnimation(@NonNull String panelId) {
+        return mMergeAnimationPanelIds.contains(panelId);
     }
 
     /**
