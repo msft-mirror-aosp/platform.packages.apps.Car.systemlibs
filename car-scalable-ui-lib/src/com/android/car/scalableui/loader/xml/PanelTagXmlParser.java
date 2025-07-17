@@ -26,6 +26,7 @@ import static com.android.car.scalableui.model.Visibility.DEFAULT_VISIBILITY;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Insets;
 import android.hardware.display.DisplayManager;
@@ -67,6 +68,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A utility class that uses a {@link XmlPullParser} to create a {@link PanelState} object for
@@ -363,8 +366,7 @@ public class PanelTagXmlParser {
         parser.require(XmlPullParser.START_TAG, null, KEY_FRAME_VARIANT_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
         String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
-        int resourceId = Integer.parseInt(id.substring(1));
-        String idName = context.getResources().getResourceEntryName(resourceId);
+        String idName = getIdName(context, id);
         String parentStr = attrs.getAttributeValue(null, PARENT_ATTRIBUTE);
         Variant parent = panelState.getVariant(parentStr);
         KeyFrameVariant.Builder builder = new KeyFrameVariant.Builder(id, idName);
@@ -408,8 +410,7 @@ public class PanelTagXmlParser {
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
         String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
-        int resourceId = Integer.parseInt(id.substring(1));
-        String idName = context.getResources().getResourceEntryName(resourceId);
+        String idName = getIdName(context, id);
         String parentVariantId = attrs.getAttributeValue(null, PARENT_ATTRIBUTE);
         Variant parentVariant = panelState.getVariant(parentVariantId);
 
@@ -428,6 +429,30 @@ public class PanelTagXmlParser {
             }
         }
         return variantBuilder.build();
+    }
+
+    /**
+     * Attempt to get the String name from a resource id.
+     * @return the resource string or the passed in id param if the string could not be parsed
+     */
+    @NonNull
+    private static String getIdName(@NonNull Context context, @NonNull String id) {
+        Pattern pattern = Pattern.compile("^@(\\d+)$");
+        Matcher matcher = pattern.matcher(id);
+        if (matcher.find() && matcher.groupCount() >= 1) {
+            String idName = matcher.group(1); // Group 1 is resource id number
+            if (idName != null && !idName.isEmpty()) {
+                try {
+                    int resourceId = Integer.parseInt(idName);
+                    return context.getResources().getResourceEntryName(
+                            resourceId);
+                } catch (NumberFormatException | Resources.NotFoundException e) {
+                    Log.e(TAG, "invalid resource format for string " + id);
+                }
+            }
+        }
+        // If not an integer (after the @) or the res id is not valid, fallback to id string
+        return id;
     }
 
     static VariantPropertyParser getVariantBackgroundParser(String id) {
