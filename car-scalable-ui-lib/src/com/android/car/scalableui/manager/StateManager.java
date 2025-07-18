@@ -257,7 +257,7 @@ public class StateManager {
      */
     public static void dumpPanelStates(PrintWriter pw) {
         for (PanelState panelState : getInstance().mPanelStates.values()) {
-            pw.println(panelState.toString());
+            pw.println(panelState.toShortString());
         }
     }
 
