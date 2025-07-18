@@ -366,25 +366,16 @@ public class Variant {
                         .collect(Collectors.joining(" , "));
 
         return "Variant{"
-                + "mIdName='"
-                + mIdName
-                + '\''
-                + ", mAlpha="
-                + mAlpha
-                + ", mIsVisible="
-                + mIsVisible
-                + ", mLayer="
-                + mLayer
-                + ", mCanFocusOnTransition="
-                + mCanFocusOnTransition
-                + ", mBounds="
-                + mBounds
-                + ", mSafeBounds="
-                + mSafeBounds
-                + ", mCornerRadius="
-                + mCornerRadius
-                + ", mInsets="
-                + mInsets
+                + "\n\tmIdName=" + mIdName
+                + "\n\tmAlpha=" + mAlpha
+                + "\n\tmIsVisible=" + mIsVisible
+                + "\n\tmLayer=" + mLayer
+                + "\n\tmCanFocusOnTransition=" + mCanFocusOnTransition
+                + "\n\tmBounds=" + mBounds
+                + "\n\tmSafeBounds=" + mSafeBounds
+                + "\n\tmCornerRadius=" + mCornerRadius
+                + "\n\tmInsets=" + mInsets
+                + "\n\tmDecors=" + decorString
                 + '}';
     }
 
