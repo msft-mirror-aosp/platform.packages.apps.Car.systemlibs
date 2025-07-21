@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<SystemBar defaultVariant="@id/variant1" type="2" side="right" barZOrder="2">
+<SystemBar defaultVariant="@id/variant1" type="2" side="right" barZOrder="2" hideForKeyboard="false">
     <Variant id="@+id/base">
         <Corner radius="10dp" />
         <Bounds girth="50" />
