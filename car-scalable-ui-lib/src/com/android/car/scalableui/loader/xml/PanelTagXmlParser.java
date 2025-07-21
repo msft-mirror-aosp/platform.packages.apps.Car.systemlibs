@@ -436,7 +436,7 @@ public class PanelTagXmlParser {
      * @return the resource string or the passed in id param if the string could not be parsed
      */
     @NonNull
-    private static String getIdName(@NonNull Context context, @NonNull String id) {
+    static String getIdName(@NonNull Context context, @NonNull String id) {
         Pattern pattern = Pattern.compile("^@(\\d+)$");
         Matcher matcher = pattern.matcher(id);
         if (matcher.find() && matcher.groupCount() >= 1) {

@@ -119,7 +119,8 @@ public final class PanelStateDocLoader {
             Log.i(TAG, "Panel " + setData.getName() + " ROLE activity " + roleName);
         }
 
-        PanelState result = new PanelState(setData.getName(), roleBuilder.build());
+        PanelState result = new PanelState(setData.getName());
+        result.setRole(roleBuilder.build());
 
         // Add variants
         Log.i(TAG, "createPanel " + setData.getName() + ", default "
