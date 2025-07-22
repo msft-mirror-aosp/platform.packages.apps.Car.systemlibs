@@ -65,6 +65,7 @@ import java.util.Map;
  */
 public class SystemBarTagXmlParser {
     public static final String SIDE_ATTRIBUTE = "side";
+    public static final String HIDE_FOR_KEYBOARD_ATTRIBUTE = "hideForKeyboard";
     public static final String BAR_Z_ORDER_ATTRIBUTE = "barZOrder";
     public static final String GIRTH_ATTRIBUTE = "girth";
     public static final String TYPE_ATTRIBUTE = "type";
@@ -101,23 +102,22 @@ public class SystemBarTagXmlParser {
             throw new XmlPullParserException(
                     "<SystemBar> barZOrder property must be a positive integer");
         }
+        boolean hideForKeyboard = attrs.getAttributeBooleanValue(null, HIDE_FOR_KEYBOARD_ATTRIBUTE,
+                false);
         String id = getIdForSide(side);
         Bundle bundle = new Bundle();
+        bundle.putBoolean(HIDE_FOR_KEYBOARD_ATTRIBUTE, hideForKeyboard);
 
         for (int index = 0; index < attrs.getAttributeCount(); index++) {
             String name = attrs.getAttributeName(index);
             switch (name) {
                 case ID_ATTRIBUTE -> throw new XmlPullParserException(
                         "<SystemBar> does not support attribute: " + ID_ATTRIBUTE);
-                case DEFAULT_VARIANT_ATTRIBUTE -> {
+                case DEFAULT_VARIANT_ATTRIBUTE, HIDE_FOR_KEYBOARD_ATTRIBUTE -> {
                     // no-op
                 }
-                case TYPE_ATTRIBUTE -> {
-                    bundle.putInt(TYPE_ATTRIBUTE, type);
-                }
-                case BAR_Z_ORDER_ATTRIBUTE -> {
-                    bundle.putInt(BAR_Z_ORDER_ATTRIBUTE, zOrder);
-                }
+                case TYPE_ATTRIBUTE -> bundle.putInt(TYPE_ATTRIBUTE, type);
+                case BAR_Z_ORDER_ATTRIBUTE -> bundle.putInt(BAR_Z_ORDER_ATTRIBUTE, zOrder);
                 default -> {
                     String value = attrs.getAttributeValue(index);
                     bundle.putString(name, value);
@@ -143,21 +143,17 @@ public class SystemBarTagXmlParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String name = parser.getName();
             switch (name) {
-                case VARIANT_TAG:
-                    panelState.addVariant(parseVariant(context, panelState,
-                            /* defaultLayer= */ null, parser, variantParserMap, displayId));
-                    break;
-                case KEY_FRAME_VARIANT_TAG:
-                    panelState.addVariant(parseKeyFrameVariant(panelState, parser, context));
-                    break;
-                case TRANSITIONS_TAG:
+                case VARIANT_TAG -> panelState.addVariant(parseVariant(context, panelState,
+                        /* defaultLayer= */ null, parser, variantParserMap, displayId));
+                case KEY_FRAME_VARIANT_TAG -> panelState.addVariant(
+                        parseKeyFrameVariant(panelState, parser, context));
+                case TRANSITIONS_TAG -> {
                     List<Transition> transitions = parseTransitions(context, panelState, parser);
                     for (Transition transition : transitions) {
                         panelState.addTransition(transition);
                     }
-                    break;
-                default:
-                    XmlPullParserHelper.skip(parser);
+                }
+                default -> XmlPullParserHelper.skip(parser);
             }
         }
         panelState.setVariant(defaultVariant); // Set the initial variant

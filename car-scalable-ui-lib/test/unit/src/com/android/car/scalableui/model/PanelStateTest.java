@@ -16,6 +16,7 @@
 package com.android.car.scalableui.model;
 
 import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.BAR_Z_ORDER_ATTRIBUTE;
+import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.HIDE_FOR_KEYBOARD_ATTRIBUTE;
 import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_BOTTOM_ID;
 import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_LEFT_ID;
 import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_RIGHT_ID;
@@ -97,6 +98,8 @@ public class PanelStateTest {
                 BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(11);
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
                 TYPE_ATTRIBUTE)).isEqualTo(3);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
+                HIDE_FOR_KEYBOARD_ATTRIBUTE)).isFalse();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
         assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(0);
         assertThat(panelState.getCurrentVariant().getBounds().right).isEqualTo(
@@ -121,6 +124,8 @@ public class PanelStateTest {
                 BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(0);
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
                 TYPE_ATTRIBUTE)).isEqualTo(0);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
+                HIDE_FOR_KEYBOARD_ATTRIBUTE)).isTrue();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(
                 displayMetrics.heightPixels - 50);
         assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(0);
@@ -147,6 +152,8 @@ public class PanelStateTest {
                 BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(10);
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
                 TYPE_ATTRIBUTE)).isEqualTo(1);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
+                HIDE_FOR_KEYBOARD_ATTRIBUTE)).isFalse();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
         assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(0);
         assertThat(panelState.getCurrentVariant().getBounds().right).isEqualTo(50);
@@ -171,6 +178,8 @@ public class PanelStateTest {
                 BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(2);
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
                 TYPE_ATTRIBUTE)).isEqualTo(2);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
+                HIDE_FOR_KEYBOARD_ATTRIBUTE)).isFalse();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
         assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(
                 displayMetrics.widthPixels - 50);
