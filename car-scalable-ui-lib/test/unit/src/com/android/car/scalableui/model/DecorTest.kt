@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,11 +16,7 @@
 package com.android.car.scalableui.model
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -29,136 +25,85 @@ class DecorTest {
 
     companion object {
         private const val TEST_ID = "testId123"
-        private const val TEST_CONTENT = "This is test content."
-        private val DEFAULT_VISUAL_DATA = VisualData.Builder().build()
-        private val CUSTOM_VISUAL_DATA = VisualData.Builder()
-            .setAlpha(0.75f)
-            .setCornerRadius(15)
-            .setIsVisible(false)
-            .build()
-
-        // Default values from Decor.Builder
-        private const val BUILDER_DEFAULT_CONTENT = "Default content"
-        // Note: The 'id' in Decor.Builder has a default "Default decor ID",
-        // but the constructor `Builder(id: String)` immediately overwrites it.
+        private const val TEST_LAYER = 5
+        private const val TEST_COLOR_RES = 12345
+        private const val TEST_ALPHA = 0.75f
+        private const val TEST_CONTENT_ID = 54321
     }
 
     @Test
-    fun testBuilder_constructorSetsId_usesDefaultsForOthers() {
-        val decor = Decor.Builder(TEST_ID).build()
+    fun constructor_withAllValues_setsPropertiesCorrectly() {
+        val decor = Decor(
+            id = TEST_ID,
+            layer = TEST_LAYER,
+            colorRes = TEST_COLOR_RES,
+            alpha = TEST_ALPHA,
+            content = TEST_CONTENT_ID
+        )
 
-        assertEquals(TEST_ID, decor.id)
-        assertEquals(DEFAULT_VISUAL_DATA, decor.visualData)
-        assertEquals(BUILDER_DEFAULT_CONTENT, decor.content)
+        assertThat(decor.id).isEqualTo(TEST_ID)
+        assertThat(decor.layer).isEqualTo(TEST_LAYER)
+        assertThat(decor.colorRes).isEqualTo(TEST_COLOR_RES)
+        assertThat(decor.alpha).isEqualTo(TEST_ALPHA)
+        assertThat(decor.content).isEqualTo(TEST_CONTENT_ID)
     }
 
     @Test
-    fun testBuilder_setAllValues() {
-        val decor = Decor.Builder(TEST_ID)
-            .setVisualData(CUSTOM_VISUAL_DATA)
-            .setContent(TEST_CONTENT)
-            .build()
+    fun constructor_withDefaultValues_usesDefaults() {
+        val decor = Decor()
 
-        assertEquals(TEST_ID, decor.id)
-        assertEquals(CUSTOM_VISUAL_DATA, decor.visualData)
-        assertEquals(TEST_CONTENT, decor.content)
+        assertThat(decor.id).isEqualTo("Default decor ID")
+        assertThat(decor.layer).isEqualTo(-1)
+        assertThat(decor.colorRes).isEqualTo(-1)
+        assertThat(decor.alpha).isEqualTo(1f)
+        assertThat(decor.content).isEqualTo(-1)
     }
 
     @Test
-    fun testBuilder_copyConstructor() {
-        val originalDecor = Decor.Builder("originalId")
-            .setVisualData(CUSTOM_VISUAL_DATA)
-            .setContent("Original Content")
-            .build()
+    fun equalsAndHashCode_forEqualObjects_areTrue() {
+        val decor1 = Decor(
+            id = TEST_ID,
+            layer = TEST_LAYER,
+            colorRes = TEST_COLOR_RES,
+            alpha = TEST_ALPHA,
+            content = TEST_CONTENT_ID
+        )
+        val decor2 = Decor(
+            id = TEST_ID,
+            layer = TEST_LAYER,
+            colorRes = TEST_COLOR_RES,
+            alpha = TEST_ALPHA,
+            content = TEST_CONTENT_ID
+        )
 
-        val copiedDecor = Decor.Builder(originalDecor).build()
-
-        assertEquals(originalDecor.id, copiedDecor.id)
-        assertEquals(originalDecor.visualData, copiedDecor.visualData)
-        assertEquals(originalDecor.content, copiedDecor.content)
-        assertEquals(originalDecor, copiedDecor) // Should be equal in value
-
-        // Ensure visualData is the same instance as VisualData is immutable
-        assertTrue(originalDecor.visualData === copiedDecor.visualData)
+        assertThat(decor1).isEqualTo(decor2)
+        assertThat(decor1.hashCode()).isEqualTo(decor2.hashCode())
     }
 
     @Test
-    fun testBuilder_copyConstructor_thenModify() {
-        val originalDecor = Decor.Builder("idToCopy")
-            .setVisualData(DEFAULT_VISUAL_DATA)
-            .setContent("Initial Content")
-            .build()
+    fun equalsAndHashCode_forDifferentObjects_areFalse() {
+        val decor1 = Decor(id = "id1")
+        val decor2 = Decor(id = "id2")
 
-        val newId = "newIdAfterCopy"
-        val newContent = "New Content After Copy"
-        val newVisualData = VisualData.Builder().setAlpha(0.1f).build()
-
-        val modifiedDecor = Decor.Builder(originalDecor)
-            // Note: Decor.Builder does not have setId, id is set via constructor.
-            // To change id, one would typically create a new builder: Decor.Builder(newId)
-            // and then copy other fields or set them.
-            // For this test, we'll assume we are building a new Decor based on an old one
-            // but with some new properties.
-            // If we wanted to change the ID using the copy constructor, we'd need a setId in builder
-            // or re-construct: Decor.Builder(newId).setVisualData(original.visualData)...
-            .setVisualData(newVisualData)
-            .setContent(newContent)
-            .build()
-
-        assertEquals(originalDecor.id, modifiedDecor.id) // ID remains from the copied Decor
-        assertEquals(newVisualData, modifiedDecor.visualData)
-        assertEquals(newContent, modifiedDecor.content)
-        assertNotEquals(originalDecor, modifiedDecor)
+        assertThat(decor1).isNotEqualTo(decor2)
+        assertThat(decor1.hashCode()).isNotEqualTo(decor2.hashCode())
     }
 
     @Test
-    fun testEqualsAndHashCode() {
-        val decor1 = Decor.Builder(TEST_ID)
-            .setVisualData(CUSTOM_VISUAL_DATA)
-            .setContent(TEST_CONTENT)
-            .build()
-
-        val decor2 = Decor.Builder(TEST_ID)
-            .setVisualData(CUSTOM_VISUAL_DATA)
-            .setContent(TEST_CONTENT)
-            .build()
-
-        val decor3_diffId = Decor.Builder("differentId")
-            .setVisualData(CUSTOM_VISUAL_DATA)
-            .setContent(TEST_CONTENT)
-            .build()
-
-        val decor4_diffVisualData = Decor.Builder(TEST_ID)
-            .setVisualData(DEFAULT_VISUAL_DATA) // Different VisualData
-            .setContent(TEST_CONTENT)
-            .build()
-
-        val decor5_diffContent = Decor.Builder(TEST_ID)
-            .setVisualData(CUSTOM_VISUAL_DATA)
-            .setContent("Different Content")
-            .build()
-
-        assertEquals(decor1, decor2)
-        assertEquals(decor1.hashCode(), decor2.hashCode())
-
-        assertNotEquals(decor1, decor3_diffId)
-        assertNotEquals(decor1.hashCode(), decor3_diffId.hashCode()) // Hashcodes likely different
-
-        assertNotEquals(decor1, decor4_diffVisualData)
-        assertNotEquals(decor1, decor5_diffContent)
-
-        assertFalse(decor1.equals(null))
-        assertFalse(decor1.equals("a string"))
-    }
-
-    @Test
-    fun testToString() {
-        val decor = Decor(TEST_ID, CUSTOM_VISUAL_DATA, TEST_CONTENT, float)
+    fun toString_containsAllProperties() {
+        val decor = Decor(
+            id = TEST_ID,
+            layer = TEST_LAYER,
+            colorRes = TEST_COLOR_RES,
+            alpha = TEST_ALPHA,
+            content = TEST_CONTENT_ID
+        )
         val str = decor.toString()
 
-        assertNotNull(str)
-        assertTrue(str.contains("id=$TEST_ID"))
-        assertTrue(str.contains("visualData=$CUSTOM_VISUAL_DATA"))
-        assertTrue(str.contains("content=$TEST_CONTENT"))
+        assertThat(str).contains("id=$TEST_ID")
+        assertThat(str).contains("layer=$TEST_LAYER")
+        assertThat(str).contains("colorRes=$TEST_COLOR_RES")
+        assertThat(str).contains("alpha=$TEST_ALPHA")
+        assertThat(str).contains("content=$TEST_CONTENT_ID")
     }
 }
