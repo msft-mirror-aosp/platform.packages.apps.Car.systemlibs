@@ -24,7 +24,10 @@ android_test {
     certificate: "platform",
     privileged: true,
     resource_dirs: ["res"],
-    srcs: ["src/**/*.java"],
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
 
     libs: [
         "android.test.runner.stubs.system",
