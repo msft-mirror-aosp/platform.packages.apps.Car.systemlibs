@@ -42,6 +42,7 @@ public class VariantTest {
         base.setBounds(new Rect(10, 20, 30, 40));
         base.setVisibility(false);
         base.setLayer(5);
+        base.setCanFocusOnTransition(false);
         base.setAlpha(0.5f);
         base.setCornerRadius(2);
 
@@ -51,6 +52,7 @@ public class VariantTest {
         assertThat(variant.getBounds()).isEqualTo(new Rect(10, 20, 30, 40));
         assertThat(variant.isVisible()).isFalse();
         assertThat(variant.getLayer()).isEqualTo(5);
+        assertThat(variant.canFocusOnTransition()).isEqualTo(false);
         assertThat(variant.getAlpha()).isEqualTo(0.5f);
         assertThat(variant.getCornerRadius()).isEqualTo(2);
     }
@@ -63,6 +65,7 @@ public class VariantTest {
         assertThat(variant.getBounds()).isEqualTo(new Rect()); // Default Rect
         assertThat(variant.isVisible()).isTrue(); // Default Visibility
         assertThat(variant.getLayer()).isEqualTo(0); // Default Layer
+        assertThat(variant.canFocusOnTransition()).isEqualTo(true); // Default focus
         assertThat(variant.getAlpha()).isEqualTo(1.0f); // Default Alpha
         assertThat(variant.getCornerRadius()).isEqualTo(0); // Default Alpha
     }

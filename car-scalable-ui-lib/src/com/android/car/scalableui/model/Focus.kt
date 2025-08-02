@@ -13,21 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.scalableui.panel;
-
-import android.view.View;
+package com.android.car.scalableui.model
 
 /**
- * Interface for DecorPanel controller
+ * Represents the focus of a {@code Panel}. This class provides methods for creating a focus object
+ * from an XML definition and retrieving values of the focus configuration.
  */
-public interface DecorPanelController {
-    /**
-     * Returns a {@link View} to show in the decor panel.
-     */
-    View getView();
+data class Focus(
+    val canFocusOnTransition: Boolean = DEFAULT_FOCUS_ON_TRANSITION
+) {
 
     /**
-     * Refreshes the theme.
+     * Returns the focus on transition state.
+     *
+     * @return Whether focus on transition is allowed.
      */
-    void refreshTheme();
+    fun canFocusOnTransition(): Boolean {
+        return canFocusOnTransition
+    }
+
+    companion object {
+        const val DEFAULT_FOCUS_ON_TRANSITION = true
+    }
 }

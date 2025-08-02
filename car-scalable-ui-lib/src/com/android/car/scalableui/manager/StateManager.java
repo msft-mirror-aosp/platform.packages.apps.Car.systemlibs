@@ -35,6 +35,7 @@ import com.android.car.scalableui.panel.Panel;
 import com.android.car.scalableui.panel.PanelPool;
 import com.android.internal.jank.InteractionJankMonitor;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -121,6 +122,7 @@ public class StateManager {
             Transition transition = panelState.getTransition(event);
             if (transition == null) {
                 Log.e(TAG, "transition is null for " + panelState.getId());
+                panelTransactionBuilder.addLockedPanelId(panelState.getId());
                 continue;
             }
             Panel panel = PanelPool.getInstance().getPanel(panelState.getId());
@@ -204,10 +206,10 @@ public class StateManager {
         panel.setVisibility(variant.isVisible());
         panel.setAlpha(variant.getAlpha());
         panel.setLayer(variant.getLayer());
+        panel.setCanFocusOnTransition(variant.canFocusOnTransition());
         panel.setDisplayId(panelState.getDisplayId());
         panel.setInsets(variant.getInsets());
         panel.setCornerRadius(variant.getCornerRadius());
-        panel.setBlur(variant.getBlur());
         // KeyFrameVariant might not have safe bounds.
         if (!(variant instanceof KeyFrameVariant)) {
             panel.setSafeBounds(variant.getSafeBounds());
@@ -248,6 +250,15 @@ public class StateManager {
     @Nullable
     public static PanelState getPanelState(String id) {
         return getInstance().mPanelStates.getOrDefault(id, null);
+    }
+
+    /**
+     * Dump all the current PanelStates to the output stream.
+     */
+    public static void dumpPanelStates(PrintWriter pw) {
+        for (PanelState panelState : getInstance().mPanelStates.values()) {
+            pw.println(panelState.toString());
+        }
     }
 
     @VisibleForTesting

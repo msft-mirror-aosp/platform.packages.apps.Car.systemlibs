@@ -19,11 +19,14 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.util.Log;
 
+import com.android.car.scalableui.model.Action;
 import com.android.car.scalableui.model.PanelState;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
 
 /**
  * Loads {@link PanelState} from an xml resource.
@@ -43,6 +46,17 @@ public class XmlModelLoader {
             PanelState ps = PanelStateXmlParser.parse(mContext, parser);
             return ps;
         } catch (XmlPullParserException | IOException e) {
+            Log.e(TAG, "Error parsing xml", e);
+            return null;
+        }
+    }
+
+    /** Creates a list of {@link actions} using the given xml resource */
+    public List<Action> createActions(int resourceId) {
+        try (XmlResourceParser parser = mContext.getResources().getXml(resourceId)) {
+            List<Action> actions = ActionXmlParser.parse(mContext, parser);
+            return actions;
+        } catch (XmlPullParserException | IOException | URISyntaxException e) {
             Log.e(TAG, "Error parsing xml", e);
             return null;
         }

@@ -22,7 +22,7 @@ import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.android.car.scalableui.model.Blur;
+
 import com.android.car.scalableui.model.PanelControllerMetadata;
 import com.android.car.scalableui.model.Role;
 
@@ -64,18 +64,6 @@ public interface Panel {
     void setSafeBounds(@NonNull Rect safeBounds);
 
     /**
-     * Sets the blur properties for the Panel. This is used only with the decor panel as a surface.
-     *
-     * @param blur properties to set on surface
-     */
-    void setBlur(Blur blur);
-
-    /**
-     * Gets the Blur properties for a surface
-     */
-    Blur getBlur();
-
-    /**
      * Gets the layer of this panel.
      * Panels with higher layer values are drawn on top of panels with lower layer values.
      *
@@ -89,6 +77,20 @@ public interface Panel {
      * @param layer The new layer of this panel.
      */
     void setLayer(int layer);
+
+    /**
+     * Returns the focus on transition state.
+     *
+     * @return Whether focus on transition is allowed.
+     */
+    boolean canFocusOnTransition();
+
+    /**
+     * Sets focus on transition value
+     *
+     * @param focusOnTransition The focus value to set.
+     */
+    void setCanFocusOnTransition(boolean focusOnTransition);
 
     /**
      * Gets the x-coordinate of the left edge of this panel.
@@ -262,4 +264,9 @@ public interface Panel {
      * Sets the {@link PanelControllerMetadata}
      */
     void setPanelControllerMetadata(@Nullable PanelControllerMetadata panelControllerMetadata);
+
+    /**
+     * Refresh the panel theme.
+     */
+    void refreshTheme();
 }

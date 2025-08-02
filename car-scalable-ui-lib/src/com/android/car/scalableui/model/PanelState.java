@@ -46,6 +46,8 @@ public class PanelState implements Cloneable {
     private final Role mRole;
     private final List<Variant> mVariants = new ArrayList<>();
     private final List<Transition> mTransitions = new ArrayList<>();
+    @Nullable
+    private Restart mRestart;
 
     @Nullable
     private Animator mRunningAnimator;
@@ -94,6 +96,17 @@ public class PanelState implements Cloneable {
     /** Adds transition */
     public void addTransition(@NonNull Transition transition) {
         mTransitions.add(transition);
+    }
+
+    /** Adds restart */
+    public void addRestart(@NonNull Restart restart) {
+        mRestart = restart;
+    }
+
+    /** Returns restart */
+    @Nullable
+    public Restart getRestart() {
+        return mRestart;
     }
 
     /** Returns current variant */

@@ -19,6 +19,7 @@ package com.android.car.scalableui.panel;
 import androidx.annotation.Nullable;
 
 import java.util.HashMap;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -47,6 +48,7 @@ public class PanelPool {
     public interface PanelCreatorDelegate {
         /**
          * Creates a panel object.
+         *
          * @param id given identifier for the panel.
          * @return the panel object.
          */
@@ -54,7 +56,8 @@ public class PanelPool {
     }
 
 
-    private PanelPool() {}
+    private PanelPool() {
+    }
 
     /**
      * Sets the {@link PanelCreatorDelegate} to be used for creating panel instances.
@@ -102,5 +105,12 @@ public class PanelPool {
             if (predicate.test(panel)) return panel;
         }
         return null;
+    }
+
+    /**
+     * Executes a given {@link Consumer} on all the panels.
+     */
+    public void forEach(Consumer<Panel> consumer) {
+        mPanels.forEach((id, panel) -> consumer.accept(panel));
     }
 }

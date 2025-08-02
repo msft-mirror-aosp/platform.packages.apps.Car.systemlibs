@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,15 +33,19 @@ public class PanelTransaction {
 
     /** A map of panel IDs to panel {@link Animator}s. */
     private final HashMap<String, Animator> mAnimatorMap;
+    private final HashSet<String> mLockededPanelIdSet;
+    /** A set of panel ids who's animations should be merged with the next transaction. */
+    private final HashSet<String> mMergeAnimationPanelIds = new HashSet<>();
     private boolean mHasWindowChanges;
 
     private Runnable mAnimationStartCallbackRunnable;
     private Runnable mAnimationEndCallbackRunnable;
 
     public PanelTransaction(Map<String, Transition> transactionMap,
-            Map<String, Animator> animatorMap) {
+            Map<String, Animator> animatorMap, Set<String> lockededPanelIdSet) {
         mTransactionMap = new HashMap<>(transactionMap);
         mAnimatorMap = new HashMap<>(animatorMap);
+        mLockededPanelIdSet = new HashSet<>(lockededPanelIdSet);
     }
 
     /** Returns a set of entries representing the transactions in this object. */
@@ -53,6 +58,29 @@ public class PanelTransaction {
     @NonNull
     public Set<Map.Entry<String, Animator>> getAnimators() {
         return mAnimatorMap.entrySet();
+    }
+
+    /**
+     * Returns a set of panel ID which should not have visual change during this transaction.
+     * TODO(b/422236430): remove once wm side make layering stable.
+     */
+    @NonNull
+    public Set<String> getLockededPanelIdSet() {
+        return mLockededPanelIdSet;
+    }
+
+    /**
+     * Add panel id to set of panels that are to be merged with the next PanelTransaction.
+     */
+    public void addPanelIdToAnimationMerge(@NonNull String panelId) {
+        mMergeAnimationPanelIds.add(panelId);
+    }
+
+    /**
+     * Check if a panel id should be merged with the next PanelTransaction.
+     */
+    public boolean shouldMergePanelAnimation(@NonNull String panelId) {
+        return mMergeAnimationPanelIds.contains(panelId);
     }
 
     /**
@@ -118,10 +146,12 @@ public class PanelTransaction {
         private Runnable mAnimationStartCallbackRunnable;
         private Runnable mAnimationEndCallbackRunnable;
         private boolean mHasWindowChanges = true;
+        private Set<String> mLockedPanelIdSet;
 
         public Builder() {
             mTransactionMap = new HashMap<>();
             mAnimatorMap = new HashMap<>();
+            mLockedPanelIdSet = new HashSet<>();
         }
 
         /**
@@ -180,13 +210,23 @@ public class PanelTransaction {
         }
 
         /**
+         * Adds the ID of a panel that should remain unchanged during this transaction.
+         */
+        @NonNull
+        public Builder addLockedPanelId(@NonNull String id) {
+            mLockedPanelIdSet.add(id);
+            return this;
+        }
+
+        /**
          * Builds the {@link PanelTransaction} object.
          *
          * @return The built {@link PanelTransaction} object.
          */
         @NonNull
         public PanelTransaction build() {
-            PanelTransaction panelTransaction = new PanelTransaction(mTransactionMap, mAnimatorMap);
+            PanelTransaction panelTransaction = new PanelTransaction(mTransactionMap, mAnimatorMap,
+                    mLockedPanelIdSet);
             panelTransaction.setHasWindowChanges(mHasWindowChanges);
             if (mAnimationStartCallbackRunnable != null) {
                 panelTransaction.setAnimationStartCallbackRunnable(mAnimationStartCallbackRunnable);

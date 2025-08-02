@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.scalableui.panel;
-
-import android.view.View;
+package com.android.car.scalableui.model
 
 /**
- * Interface for DecorPanel controller
+ * Represents the restart behavior of a panel.
+ *
+ * @property policy The restart policy.
+ * @property maxRetry The maximum number of retries.
  */
-public interface DecorPanelController {
-    /**
-     * Returns a {@link View} to show in the decor panel.
-     */
-    View getView();
+data class Restart(val policy: String, val maxRetry: Int) {
+    companion object {
+        // Policy to launch the default task when restarted in a panel.
+        const val RESTART_POLICY_DEFAULT = "DEFAULT"
 
-    /**
-     * Refreshes the theme.
-     */
-    void refreshTheme();
+        // Policy to start the last vanished task in a panel.
+        const val RESTART_POLICY_LAST = "LAST"
+    }
 }

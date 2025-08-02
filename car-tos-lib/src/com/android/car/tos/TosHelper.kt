@@ -81,6 +81,13 @@ object TosHelper {
     /**
      * Replaces the [mapIntent] with an intent defined in the resources with [id] if terms of
      * services have not been accepted and the app defined by [mapIntent] is disabled.
+     *
+     * @param context The app context
+     * @param mapIntent The map intent to replace if tos is not accepted
+     * @param id The desired resource identifier to replace [mapIntent]
+     * @param uid A user id for which the [mapIntent] must be replaced
+     *
+     * @return [mapIntent] if tos is accepted or the intent defined by [id]
      */
     @JvmStatic
     @JvmOverloads
@@ -92,13 +99,14 @@ object TosHelper {
      ): Intent {
          val packageName = mapIntent.component?.packageName
          val tosDisabledPackages = getTosDisabledPackages(context, uid)
+         val tosAccepted = tosAccepted(context, uid)
 
-        Log.i(TAG, "TOS disabled packages:$tosDisabledPackages")
-        Log.i(TAG, "TOS accepted:" + tosAccepted(context))
+        Log.i(TAG, "UserID:$uid; TOS disabled packages:$tosDisabledPackages")
+        Log.i(TAG, "UserID:$uid; TOS accepted:$tosAccepted")
 
         // Launch tos map intent when the user has not accepted tos and when the
         // default maps package is not available to package manager, or it's disabled by tos
-        if (!tosAccepted(context) &&
+        if (!tosAccepted &&
             (packageName == null || tosDisabledPackages.contains(packageName))
         ) {
             Log.i(TAG, "Replacing default maps intent with tos map intent")
@@ -108,7 +116,7 @@ object TosHelper {
     }
 
     /**
-     * Returns true if tos is accepted or uninitialized, false otherwise.
+     * Returns true if tos is accepted or uninitialized, false otherwise for the specified [uid].
      */
     @JvmStatic
     @JvmOverloads
@@ -123,7 +131,7 @@ object TosHelper {
     }
 
     /**
-     * Returns true if tos is uninitialized, false otherwise.
+     * Returns true if tos is uninitialized, false otherwise for the specified [uid].
      */
     @JvmStatic
     @JvmOverloads

@@ -33,6 +33,7 @@ import androidx.annotation.Nullable;
  * specific meaning of the role value is determined by the system using it.
  */
 public class Role {
+    public static Role DEFAULT_ROLE = new Builder().setLayoutId(-1).build();
     @LayoutRes
     private final int mLayoutId;
     private final boolean mIsDefault;
@@ -130,7 +131,7 @@ public class Role {
                 return new Role(mLayoutId);
             } else {
                 return new Role(mIsDefault,
-                        mPersistedActivities.stream().toArray(ComponentName[]::new));
+                        mPersistedActivities.toArray(ComponentName[]::new));
             }
         }
     }

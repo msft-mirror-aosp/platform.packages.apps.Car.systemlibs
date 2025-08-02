@@ -31,6 +31,13 @@ import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.panel.Panel;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+
 /**
  * Represents a specific visual state or variant of a {@code Panel}.
  *
@@ -51,6 +58,7 @@ public class Variant {
     private float mAlpha;
     private boolean mIsVisible;
     private int mLayer;
+    private boolean mCanFocusOnTransition;
     private int mCornerRadius;
     @NonNull
     private Rect mBounds;
@@ -59,7 +67,7 @@ public class Variant {
     @NonNull
     private Insets mInsets;
     @NonNull
-    private Blur mBlur;
+    private final Map<String, Decor> mDecors;
 
     /**
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
@@ -68,16 +76,16 @@ public class Variant {
      * @param id The ID of the variant.
      */
     Variant(@NonNull String id) {
-        this.mId = id;
-
-        // Initialize with default values
+        mId = id;
         mBounds = new Rect();
         mSafeBounds = new Rect();
         mIsVisible = Visibility.DEFAULT_VISIBILITY;
         mLayer = Layer.DEFAULT_LAYER;
+        mCanFocusOnTransition = Focus.DEFAULT_FOCUS_ON_TRANSITION;
         mAlpha = Alpha.DEFAULT_ALPHA;
         mCornerRadius = Corner.DEFAULT_RADIUS;
         mInsets = Insets.NONE;
+        mDecors = new HashMap<>();
     }
 
     /**
@@ -95,10 +103,10 @@ public class Variant {
         mSafeBounds = new Rect(base.getSafeBounds());
         mIsVisible = base.isVisible();
         mLayer = base.getLayer();
+        mCanFocusOnTransition = base.canFocusOnTransition();
         mAlpha = base.getAlpha();
         mCornerRadius = base.getCornerRadius();
         mInsets = base.getInsets();
-        mBlur = base.getBlur();
     }
 
     /**
@@ -137,6 +145,7 @@ public class Variant {
             Rect toBounds = new Rect(toVariant.getBounds());
             boolean isVisible = panel.isVisible() || toVariant.isVisible();
             int layer = toVariant.getLayer();
+            boolean canFocusOnTransition = toVariant.canFocusOnTransition();
             Rect fromInsets = panel.getInsets().toRect();
             Rect toInsets = toVariant.getInsets().toRect();
             ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
@@ -146,6 +155,7 @@ public class Variant {
                     animator -> {
                         panel.setVisibility(isVisible);
                         panel.setLayer(layer);
+                        panel.setCanFocusOnTransition(canFocusOnTransition);
                         float fraction = animator.getAnimatedFraction();
                         Rect bounds = mRectEvaluator.evaluate(fraction, fromBounds, toBounds);
                         panel.setBounds(bounds);
@@ -193,12 +203,30 @@ public class Variant {
     }
 
     /**
+     * Returns the focus on transition state.
+     *
+     * @return Whether focus on transition is allowed.
+     */
+    public boolean canFocusOnTransition() {
+        return mCanFocusOnTransition;
+    }
+
+    /**
      * Sets the layer of the variant.
      *
      * @param layer The layer value to set.
      */
     protected void setLayer(int layer) {
         mLayer = layer;
+    }
+
+    /**
+     * Sets focus on transition value
+     *
+     * @param focusOnTransition The focus value to set.
+     */
+    protected void setCanFocusOnTransition(boolean focusOnTransition) {
+        mCanFocusOnTransition = focusOnTransition;
     }
 
     /**
@@ -276,15 +304,6 @@ public class Variant {
     }
 
     /**
-     * Update the variant with data from an event.
-     *
-     * @param event the event that was executed.
-     */
-    protected void updateFromEvent(@Nullable Event event) {
-        // no-op
-    }
-
-    /**
      * @return {@link Insets}.
      */
     @NonNull
@@ -293,47 +312,62 @@ public class Variant {
     }
 
     /**
-     * @return {@link Blur}.
-     */
-    @Nullable
-    public Blur getBlur() {
-        return mBlur;
-    }
-
-    protected void setBlur(Blur blur) {
-        mBlur = blur;
-    }
-
-    /**
      * Sets insets.
-     * This is essentially the panle's safe rectangle.
+     * This is essentially the panel's insets.
      */
     protected void setInsets(@NonNull Insets insets) {
         mInsets = insets;
     }
 
+    private void setDecors(@NonNull Set<Decor> decors) {
+        if (!enableDecor()) {
+            return;
+        }
+        mDecors.clear();
+        decors.forEach(decor -> {
+            mDecors.put(decor.getId(), decor);
+        });
+    }
+
+    /**
+     * Update the variant with data from an event.
+     *
+     * @param event the event that was executed.
+     */
+    protected void updateFromEvent(@Nullable Event event) {
+        // no-op
+    }
+
     @Override
     @NonNull
     public String toString() {
+        String decorString = mDecors.isEmpty()
+                ? "empty"
+                : mDecors.entrySet()
+                        .stream()
+                        .map(entry -> entry.getKey() + "=" + entry.getValue())
+                        .collect(Collectors.joining(" , "));
+
         return "Variant{"
-                + "mId='"
-                + mId
-                + '\''
-                + ", mAlpha="
-                + mAlpha
-                + ", mIsVisible="
-                + mIsVisible
-                + ", mLayer="
-                + mLayer
-                + ", mBounds="
-                + mBounds
-                + ", mSafeBounds="
-                + mSafeBounds
-                + ", mCornerRadius="
-                + mCornerRadius
-                + ", mInsets="
-                + mInsets
+                + "mId='" + mId
+                + ", mAlpha=" + mAlpha
+                + ", mIsVisible=" + mIsVisible
+                + ", mLayer=" + mLayer
+                + ", mCanFocusOnTransition=" + mCanFocusOnTransition
+                + ", mBounds=" + mBounds
+                + ", mSafeBounds=" + mSafeBounds
+                + ", mCornerRadius=" + mCornerRadius
+                + ", mInsets=" + mInsets
+                + ", mDecors" + decorString
                 + '}';
+    }
+
+    /**
+     * Returns a map of id to {@code Decor} pair.
+     */
+    @NonNull
+    public Map<String, Decor> getDecors() {
+        return mDecors;
     }
 
     /** Builder for {@link Variant} objects. */
@@ -347,6 +381,8 @@ public class Variant {
         @Nullable
         protected Integer mLayer;
         @Nullable
+        protected Boolean mCanFocusOnTransition;
+        @Nullable
         protected Rect mBounds;
         @Nullable
         protected Rect mSafeBounds;
@@ -355,13 +391,13 @@ public class Variant {
         @Nullable
         protected Insets mInsets;
         @Nullable
-        protected Blur mBlur;
-        @Nullable
         protected Variant mParent;
-
+        @NonNull
+        private Set<Decor> mDecors;
 
         public Builder(@NonNull String id) {
             mId = id;
+            mDecors = new HashSet<>();
         }
 
         /** Sets alpha */
@@ -379,6 +415,12 @@ public class Variant {
         /** Sets layer */
         public Builder setLayer(@Nullable Integer layer) {
             mLayer = layer;
+            return this;
+        }
+
+        /** Sets focus allowed on transition */
+        public Builder setCanFocusOnTransition(@Nullable Boolean canFocusOnTransition) {
+            mCanFocusOnTransition = canFocusOnTransition;
             return this;
         }
 
@@ -409,15 +451,17 @@ public class Variant {
             return this;
         }
 
-        /** Sets insets */
-        public Builder setBlur(@NonNull Blur blur) {
-            mBlur = blur;
-            return this;
-        }
-
         /** Sets parent */
         public Builder setParent(@Nullable Variant parent) {
             mParent = parent;
+            return this;
+        }
+
+        /** Adds decor */
+        public Builder addDecor(Decor decor) {
+            if (enableDecor()) {
+                mDecors.add(decor);
+            }
             return this;
         }
 
@@ -440,6 +484,9 @@ public class Variant {
             if (mLayer != null) {
                 variant.setLayer(mLayer);
             }
+            if (mCanFocusOnTransition != null) {
+                variant.setCanFocusOnTransition(mCanFocusOnTransition);
+            }
             if (mBounds != null) {
                 variant.setBounds(new Rect(mBounds)); // Defensive copy
             }
@@ -455,11 +502,14 @@ public class Variant {
                 variant.setInsets(
                         Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
             }
-            if (mBlur != null) {
-                variant.setBlur(mBlur);
+            if (!mDecors.isEmpty()) {
+                variant.setDecors(mDecors);
             }
-
             return variant;
         }
+    }
+
+    private static boolean enableDecor() {
+        return Build.isDebuggable();
     }
 }

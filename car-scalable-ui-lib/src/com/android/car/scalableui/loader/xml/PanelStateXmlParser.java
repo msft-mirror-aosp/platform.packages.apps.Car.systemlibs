@@ -18,6 +18,7 @@ package com.android.car.scalableui.loader.xml;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.car.scalableui.model.Alpha.DEFAULT_ALPHA;
+import static com.android.car.scalableui.model.Focus.DEFAULT_FOCUS_ON_TRANSITION;
 import static com.android.car.scalableui.model.Layer.DEFAULT_LAYER;
 import static com.android.car.scalableui.model.Transition.DEFAULT_DURATION;
 import static com.android.car.scalableui.model.Visibility.DEFAULT_VISIBILITY;
@@ -38,15 +39,18 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.scalableui.R;
 import com.android.car.scalableui.model.Alpha;
-import com.android.car.scalableui.model.Blur;
 import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.BreakPoint;
 import com.android.car.scalableui.model.Corner;
+import com.android.car.scalableui.model.Decor;
+import com.android.car.scalableui.model.Focus;
 import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelControllerMetadata;
 import com.android.car.scalableui.model.PanelState;
+import com.android.car.scalableui.model.Restart;
 import com.android.car.scalableui.model.Role;
 import com.android.car.scalableui.model.Transition;
 import com.android.car.scalableui.model.Variant;
@@ -59,6 +63,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * A utility class that uses a {@link XmlPullParser} to create a {@link PanelState} object.
@@ -83,6 +88,11 @@ public class PanelStateXmlParser {
     public static final String DEFAULT_DURATION_ATTRIBUTE = "defaultDuration";
     public static final String DEFAULT_INTERPOLATOR_ATTRIBUTE = "defaultInterpolator";
 
+    // --- Restart Tags ---
+    public static final String RESTART_TAG = "Restart";
+    public static final String POLICY_ATTRIBUTE = "policy";
+    public static final String MAX_RETRY_ATTRIBUTE = "maxRetry";
+
     // --- Transition Tags ---
     public static final String TRANSITION_TAG = "Transition";
     public static final String FROM_VARIANT_ATTRIBUTE = "fromVariant";
@@ -103,6 +113,11 @@ public class PanelStateXmlParser {
     private static final String FRAME_ATTRIBUTE = "frame";
     private static final String VARIANT_ATTRIBUTE = "variant";
 
+    // --- Background Tags ---
+    public static final String BACKGROUND_TAG = "Background";
+    public static final String BACKGROUND_COLOR_ATTRIBUTE = "color";
+    public static final String BACKGROUND_ALPHA_ATTRIBUTE = "alpha";
+
     // --- Visibility Tags ---
     public static final String VISIBILITY_TAG = "Visibility";
     public static final String IS_VISIBLE_ATTRIBUTE = "isVisible";
@@ -114,6 +129,10 @@ public class PanelStateXmlParser {
     // --- Layer Tags ---
     public static final String LAYER_TAG = "Layer";
     public static final String LAYER_VALUE_ATTRIBUTE = "layer";
+
+    // --- Focus Tags ---
+    public static final String FOCUS_TAG = "Focus";
+    public static final String FOCUS_ON_TRANSITION_ATTRIBUTE = "onTransition";
 
     // --- Bounds Tags ---
     public static final String BOUNDS_TAG = "Bounds";
@@ -129,13 +148,6 @@ public class PanelStateXmlParser {
     public static final String TOP_OFFSET_ATTRIBUTE = "topOffset";
     public static final String RIGHT_OFFSET_ATTRIBUTE = "rightOffset";
     public static final String BOTTOM_OFFSET_ATTRIBUTE = "bottomOffset";
-
-    // --- Blur Tags ---
-    public static final String BLUR_TAG = "Blur";
-    public static final String CORNER_RADIUS_ATTRIBUTE = "cornerRadius";
-    public static final String BLUR_RADIUS_ATTRIBUTE = "blurRadius";
-    public static final String BACKGROUND_COLOR_ATTRIBUTE = "backgroundColor";
-    public static final String VAIL_ENABLED_ATTRIBUTE = "vailEnabled";
 
     // --- Corner Tags ---
     public static final String CORNER_TAG = "Corner";
@@ -256,12 +268,27 @@ public class PanelStateXmlParser {
                         panelState.addTransition(transition);
                     }
                     break;
+                case RESTART_TAG:
+                    panelState.addRestart(parseRestart(parser));
+                    break;
                 default:
                     XmlPullParserHelper.skip(parser);
             }
         }
         panelState.setVariant(defaultVariant); // Set the initial variant
         return panelState;
+    }
+
+    private static Restart parseRestart(@NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, null, RESTART_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        String policy = attrs.getAttributeValue(null, POLICY_ATTRIBUTE);
+        int maxRetry = attrs.getAttributeIntValue(null, MAX_RETRY_ATTRIBUTE, 0);
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.skip(parser); // Skip any nested tags
+        }
+        return new Restart(policy, maxRetry);
     }
 
     private static PanelControllerMetadata createController(@NonNull Context context, int xmlId)
@@ -421,6 +448,10 @@ public class PanelStateXmlParser {
                 case LAYER_TAG:
                     variantBuilder.setLayer(parseLayer(context, parser).getLayer());
                     break;
+                case FOCUS_TAG:
+                    variantBuilder.setCanFocusOnTransition(
+                            parseFocus(context, parser).canFocusOnTransition());
+                    break;
                 case BOUNDS_TAG:
                     variantBuilder.setBounds(parseBounds(context, parser).getRect());
                     break;
@@ -433,14 +464,37 @@ public class PanelStateXmlParser {
                 case INSETS_TAG:
                     variantBuilder.setInsets(parseInsets(context, parser));
                     break;
-                case BLUR_TAG:
-                    variantBuilder.setBlur(parseBlur(context, parser));
+                case BACKGROUND_TAG:
+                    variantBuilder.addDecor(parseBackground(context, parser, panelState.getId()));
                     break;
                 default:
                     XmlPullParserHelper.skip(parser); // Skip other nested tags
             }
         }
         return variantBuilder.build();
+    }
+
+    @NonNull
+    private static Decor parseBackground(
+            @NonNull Context context,
+            @NonNull XmlPullParser parser,
+            @NonNull String id)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, null, BACKGROUND_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        String decorId = id + "_" + BACKGROUND_TAG;
+        int colorRes = attrs.getAttributeResourceValue(/* namespace= */null,
+                BACKGROUND_COLOR_ATTRIBUTE, /* defaultValue= */-1);
+        float alpha = 1f;
+        while (parser.next() != XmlPullParser.END_TAG) {
+            if (parser.getEventType() != XmlPullParser.START_TAG) continue;
+            String name = parser.getName();
+            if (Objects.equals(name, BACKGROUND_ALPHA_ATTRIBUTE)) {
+                alpha = parseAlpha(context, parser).getAlpha();
+            }
+        }
+
+        return new Decor(decorId, /* layer= */ -1, colorRes, alpha, R.layout.background_layout);
     }
 
     @NonNull
@@ -497,6 +551,28 @@ public class PanelStateXmlParser {
         }
 
         return new Layer.Builder().setLayer(layer).build();
+    }
+
+    @NonNull
+    private static Focus parseFocus(@NonNull Context context, @NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, null, FOCUS_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+
+        boolean focusOnTransition = DEFAULT_FOCUS_ON_TRANSITION;
+        int resId = attrs.getAttributeResourceValue(null, FOCUS_ON_TRANSITION_ATTRIBUTE, 0);
+        if (resId != 0) {
+            focusOnTransition = context.getResources().getBoolean(resId);
+        } else {
+            focusOnTransition = attrs.getAttributeBooleanValue(null, FOCUS_ON_TRANSITION_ATTRIBUTE,
+                    DEFAULT_FOCUS_ON_TRANSITION);
+        }
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.skip(parser); // Skip any nested tags
+        }
+
+        return new Focus(focusOnTransition);
     }
 
     @NonNull
@@ -584,27 +660,6 @@ public class PanelStateXmlParser {
         }
 
         return Insets.of(left, top, right, bottom);
-    }
-
-    private static Blur parseBlur(@NonNull Context context, @NonNull XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-
-        parser.require(XmlPullParser.START_TAG, null, BLUR_TAG);
-        AttributeSet attrs = Xml.asAttributeSet(parser);
-
-        float cornerRadius = attrs.getAttributeFloatValue(null, CORNER_RADIUS_ATTRIBUTE, 0f);
-        int blurRadius = attrs.getAttributeIntValue(null, BLUR_RADIUS_ATTRIBUTE, 0);
-        boolean vailEnabled = attrs.getAttributeBooleanValue(null, VAIL_ENABLED_ATTRIBUTE, false);
-
-        int resId = attrs.getAttributeResourceValue(null, BACKGROUND_COLOR_ATTRIBUTE, 0);
-        int backgroundColor = context.getColor(resId);
-
-        while (parser.next() != XmlPullParser.END_TAG) {
-            XmlPullParserHelper.skip(parser); // Skip any nested tags
-        }
-
-        return new Blur.Builder().setBlurRadius(blurRadius).setBackgroundColor(
-                backgroundColor).setCornerRadius(cornerRadius).setEnableVail(vailEnabled).build();
     }
 
     @NonNull
