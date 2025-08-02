@@ -18,6 +18,8 @@ package com.android.car.scalableui.panel;
 import android.annotation.FlaggedApi;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.view.Gravity;
 
 import com.android.car.scalableui.Flags;
 import com.android.car.scalableui.model.PanelControllerMetadata;
@@ -84,4 +86,22 @@ public interface PanelUpdatePublisher {
      */
     @FlaggedApi(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
     void postControllerMetadata(String panelId, PanelControllerMetadata metadata);
+
+    /**
+     * Posts an update for the panel's scrim drawable.
+     *
+     * @param panelId The unique identifier of the panel.
+     * @param scrim   The new scrim drawable.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    void postScrim(String panelId, Drawable scrim);
+
+    /**
+     * Posts an update for the panel's gravity.
+     *
+     * @param panelId The unique identifier of the panel.
+     * @param gravity The new gravity value. See {@link Gravity}.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    void postGravity(String panelId, int gravity);
 }
