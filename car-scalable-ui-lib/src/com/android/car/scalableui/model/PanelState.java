@@ -282,6 +282,21 @@ public class PanelState implements Cloneable {
                 + '}';
     }
 
+    /**
+     * Shorter version of {@link #toString()}
+     */
+    @NonNull
+    public String toShortString() {
+        return "PanelState{"
+                + "\n\tmId='" + mId + "'"
+                + "\n\tmDisplayId=" + mDisplayId
+                + "\n\tmRunningAnimator=" + mRunningAnimator
+                + "\n\tmCurrentVariant="
+                + (mCurrentVariant == null ? "null" : mCurrentVariant.toString().replaceAll("\\R",
+                "\n\t"))
+                + '}';
+    }
+
     @Override
     public PanelState clone() {
         try {
