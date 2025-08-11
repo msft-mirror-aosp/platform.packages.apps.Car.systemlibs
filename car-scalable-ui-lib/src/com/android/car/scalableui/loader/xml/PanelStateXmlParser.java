@@ -26,13 +26,14 @@ import static com.android.car.scalableui.model.Visibility.DEFAULT_VISIBILITY;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.content.Context;
-import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Insets;
+import android.hardware.display.DisplayManager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Xml;
+import android.view.Display;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
@@ -213,7 +214,7 @@ public class PanelStateXmlParser {
             int xmlId = attrs.getAttributeResourceValue(null, CONTROLLER, 0);
             if (xmlId != 0) {
                 try {
-                    panelControllerMetaData = createController(context, xmlId);
+                    panelControllerMetaData = createController(context, xmlId, displayId);
                 } catch (XmlPullParserException e) {
                     Log.e(TAG, "error inflate" + id + " with controller " + xmlId);
                 }
@@ -233,7 +234,7 @@ public class PanelStateXmlParser {
                 break;
             case ROLE_TYPE_ARRAY:
                 String[] componentNames = context.getResources().getStringArray(roleValue);
-                for (String componentName: componentNames) {
+                for (String componentName : componentNames) {
                     roleBuilder.addPersistentActivity(componentName);
                 }
                 break;
@@ -257,7 +258,7 @@ public class PanelStateXmlParser {
             switch (name) {
                 case VARIANT_TAG:
                     panelState.addVariant(
-                            parseVariant(context, panelState, defaultLayer, parser));
+                            parseVariant(context, panelState, defaultLayer, parser, displayId));
                     break;
                 case KEY_FRAME_VARIANT_TAG:
                     panelState.addVariant(parseKeyFrameVariant(panelState, parser));
@@ -291,15 +292,16 @@ public class PanelStateXmlParser {
         return new Restart(policy, maxRetry);
     }
 
-    private static PanelControllerMetadata createController(@NonNull Context context, int xmlId)
-            throws XmlPullParserException, IOException {
+    private static PanelControllerMetadata createController(@NonNull Context context, int xmlId,
+            int displayId) throws XmlPullParserException, IOException {
         XmlResourceParser parser = context.getResources().getXml(xmlId);
-        return parseController(context, parser);
+        return parseController(context, parser, displayId);
 
     }
 
     private static PanelControllerMetadata parseController(@NonNull Context context,
-            @NonNull XmlResourceParser parser) throws IOException, XmlPullParserException {
+            @NonNull XmlResourceParser parser, int displayId)
+            throws IOException, XmlPullParserException {
         // Consume any START_DOCUMENT or whitespace events
         int eventType = parser.getEventType();
         while (eventType == XmlPullParser.START_DOCUMENT
@@ -339,7 +341,7 @@ public class PanelStateXmlParser {
                     parser.next();
                     break;
                 case BREAKPOINTS_TAG:
-                    builder.addBreakPoints(parseBreakPoints(context, parser));
+                    builder.addBreakPoints(parseBreakPoints(context, parser, displayId));
                     parser.next();
                     break;
                 default:
@@ -349,14 +351,14 @@ public class PanelStateXmlParser {
         return builder.build();
     }
 
-    private static List<BreakPoint> parseBreakPoints(Context context, XmlResourceParser parser)
-            throws IOException, XmlPullParserException {
+    private static List<BreakPoint> parseBreakPoints(Context context, XmlResourceParser parser,
+            int displayId) throws IOException, XmlPullParserException {
         List<BreakPoint> points = new ArrayList<>();
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String name = parser.getName();
             if (name.equals(BREAKPOINT_TAG)) {
-                points.add(parseBreakPoint(context, parser));
+                points.add(parseBreakPoint(context, parser, displayId));
             } else {
                 XmlPullParserHelper.skip(parser);
             }
@@ -366,10 +368,12 @@ public class PanelStateXmlParser {
     }
 
     private static BreakPoint parseBreakPoint(@NonNull Context context,
-            @NonNull XmlPullParser parser) throws XmlPullParserException, IOException {
+            @NonNull XmlPullParser parser, int displayId)
+            throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, null, BREAKPOINT_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
-        Integer point = getDimensionPixelSize(context, attrs, BREAKPOINT_POINT_TAG, false);
+        Integer point = getDimensionPixelSize(context, attrs, BREAKPOINT_POINT_TAG, displayId,
+                false);
         String eventId = attrs.getAttributeValue(null, BREAKPOINT_EVENT_ID_TAG);
         parser.nextTag();
         parser.require(XmlPullParser.END_TAG, null, BREAKPOINT_TAG);
@@ -380,7 +384,8 @@ public class PanelStateXmlParser {
     @NonNull
     private static Variant parseKeyFrameVariant(
             @NonNull PanelState panelState,
-            @NonNull XmlPullParser parser) throws IOException, XmlPullParserException {
+            @NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, KEY_FRAME_VARIANT_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
         String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
@@ -423,7 +428,8 @@ public class PanelStateXmlParser {
             @NonNull Context context,
             @NonNull PanelState panelState,
             @Nullable Integer defaultLayer,
-            @NonNull XmlPullParser parser)
+            @NonNull XmlPullParser parser,
+            int displayId)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, VARIANT_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
@@ -453,16 +459,17 @@ public class PanelStateXmlParser {
                             parseFocus(context, parser).canFocusOnTransition());
                     break;
                 case BOUNDS_TAG:
-                    variantBuilder.setBounds(parseBounds(context, parser).getRect());
+                    variantBuilder.setBounds(parseBounds(context, parser, displayId).getRect());
                     break;
                 case SAFE_BOUNDS_TAG:
-                    variantBuilder.setSafeBounds(parseBounds(context, parser).getRect());
+                    variantBuilder.setSafeBounds(parseBounds(context, parser, displayId).getRect());
                     break;
                 case CORNER_TAG:
-                    variantBuilder.setCornerRadius(parseCorner(context, parser).getRadius());
+                    variantBuilder.setCornerRadius(
+                            parseCorner(context, parser, displayId).getRadius());
                     break;
                 case INSETS_TAG:
-                    variantBuilder.setInsets(parseInsets(context, parser));
+                    variantBuilder.setInsets(parseInsets(context, parser, displayId));
                     break;
                 case BACKGROUND_TAG:
                     variantBuilder.addDecor(parseBackground(context, parser, panelState.getId()));
@@ -576,8 +583,8 @@ public class PanelStateXmlParser {
     }
 
     @NonNull
-    private static Bounds parseBounds(@NonNull Context context, @NonNull XmlPullParser parser)
-            throws IOException, XmlPullParserException {
+    private static Bounds parseBounds(@NonNull Context context, @NonNull XmlPullParser parser,
+            int displayId) throws IOException, XmlPullParserException {
         if (XmlPullParser.START_TAG != parser.getEventType()
                 || !(BOUNDS_TAG.equals(parser.getName())
                 || SAFE_BOUNDS_TAG.equals(parser.getName()))) {
@@ -587,28 +594,28 @@ public class PanelStateXmlParser {
         }
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
-        Integer left = getDimensionPixelSize(context, attrs, LEFT_ATTRIBUTE,
+        Integer left = getDimensionPixelSize(context, attrs, LEFT_ATTRIBUTE, displayId,
                 /* isHorizontal= */ true);
-        Integer top = getDimensionPixelSize(context, attrs, TOP_ATTRIBUTE,
+        Integer top = getDimensionPixelSize(context, attrs, TOP_ATTRIBUTE, displayId,
                 /* isHorizontal= */ false);
-        Integer right = getDimensionPixelSize(context, attrs, RIGHT_ATTRIBUTE,
+        Integer right = getDimensionPixelSize(context, attrs, RIGHT_ATTRIBUTE, displayId,
                 /* isHorizontal= */ true);
-        Integer bottom = getDimensionPixelSize(context, attrs, BOTTOM_ATTRIBUTE,
+        Integer bottom = getDimensionPixelSize(context, attrs, BOTTOM_ATTRIBUTE, displayId,
                 /* isHorizontal= */ false);
 
-        Integer width = getDimensionPixelSize(context, attrs, WIDTH_ATTRIBUTE,
+        Integer width = getDimensionPixelSize(context, attrs, WIDTH_ATTRIBUTE, displayId,
                 /* isHorizontal= */ true);
-        Integer height = getDimensionPixelSize(context, attrs, HEIGHT_ATTRIBUTE,
+        Integer height = getDimensionPixelSize(context, attrs, HEIGHT_ATTRIBUTE, displayId,
                 /* isHorizontal= */ false);
 
         Integer leftOffset = getDimensionPixelSize(context, attrs, LEFT_OFFSET_ATTRIBUTE,
-                /* isHorizontal= */ true);
+                displayId, /* isHorizontal= */ true);
         Integer topOffset = getDimensionPixelSize(context, attrs, TOP_OFFSET_ATTRIBUTE,
-                /* isHorizontal= */ false);
+                displayId, /* isHorizontal= */ false);
         Integer rightOffset = getDimensionPixelSize(context, attrs, RIGHT_OFFSET_ATTRIBUTE,
-                /* isHorizontal= */ true);
+                displayId, /* isHorizontal= */ true);
         Integer bottomOffset = getDimensionPixelSize(context, attrs, BOTTOM_OFFSET_ATTRIBUTE,
-                /* isHorizontal= */ false);
+                displayId, /* isHorizontal= */ false);
 
         while (parser.next() != XmlPullParser.END_TAG) {
             XmlPullParserHelper.skip(parser); // Skip any nested tags
@@ -629,11 +636,11 @@ public class PanelStateXmlParser {
     }
 
     @NonNull
-    private static Corner parseCorner(Context context, XmlPullParser parser)
+    private static Corner parseCorner(Context context, XmlPullParser parser, int displayId)
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, CORNER_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
-        Integer radius = getDimensionPixelSize(context, attrs, RADIUS_ATTRIBUTE, false);
+        Integer radius = getDimensionPixelSize(context, attrs, RADIUS_ATTRIBUTE, displayId, false);
 
         while (parser.next() != XmlPullParser.END_TAG) {
             XmlPullParserHelper.skip(parser); // Skip any nested tags
@@ -644,16 +651,16 @@ public class PanelStateXmlParser {
                 .build();
     }
 
-    private static Insets parseInsets(@NonNull Context context, @NonNull XmlPullParser parser)
-            throws IOException, XmlPullParserException {
+    private static Insets parseInsets(@NonNull Context context, @NonNull XmlPullParser parser,
+            int displayId) throws IOException, XmlPullParserException {
 
         parser.require(XmlPullParser.START_TAG, null, INSETS_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
 
-        Integer left = getDimensionPixelSize(context, attrs, LEFT_ATTRIBUTE, true);
-        Integer top = getDimensionPixelSize(context, attrs, TOP_ATTRIBUTE, false);
-        Integer right = getDimensionPixelSize(context, attrs, RIGHT_ATTRIBUTE, true);
-        Integer bottom = getDimensionPixelSize(context, attrs, BOTTOM_ATTRIBUTE, false);
+        Integer left = getDimensionPixelSize(context, attrs, LEFT_ATTRIBUTE, displayId, true);
+        Integer top = getDimensionPixelSize(context, attrs, TOP_ATTRIBUTE, displayId, false);
+        Integer right = getDimensionPixelSize(context, attrs, RIGHT_ATTRIBUTE, displayId, true);
+        Integer bottom = getDimensionPixelSize(context, attrs, BOTTOM_ATTRIBUTE, displayId, false);
 
         while (parser.next() != XmlPullParser.END_TAG) {
             XmlPullParserHelper.skip(parser); // Skip any nested tags
@@ -743,7 +750,8 @@ public class PanelStateXmlParser {
      */
     @Nullable
     private static Integer getDimensionPixelSize(@NonNull Context context,
-            @NonNull AttributeSet attrs, @NonNull String name, boolean isHorizontal) {
+            @NonNull AttributeSet attrs, @NonNull String name, int displayId,
+            boolean isHorizontal) {
         int resId = attrs.getAttributeResourceValue(null, name, 0);
         String dimenStr;
         if (resId != 0) {
@@ -778,17 +786,17 @@ public class PanelStateXmlParser {
         if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DP)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - DP.length());
             float value = Float.parseFloat(valueStr);
-            return (int) (value * Resources.getSystem().getDisplayMetrics().density);
+            return (int) (value * getDisplayMetricsForDisplay(context, displayId).density);
         }
         if (dimenStr.toLowerCase(Locale.ROOT).endsWith(DIP)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - DIP.length());
             float value = Float.parseFloat(valueStr);
-            return (int) (value * Resources.getSystem().getDisplayMetrics().density);
+            return (int) (value * getDisplayMetricsForDisplay(context, displayId).density);
         }
         if (dimenStr.toLowerCase(Locale.ROOT).endsWith(PERCENT)) {
             String valueStr = dimenStr.substring(0, dimenStr.length() - PERCENT.length());
             float value = Float.parseFloat(valueStr);
-            DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
+            DisplayMetrics displayMetrics = getDisplayMetricsForDisplay(context, displayId);
             if (isHorizontal) {
                 return (int) (value * displayMetrics.widthPixels / 100);
             }
@@ -796,5 +804,22 @@ public class PanelStateXmlParser {
         }
         // The default value is never returned because `attrs.getAttributeValue` is not null.
         return attrs.getAttributeIntValue(null, name, 0);
+    }
+
+    @NonNull
+    private static DisplayMetrics getDisplayMetricsForDisplay(@NonNull Context context,
+            int displayId) {
+        DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+        if (displayManager == null) {
+            throw new IllegalStateException("Cannot obtain display manager");
+        }
+        Display display = displayManager.getDisplay(displayId);
+        if (display == null) {
+            throw new IllegalArgumentException("Cannot find display " + displayId);
+        }
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+        return metrics;
     }
 }
