@@ -65,16 +65,16 @@ public class PanelStateTest {
 
     @Test
     public void testPanelStateCreation() {
-        Role defaultRole = new Role.Builder().setIsDefault(true).build();
-        PanelState panelState = new PanelState(TEST_PANEL_ID, defaultRole);
+        PanelState panelState = new PanelState(TEST_PANEL_ID);
         assertThat(panelState.getId()).isEqualTo(TEST_PANEL_ID);
-        assertTrue(panelState.getRole().isDefault());
     }
 
     @Test
     public void testLoadFromXmlResource_panel() {
         XmlModelLoader loader = new XmlModelLoader(mContext);
         PanelState panelState = loader.createPanelState(R.xml.panel_test);
+        Role defaultRole = new Role.Builder().setIsDefault(true).build();
+        panelState.setRole(defaultRole);
 
         assertThat(panelState.getId()).isEqualTo("panel_id");
         assertTrue(panelState.getRole().isDefault());
@@ -195,7 +195,7 @@ public class PanelStateTest {
 
     @Test
     public void testAddVariant() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
+        PanelState panelState = new PanelState(TEST_PANEL_ID);
         Variant variant = new Variant(VARIANT1, "");
         panelState.addVariant(variant);
         assertThat(panelState.getVariant(VARIANT1)).isEqualTo(variant);
@@ -203,7 +203,7 @@ public class PanelStateTest {
 
     @Test
     public void testAddTransition() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
+        PanelState panelState = new PanelState(TEST_PANEL_ID);
         Variant variant1 = new Variant(VARIANT1, "");
         Variant variant2 = new Variant(VARIANT2, "");
         Transition transition = new Transition(variant1, variant2, TEST_EVENT, null, 0, 0, null);
@@ -217,7 +217,7 @@ public class PanelStateTest {
 
     @Test
     public void testSetVariant() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
+        PanelState panelState = new PanelState(TEST_PANEL_ID);
         Variant variant1 = new Variant(VARIANT1, "");
         Variant variant2 = new Variant(VARIANT2, "");
         panelState.addVariant(variant1);
@@ -229,7 +229,7 @@ public class PanelStateTest {
 
     @Test
     public void testResetVariant() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID, DEFAULT_ROLE);
+        PanelState panelState = new PanelState(TEST_PANEL_ID);
         Variant variant1 = new Variant(VARIANT1, "");
         Variant variant2 = new Variant(VARIANT2, "");
         panelState.addVariant(variant1);

@@ -16,6 +16,8 @@
 package com.android.car.scalableui.loader.xml;
 
 import static com.android.car.scalableui.Flags.enableExtPanelUpdates;
+import static com.android.car.scalableui.loader.xml.HunTagXmlParser.HUN_TAG;
+import static com.android.car.scalableui.loader.xml.HunTagXmlParser.parseHun;
 import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.PANEL_TAG;
 import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.parsePanel;
 import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_TAG;
@@ -56,6 +58,8 @@ public class PanelStateXmlParser {
             return parsePanel(context, parser);
         } else if (enableExtPanelUpdates() && parser.getName().equals(SYSTEM_BAR_TAG)) {
             return parseSystemBar(context, parser);
+        } else if (enableExtPanelUpdates() && parser.getName().equals(HUN_TAG)) {
+            return parseHun(context, parser);
         } else {
             throw new XmlPullParserException(
                     "Unrecognized tag at the beginning: " + parser.getName());
