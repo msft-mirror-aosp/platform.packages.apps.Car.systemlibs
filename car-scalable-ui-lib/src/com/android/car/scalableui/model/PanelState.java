@@ -37,7 +37,6 @@ public class PanelState implements Cloneable {
     private static final String TAG = PanelState.class.getSimpleName();
 
     public static final String DEFAULT_ROLE = "DEFAULT";
-    public static final String DECOR_PANEL_ID_PREFIX = "decor";
 
     private String mDefaultVariant;
     private int mDisplayId;
@@ -56,14 +55,18 @@ public class PanelState implements Cloneable {
     private Variant mCurrentVariant;
     @Nullable
     private PanelControllerMetadata mPanelControllerMetadata;
+    @PanelType
+    private int mType;
 
     /**
      * Constructor for PanelState.
      *
      * @param id   The ID of the panel.
+     * @param type The type of the panel.
      */
-    public PanelState(@NonNull String id) {
+    public PanelState(@NonNull String id, @PanelType int type) {
         mId = id;
+        mType = type;
         mDisplayId = DEFAULT_DISPLAY;
     }
 
@@ -72,6 +75,7 @@ public class PanelState implements Cloneable {
      */
     public PanelState(@NonNull PanelState other) {
         mId = other.mId;
+        mType = other.mType;
         mRole = other.mRole;
         mDisplayId = other.mDisplayId;
         mDefaultVariant = other.mDefaultVariant;
@@ -85,6 +89,11 @@ public class PanelState implements Cloneable {
     @NonNull
     public String getId() {
         return mId;
+    }
+
+    @PanelType
+    public int getType() {
+        return mType;
     }
 
     /** Adds variant */
@@ -271,6 +280,7 @@ public class PanelState implements Cloneable {
     public String toString() {
         return "PanelState{"
                 + "mId='" + mId + '\''
+                + ", mType=" + mType
                 + ", mRole=" + mRole
                 + ", mDefaultVariant='" + mDefaultVariant + '\''
                 + ", mDisplayId=" + mDisplayId
@@ -293,6 +303,7 @@ public class PanelState implements Cloneable {
     public String toShortString() {
         return "PanelState{"
                 + "\n\tmId='" + mId + "'"
+                + "\n\tmType='" + mType + "'"
                 + "\n\tmDisplayId=" + mDisplayId
                 + "\n\tmRunningAnimator=" + mRunningAnimator
                 + "\n\tmCurrentVariant="
@@ -314,6 +325,8 @@ public class PanelState implements Cloneable {
     /** Builder for {@link PanelState} objects. */
     public static class Builder {
         private String mId;
+        @PanelType
+        private int mType;
         private Role mRole;
         private String mDefaultVariant;
         private Integer mDisplayId;
@@ -321,8 +334,9 @@ public class PanelState implements Cloneable {
         private List<Transition> mTransitions = new ArrayList<>();
         private PanelControllerMetadata mPanelControllerMetadata;
 
-        public Builder(@NonNull String id) {
+        public Builder(@NonNull String id, @PanelType int type) {
             mId = id;
+            mType = type;
         }
 
         /** Sets role */
@@ -374,7 +388,7 @@ public class PanelState implements Cloneable {
         /** Returns the {@link PanelState} instance */
         @NonNull
         public PanelState build() {
-            PanelState panelState = new PanelState(mId);
+            PanelState panelState = new PanelState(mId, mType);
             if (mRole != null) {
                 panelState.setRole(mRole);
             }

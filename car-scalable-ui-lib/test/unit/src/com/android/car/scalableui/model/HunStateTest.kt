@@ -38,7 +38,7 @@ class HunStateTest {
         val variant2 = mock(HunVariant::class.java)
         val transition1 = mock(Transition::class.java)
 
-        val builder = HunState.Builder(panelId)
+        val builder = HunState.Builder(panelId, PanelType.HUN)
         builder.setDefaultVariant(defaultVariant)
             .setDisplayId(displayId)
             .addVariant(variant1)

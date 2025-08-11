@@ -48,7 +48,7 @@ class HunTagXmlParserTest {
         ) {
             eventType = parser.next()
         }
-        val hunState = HunTagXmlParser.parseHun(context, parser)
+        val hunState = parseHun(context, parser)
 
         assertThat(hunState).isNotNull()
         assertThat(hunState.id).isEqualTo("_Hun_Panel")
