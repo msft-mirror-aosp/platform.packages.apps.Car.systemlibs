@@ -320,9 +320,6 @@ public class Variant {
     }
 
     private void setDecors(@NonNull Set<Decor> decors) {
-        if (!enableDecor()) {
-            return;
-        }
         mDecors.clear();
         decors.forEach(decor -> {
             mDecors.put(decor.getId(), decor);
@@ -459,9 +456,7 @@ public class Variant {
 
         /** Adds decor */
         public Builder addDecor(Decor decor) {
-            if (enableDecor()) {
-                mDecors.add(decor);
-            }
+            mDecors.add(decor);
             return this;
         }
 
