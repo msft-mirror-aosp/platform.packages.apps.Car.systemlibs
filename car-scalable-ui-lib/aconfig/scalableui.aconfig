@@ -42,3 +42,10 @@ flag {
     description: "This flag controls restarting last task automatically when removed by shell."
     bug: "427231933"
 }
+
+flag {
+    name: "scalable_ui_handle_configuration_change"
+    namespace: "car_sys_exp"
+    description: "This flag controls enabling scalable ui to handle configuration changes."
+    bug: "438535832"
+}
