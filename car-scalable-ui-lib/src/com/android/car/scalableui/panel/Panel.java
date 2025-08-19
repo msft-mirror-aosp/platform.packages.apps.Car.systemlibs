@@ -64,6 +64,21 @@ public interface Panel {
     void setSafeBounds(@NonNull Rect safeBounds);
 
     /**
+     * Gets the bounds of the task toolbar associated with this panel.
+     *
+     * @return The bounding rectangle of the task toolbar.
+     */
+    @NonNull
+    Rect getTaskToolbarBounds();
+
+    /**
+     * Sets the bounds of the task toolbar associated with this panel.
+     *
+     * @param bounds The new bounding rectangle for the task toolbar.
+     */
+    void setTaskToolbarBounds(@NonNull Rect bounds);
+
+    /**
      * Gets the layer of this panel.
      * Panels with higher layer values are drawn on top of panels with lower layer values.
      *

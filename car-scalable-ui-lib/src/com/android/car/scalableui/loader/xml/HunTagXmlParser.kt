@@ -116,7 +116,7 @@ private fun parseHunVariant(
     // Create a map of property parsers, including standard and custom ones.
     val parsers = mapOf<String, VariantPropertyParser>(
         VISIBILITY_TAG to getVariantVisibilityParser(),
-        BOUNDS_TAG to getVariantBoundsParser(),
+        BOUNDS_TAG to getVariantBoundsParser(BOUNDS_TAG),
         SCRIM_TAG to getScrimParser(),
         GRAVITY_TAG to getVariantGravityParser(),
     )

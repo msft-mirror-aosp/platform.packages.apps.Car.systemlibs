@@ -129,6 +129,7 @@ public class PanelTagXmlParser {
     // --- Bounds Tags ---
     public static final String BOUNDS_TAG = "Bounds";
     public static final String SAFE_BOUNDS_TAG = "SafeBounds";
+    public static final String TASK_TOOLBAR_BOUNDS_TAG = "TaskToolbarBounds";
     public static final String LEFT_ATTRIBUTE = "left";
     public static final String RIGHT_ATTRIBUTE = "right";
     public static final String TOP_ATTRIBUTE = "top";
@@ -213,8 +214,9 @@ public class PanelTagXmlParser {
                 ALPHA_TAG, getVariantAlphaParser(),
                 LAYER_TAG, getVariantLayerParser(),
                 FOCUS_TAG, getVariantFocusParser(),
-                BOUNDS_TAG, getVariantBoundsParser(),
-                SAFE_BOUNDS_TAG, getVariantSafeBoundsParser(),
+                BOUNDS_TAG, getVariantBoundsParser(BOUNDS_TAG),
+                SAFE_BOUNDS_TAG, getVariantBoundsParser(SAFE_BOUNDS_TAG),
+                TASK_TOOLBAR_BOUNDS_TAG, getVariantBoundsParser(TASK_TOOLBAR_BOUNDS_TAG),
                 CORNER_TAG, getVariantCornerParser(),
                 INSETS_TAG, getVariantInsetsParser(),
                 BACKGROUND_TAG, getVariantBackgroundParser(id));
@@ -326,6 +328,7 @@ public class PanelTagXmlParser {
 
             String name = parser.getName();
             switch (name) {
+                //TODO(b/439937106):Deprecate CONFIG_TAG
                 case CONGIF_TAG:
                     String key = attrs.getAttributeValue(null, CONGIF_KEY_TAG);
                     String value = attrs.getAttributeValue(null, CONGIF_VALUE_TAG);
@@ -593,21 +596,36 @@ public class PanelTagXmlParser {
         return new Focus(focusOnTransition);
     }
 
-    static VariantPropertyParser getVariantBoundsParser() {
-        return (context, parser, builder, displayId) -> builder.setBounds(
-                parseBounds(context, parser, displayId).getRect());
+    /**
+     * Returns a parser that extracts bounds from XML and applies them to the correct property
+     * in the Variant.Builder based on the provided tag.
+     *
+     * @param tag The XML tag (e.g., "Bounds", "SafeBounds", "TaskToolbarBounds") that
+     *            determines which property on the builder is set.
+     * @return A {@link VariantPropertyParser} for handling bounds attributes.
+     */
+    static VariantPropertyParser getVariantBoundsParser(String tag) {
+        return (context, parser, builder, displayId) -> switch (tag) {
+            case BOUNDS_TAG -> builder.setBounds(
+                    parseBounds(context, parser, displayId).getRect());
+            case SAFE_BOUNDS_TAG -> builder.setSafeBounds(
+                    parseBounds(context, parser, displayId).getRect());
+            case TASK_TOOLBAR_BOUNDS_TAG -> builder.setTaskToolbarBounds(
+                    parseBounds(context, parser, displayId).getRect());
+            default -> throw new IllegalStateException("Unknown bounds tag: " + tag);
+        };
     }
 
-    static VariantPropertyParser getVariantSafeBoundsParser() {
-        return (context, parser, builder, displayId) -> builder.setSafeBounds(
-                parseBounds(context, parser, displayId).getRect());
+    private static boolean isSupportedBoundsTag(@NonNull String tag) {
+        return BOUNDS_TAG.equals(tag) || SAFE_BOUNDS_TAG.equals(tag)
+                || TASK_TOOLBAR_BOUNDS_TAG.equals(tag);
     }
 
     @NonNull
     static Bounds parseBounds(@NonNull Context context, @NonNull XmlPullParser parser,
             int displayId) throws IOException, XmlPullParserException {
-        if (XmlPullParser.START_TAG != parser.getEventType() || !(BOUNDS_TAG.equals(
-                parser.getName()) || SAFE_BOUNDS_TAG.equals(parser.getName()))) {
+        if (XmlPullParser.START_TAG != parser.getEventType() || !isSupportedBoundsTag(
+                parser.getName())) {
             throw new XmlPullParserException(
                     "parseBounds called with wrong parser event type: " + parser.getEventType()
                             + " or name: " + parser.getName());
