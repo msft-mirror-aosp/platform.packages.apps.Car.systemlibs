@@ -326,7 +326,7 @@ public class PanelState implements Cloneable {
         }
 
         /** Sets role */
-        public Builder setRole(@NonNull Role role) {
+        public Builder setRole(@Nullable Role role) {
             mRole = role;
             return this;
         }

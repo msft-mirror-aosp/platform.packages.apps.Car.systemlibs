@@ -35,6 +35,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Xml;
 import android.view.Display;
+import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
@@ -172,7 +173,7 @@ public class PanelTagXmlParser {
         String displayIdStr = attrs.getAttributeValue(null, DISPLAY_ID);
         int displayId = (displayIdStr == null) ? DEFAULT_DISPLAY : Integer.parseInt(displayIdStr);
         String defaultVariant = attrs.getAttributeValue(null, DEFAULT_VARIANT_ATTRIBUTE);
-        int roleValue = attrs.getAttributeResourceValue(null, ROLE_ATTRIBUTE, 0);
+        int roleValue = attrs.getAttributeResourceValue(null, ROLE_ATTRIBUTE, View.NO_ID);
 
         Integer defaultLayer = null;
         if (attrs.getAttributeValue(null, DEFAULT_LAYER_ATTRIBUTE) != null) {
@@ -196,29 +197,11 @@ public class PanelTagXmlParser {
             }
         }
 
-        Role.Builder roleBuilder = new Role.Builder();
-        String roleTypeName = context.getResources().getResourceTypeName(roleValue);
-        switch (roleTypeName) {
-            case ROLE_TYPE_STRING -> {
-                String roleString = context.getResources().getString(roleValue);
-                if (PanelState.DEFAULT_ROLE.equals(roleString)) {
-                    roleBuilder.setIsDefault(true);
-                } else {
-                    roleBuilder.addPersistentActivity(roleString);
-                }
-            }
-            case ROLE_TYPE_ARRAY -> {
-                String[] componentNames = context.getResources().getStringArray(roleValue);
-                for (String componentName : componentNames) {
-                    roleBuilder.addPersistentActivity(componentName);
-                }
-            }
-            case ROLE_TYPE_LAYOUT -> roleBuilder.setLayoutId(roleValue);
-            default -> Log.e(TAG, "Role type is not supported " + roleTypeName);
+        PanelState.Builder builder = new PanelState.Builder(id);
+        if (roleValue != View.NO_ID) {
+            builder.setRole(parseRole(context, roleValue, id));
         }
 
-        PanelState.Builder builder = new PanelState.Builder(id);
-        builder.setRole(roleBuilder.build());
         builder.setDisplayId(displayId);
         builder.setDefaultVariant(defaultVariant);
         builder.setPanelControllerMetadata(panelControllerMetaData);
@@ -256,6 +239,36 @@ public class PanelTagXmlParser {
         }
         panelState.setVariant(defaultVariant); // Set the initial variant
         return panelState;
+    }
+
+    @Nullable
+    private static Role parseRole(@NonNull Context context, int roleValue, String panelId) {
+        try {
+            Role.Builder roleBuilder = new Role.Builder();
+            String roleTypeName = context.getResources().getResourceTypeName(roleValue);
+            switch (roleTypeName) {
+                case ROLE_TYPE_STRING -> {
+                    String roleString = context.getResources().getString(roleValue);
+                    if (PanelState.DEFAULT_ROLE.equals(roleString)) {
+                        roleBuilder.setIsDefault(true);
+                    } else {
+                        roleBuilder.addPersistentActivity(roleString);
+                    }
+                }
+                case ROLE_TYPE_ARRAY -> {
+                    String[] componentNames = context.getResources().getStringArray(roleValue);
+                    for (String componentName : componentNames) {
+                        roleBuilder.addPersistentActivity(componentName);
+                    }
+                }
+                case ROLE_TYPE_LAYOUT -> roleBuilder.setLayoutId(roleValue);
+                default -> Log.e(TAG, "Role type is not supported " + roleTypeName);
+            }
+            return roleBuilder.build();
+        } catch (Resources.NotFoundException e) {
+            Log.e(TAG, "role resource not found for " + panelId + ", roleValue: " + roleValue);
+            return null;
+        }
     }
 
     private static Restart parseRestart(@NonNull XmlPullParser parser)
@@ -433,6 +446,7 @@ public class PanelTagXmlParser {
 
     /**
      * Attempt to get the String name from a resource id.
+     *
      * @return the resource string or the passed in id param if the string could not be parsed
      */
     @NonNull
