@@ -34,7 +34,10 @@ import android.view.View
 data class Decor(
     val id: String = "Default decor ID",
     val layer: Int = -1,
+    // TODO(b/441572972): Instead of resource IDs, consider using Color, Drawable, or View directly
+    //  to improve compatibility with declarative UI frameworks like Compose.
     val colorRes: Int = -1,
+    val drawableRes: Int = -1,
     val alpha: Float = 1f,
     val content: Int = -1
 ) {
@@ -50,7 +53,11 @@ data class Decor(
      */
     fun getView(context: Context): View {
         val view = LayoutInflater.from(context).inflate(content, null)
-        view.setBackgroundColor(context.getColor(colorRes))
+        if (drawableRes != -1) {
+            view.background = context.getDrawable(drawableRes)
+        } else if (colorRes != -1) {
+            view.setBackgroundColor(context.getColor(colorRes))
+        }
         return view
     }
 }

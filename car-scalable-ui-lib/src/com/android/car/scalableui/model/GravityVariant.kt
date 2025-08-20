@@ -15,10 +15,14 @@
  */
 package com.android.car.scalableui.model
 
+import android.animation.Animator
+import android.animation.ValueAnimator
 import android.graphics.Insets
 import android.graphics.Rect
 import android.view.Gravity
+import android.view.animation.Interpolator
 import androidx.annotation.NonNull
+import com.android.car.scalableui.panel.Panel
 
 /**
  * A specialized version of [Variant] that includes a gravity property.
@@ -43,6 +47,22 @@ open class GravityVariant : Variant {
         this.gravity = gravity
     }
 
+    override fun getAnimator(
+        panel: Panel,
+        toVariant: Variant,
+        duration: Long,
+        delay: Long,
+        interpolator: Interpolator?
+    ): Animator? {
+        val animator = super.getAnimator(panel, toVariant, duration, delay, interpolator)
+        if (toVariant is GravityVariant && animator is ValueAnimator) {
+            animator.addUpdateListener {
+                panel.gravity = toVariant.gravity
+            }
+        }
+        return animator
+    }
+
     /** Builder for [GravityVariant] objects. */
     open class Builder(id: String, idName: String) : Variant.Builder(id, idName) {
         protected var gravity: Int = Gravity.NO_GRAVITY
@@ -64,6 +84,7 @@ open class GravityVariant : Variant {
         override fun setCornerRadius(cornerRadius: Int): Builder =
             apply { super.setCornerRadius(cornerRadius) }
         override fun setInsets(insets: Insets): Builder = apply { super.setInsets(insets) }
+        override fun addDecor(decor: Decor): Builder = apply { super.addDecor(decor) }
 
         /** Returns the [GravityVariant] instance. */
         @NonNull
@@ -80,8 +101,32 @@ open class GravityVariant : Variant {
             mSafeBounds?.let { variant.safeBounds = Rect(it) }
             mCornerRadius?.let { variant.cornerRadius = it }
             mInsets?.let { variant.insets = Insets.of(it.left, it.top, it.right, it.bottom) }
+            variant.setDecors(mDecors)
 
             return variant
         }
+    }
+
+    @NonNull
+    override fun toString(): String {
+        val decorString = if (decors.isEmpty()) {
+            "empty"
+        } else {
+            decors.entries.joinToString(" , ") { (key, value) -> "$key=$value" }
+        }
+
+        return "GravityVariant{" +
+          " mIdName=" + idName +
+          " mAlpha=" + alpha +
+          " mIsVisible=" + isVisible +
+          " mLayer=" + layer +
+          " mCanFocusOnTransition=" + canFocusOnTransition() +
+          " mBounds=" + bounds +
+          " mSafeBounds=" + safeBounds +
+          " mCornerRadius=" + cornerRadius +
+          " mInsets=" + insets +
+          " mDecors=" + decorString +
+          " mGravity=" + gravity +
+          '}'
     }
 }

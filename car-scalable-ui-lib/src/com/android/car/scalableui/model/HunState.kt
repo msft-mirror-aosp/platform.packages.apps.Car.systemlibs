@@ -20,7 +20,7 @@ import androidx.annotation.NonNull
 /**
  * A specialized version of [PanelState] for Heads-Up Notifications (Huns).
  *
- * This class uses a custom [HunVariant] to hold variant-specific attributes.
+ * This class uses a custom [GravityVariant] to hold variant-specific attributes.
  */
 class HunState(id: String, type: @PanelType Int) : PanelState(id, type) {
 

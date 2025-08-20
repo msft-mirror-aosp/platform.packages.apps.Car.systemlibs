@@ -113,6 +113,7 @@ public class PanelTagXmlParser {
     // --- Background Tags ---
     public static final String BACKGROUND_TAG = "Background";
     public static final String BACKGROUND_COLOR_ATTRIBUTE = "color";
+    public static final String BACKGROUND_DRAWABLE_ATTRIBUTE = "drawable";
     public static final String BACKGROUND_ALPHA_ATTRIBUTE = "alpha";
     // --- Visibility Tags ---
     public static final String VISIBILITY_TAG = "Visibility";
@@ -487,6 +488,11 @@ public class PanelTagXmlParser {
         String decorId = id + "_" + BACKGROUND_TAG;
         int colorRes = attrs.getAttributeResourceValue(/* namespace= */null,
                 BACKGROUND_COLOR_ATTRIBUTE, /* defaultValue= */-1);
+        // TODO(b/441580484): The drawableRes might be from a different package if it's only
+        // defined in an RRO. Add defensive mechanisms to handle cases where the resource ID
+        // is valid but not resolvable within the current package context.
+        int drawableRes = attrs.getAttributeResourceValue(/* namespace= */null,
+                BACKGROUND_DRAWABLE_ATTRIBUTE, /* defaultValue= */-1);
         float alpha = 1f;
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
@@ -496,7 +502,8 @@ public class PanelTagXmlParser {
             }
         }
 
-        return new Decor(decorId, /* layer= */ -1, colorRes, alpha, R.layout.background_layout);
+        return new Decor(decorId, /* layer= */ -1, colorRes, drawableRes, alpha,
+            R.layout.background_layout);
     }
 
     static VariantPropertyParser getVariantVisibilityParser() {

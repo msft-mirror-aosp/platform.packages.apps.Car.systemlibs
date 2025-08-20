@@ -27,6 +27,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.car.scalableui.metrics.MetricsHelper;
 import com.android.car.scalableui.model.Event;
+import com.android.car.scalableui.model.GravityVariant;
 import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.PanelTransaction;
@@ -227,6 +228,9 @@ public class StateManager {
         panel.setDisplayId(panelState.getDisplayId());
         panel.setInsets(variant.getInsets());
         panel.setCornerRadius(variant.getCornerRadius());
+        if (variant instanceof GravityVariant) {
+            panel.setGravity(((GravityVariant) variant).getGravity());
+        }
         // KeyFrameVariant might not have safe bounds.
         if (!(variant instanceof KeyFrameVariant)) {
             panel.setSafeBounds(variant.getSafeBounds());

@@ -16,7 +16,6 @@
 package com.android.car.scalableui.loader.xml
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.Log
 import android.util.Xml
@@ -32,12 +31,12 @@ import com.android.car.scalableui.loader.xml.PanelTagXmlParser.TRANSITIONS_TAG
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.VARIANT_TAG
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.VISIBILITY_TAG
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.getIdName
+import com.android.car.scalableui.loader.xml.PanelTagXmlParser.getVariantBackgroundParser
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.getVariantBoundsParser
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.getVariantVisibilityParser
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.parseTransitions
 import com.android.car.scalableui.model.GravityVariant
 import com.android.car.scalableui.model.HunState
-import com.android.car.scalableui.model.HunVariant
 import com.android.car.scalableui.model.PanelType
 import com.android.car.scalableui.model.Variant
 import java.io.IOException
@@ -49,8 +48,7 @@ import org.xmlpull.v1.XmlPullParserException
 internal const val HUN_TAG = "HunPanel"
 const val HUN_PANEL_ID = "_Hun_Panel"
 private const val TAG = "HunTagXmlParser"
-private const val SCRIM_TAG = "Scrim"
-private const val DRAWABLE_ATTRIBUTE = "drawable"
+private const val BACKGROUND_TAG = "Background"
 internal const val GRAVITY_TAG: String = "Gravity"
 private const val GRAVITY_VALUE_ATTRIBUTE: String = "value"
 private const val GRAVITY_SEPARATOR: String = "|"
@@ -73,9 +71,9 @@ fun parseHun(context: Context, parser: XmlPullParser): HunState {
     while (parser.next() != XmlPullParser.END_TAG) {
         if (parser.eventType != XmlPullParser.START_TAG) continue
         when (parser.name) {
-            // A <Variant> tag within a <HunPanel> is parsed as a HunVariant.
+            // A <Variant> tag within a <HunPanel> is parsed as a GravityVariant.
             VARIANT_TAG -> builder.addVariant(
-                parseHunVariant(
+                parseGravityVariant(
                     context,
                     builder.build(),
                     parser,
@@ -99,15 +97,15 @@ fun parseHun(context: Context, parser: XmlPullParser): HunState {
 
 /**
  * Parses a `<Variant>` tag within a `<HunPanel>` tag, creating a
- * [HunVariant] which includes custom Hun properties.
+ * [GravityVariant] which includes custom Hun properties.
  */
 @Throws(IOException::class, XmlPullParserException::class)
-private fun parseHunVariant(
+private fun parseGravityVariant(
     context: Context,
     hunState: HunState,
     parser: XmlPullParser,
     displayId: Int
-): HunVariant {
+): GravityVariant {
     parser.require(XmlPullParser.START_TAG, null, VARIANT_TAG)
     val attrs = Xml.asAttributeSet(parser)
     val id = attrs.getAttributeValue(null, ID_ATTRIBUTE)
@@ -115,14 +113,14 @@ private fun parseHunVariant(
     val parentVariantId = attrs.getAttributeValue(null, PARENT_ATTRIBUTE)
     val parentVariant = hunState.getVariant(parentVariantId)
 
-    val variantBuilder = HunVariant.Builder(id, idName)
+    val variantBuilder = GravityVariant.Builder(id, idName)
         .setParent(parentVariant)
 
     // Create a map of property parsers, including standard and custom ones.
     val parsers = mapOf<String, VariantPropertyParser>(
         VISIBILITY_TAG to getVariantVisibilityParser(),
         BOUNDS_TAG to getVariantBoundsParser(BOUNDS_TAG),
-        SCRIM_TAG to getScrimParser(),
+        BACKGROUND_TAG to getVariantBackgroundParser(HUN_PANEL_ID),
         GRAVITY_TAG to getVariantGravityParser(),
     )
 
@@ -137,25 +135,6 @@ private fun parseHunVariant(
         }
     }
     return variantBuilder.build()
-}
-
-private fun getScrimParser(): VariantPropertyParser {
-    return VariantPropertyParser { context: Context, parser: XmlPullParser,
-                                   builder: Variant.Builder, displayId: Int ->
-        (builder as HunVariant.Builder).setScrim(
-            parseScrim(context, parser)
-        )
-    }
-}
-
-@Throws(XmlPullParserException::class, IOException::class)
-private fun parseScrim(context: Context, parser: XmlPullParser): Drawable? {
-    parser.require(XmlPullParser.START_TAG, null, SCRIM_TAG)
-    val attrs = Xml.asAttributeSet(parser)
-    val drawableRes = attrs.getAttributeResourceValue(null, DRAWABLE_ATTRIBUTE, 0)
-    // Skip to the end tag, consuming any nested content.
-    while (parser.next() != XmlPullParser.END_TAG) {}
-    return if (drawableRes != 0) context.getDrawable(drawableRes) else null
 }
 
 internal fun getVariantGravityParser(): VariantPropertyParser {
