@@ -17,8 +17,9 @@ package com.android.car.scalableui.metrics;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.Nullable;
 import android.util.Pair;
+
+import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.model.Event;
 import com.android.car.scalableui.model.PanelState;

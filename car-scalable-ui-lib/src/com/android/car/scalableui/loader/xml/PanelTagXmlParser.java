@@ -53,6 +53,7 @@ import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelControllerMetadata;
 import com.android.car.scalableui.model.PanelState;
+import com.android.car.scalableui.model.PanelType;
 import com.android.car.scalableui.model.Restart;
 import com.android.car.scalableui.model.Role;
 import com.android.car.scalableui.model.Transition;
@@ -64,7 +65,6 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -78,7 +78,8 @@ import java.util.regex.Pattern;
  */
 public class PanelTagXmlParser {
     // --- Panel Tags ---
-    public static final String PANEL_TAG = "Panel";
+    public static final String TASK_PANEL_TAG = "TaskPanel";
+    public static final String DECOR_PANEL_TAG = "DecorPanel";
     public static final String ID_ATTRIBUTE = "id";
     public static final String DEFAULT_VARIANT_ATTRIBUTE = "defaultVariant";
     public static final String ROLE_ATTRIBUTE = "role";
@@ -165,9 +166,10 @@ public class PanelTagXmlParser {
     private static final String FRAME_ATTRIBUTE = "frame";
     private static final String VARIANT_ATTRIBUTE = "variant";
 
-    static PanelState parsePanel(@NonNull Context context, @NonNull XmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, null, PANEL_TAG);
+    static PanelState parsePanel(@NonNull Context context, @NonNull XmlPullParser parser,
+            @PanelType int type) throws XmlPullParserException, IOException {
+        parser.require(XmlPullParser.START_TAG, null, type == PanelType.DECOR ? DECOR_PANEL_TAG
+                : TASK_PANEL_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
         String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
         String displayIdStr = attrs.getAttributeValue(null, DISPLAY_ID);
@@ -197,26 +199,25 @@ public class PanelTagXmlParser {
             }
         }
 
-        PanelState.Builder builder = new PanelState.Builder(id);
+        PanelState.Builder builder = new PanelState.Builder(id, type);
         if (roleValue != View.NO_ID) {
             builder.setRole(parseRole(context, roleValue, id));
         }
-
         builder.setDisplayId(displayId);
         builder.setDefaultVariant(defaultVariant);
         builder.setPanelControllerMetadata(panelControllerMetaData);
         PanelState panelState = builder.build();
 
-        Map<String, VariantPropertyParser> variantParserMap = new HashMap<>();
-        variantParserMap.put(VISIBILITY_TAG, getVariantVisibilityParser());
-        variantParserMap.put(ALPHA_TAG, getVariantAlphaParser());
-        variantParserMap.put(LAYER_TAG, getVariantLayerParser());
-        variantParserMap.put(FOCUS_TAG, getVariantFocusParser());
-        variantParserMap.put(BOUNDS_TAG, getVariantBoundsParser());
-        variantParserMap.put(SAFE_BOUNDS_TAG, getVariantSafeBoundsParser());
-        variantParserMap.put(CORNER_TAG, getVariantCornerParser());
-        variantParserMap.put(INSETS_TAG, getVariantInsetsParser());
-        variantParserMap.put(BACKGROUND_TAG, getVariantBackgroundParser(id));
+        Map<String, VariantPropertyParser> variantParserMap = Map.of(
+                VISIBILITY_TAG, getVariantVisibilityParser(),
+                ALPHA_TAG, getVariantAlphaParser(),
+                LAYER_TAG, getVariantLayerParser(),
+                FOCUS_TAG, getVariantFocusParser(),
+                BOUNDS_TAG, getVariantBoundsParser(),
+                SAFE_BOUNDS_TAG, getVariantSafeBoundsParser(),
+                CORNER_TAG, getVariantCornerParser(),
+                INSETS_TAG, getVariantInsetsParser(),
+                BACKGROUND_TAG, getVariantBackgroundParser(id));
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
@@ -469,7 +470,7 @@ public class PanelTagXmlParser {
         return id;
     }
 
-    static VariantPropertyParser getVariantBackgroundParser(String id) {
+    static VariantPropertyParser getVariantBackgroundParser(@NonNull String id) {
         return (context, parser, builder, displayId) -> builder.addDecor(
                 parseBackground(context, parser, id));
     }
@@ -603,7 +604,7 @@ public class PanelTagXmlParser {
     }
 
     @NonNull
-    private static Bounds parseBounds(@NonNull Context context, @NonNull XmlPullParser parser,
+    static Bounds parseBounds(@NonNull Context context, @NonNull XmlPullParser parser,
             int displayId) throws IOException, XmlPullParserException {
         if (XmlPullParser.START_TAG != parser.getEventType() || !(BOUNDS_TAG.equals(
                 parser.getName()) || SAFE_BOUNDS_TAG.equals(parser.getName()))) {
@@ -815,7 +816,7 @@ public class PanelTagXmlParser {
     }
 
     @NonNull
-    private static DisplayMetrics getDisplayMetricsForDisplay(@NonNull Context context,
+    static DisplayMetrics getDisplayMetricsForDisplay(@NonNull Context context,
             int displayId) {
         DisplayManager displayManager = context.getSystemService(DisplayManager.class);
         if (displayManager == null) {

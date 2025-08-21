@@ -17,10 +17,6 @@ package com.android.car.scalableui.model;
 
 import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.BAR_Z_ORDER_ATTRIBUTE;
 import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.HIDE_FOR_KEYBOARD_ATTRIBUTE;
-import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_BOTTOM_ID;
-import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_LEFT_ID;
-import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_RIGHT_ID;
-import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_PANEL_TOP_ID;
 import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.TYPE_ATTRIBUTE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -65,19 +61,37 @@ public class PanelStateTest {
 
     @Test
     public void testPanelStateCreation() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID);
+        PanelState panelState = new PanelState(TEST_PANEL_ID, PanelType.TASK);
         assertThat(panelState.getId()).isEqualTo(TEST_PANEL_ID);
     }
 
     @Test
-    public void testLoadFromXmlResource_panel() {
+    public void testLoadFromXmlResource_taskPanel() {
         XmlModelLoader loader = new XmlModelLoader(mContext);
-        PanelState panelState = loader.createPanelState(R.xml.panel_test);
+        PanelState panelState = loader.createPanelState(R.xml.task_panel_test);
         Role defaultRole = new Role.Builder().setIsDefault(true).build();
         panelState.setRole(defaultRole);
 
         assertThat(panelState.getId()).isEqualTo("panel_id");
         assertTrue(panelState.getRole().isDefault());
+        assertThat(panelState.getType()).isEqualTo(PanelType.TASK);
+        assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
+        Variant variant2 = panelState.getVariant("@" + R.id.variant2);
+        assertThat(variant2.getLayer()).isEqualTo(100);
+        assertThat(variant2.getAlpha()).isEqualTo(0.8f);
+        assertThat(variant2.getInsets()).isNotNull();
+    }
+
+    @Test
+    public void testLoadFromXmlResource_decorPanel() {
+        XmlModelLoader loader = new XmlModelLoader(mContext);
+        PanelState panelState = loader.createPanelState(R.xml.decor_panel_test);
+        Role defaultRole = new Role.Builder().setIsDefault(true).build();
+        panelState.setRole(defaultRole);
+
+        assertThat(panelState.getId()).isEqualTo("panel_id");
+        assertTrue(panelState.getRole().isDefault());
+        assertThat(panelState.getType()).isEqualTo(PanelType.DECOR);
         assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
         Variant variant2 = panelState.getVariant("@" + R.id.variant2);
         assertThat(variant2.getLayer()).isEqualTo(100);
@@ -92,12 +106,12 @@ public class PanelStateTest {
         PanelState panelState = loader.createPanelState(R.xml.system_bar_top_test);
 
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
-        assertThat(panelState.getId()).isEqualTo(SYSTEM_BAR_PANEL_TOP_ID);
+        assertThat(panelState.getId()).isEqualTo("top");
         assertThat(panelState.getRole()).isNull();
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
                 BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(11);
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
-                TYPE_ATTRIBUTE)).isEqualTo(3);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getString(
+                TYPE_ATTRIBUTE)).isEqualTo("status");
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
                 HIDE_FOR_KEYBOARD_ATTRIBUTE)).isFalse();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
@@ -118,12 +132,12 @@ public class PanelStateTest {
         PanelState panelState = loader.createPanelState(R.xml.system_bar_bottom_test);
 
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
-        assertThat(panelState.getId()).isEqualTo(SYSTEM_BAR_PANEL_BOTTOM_ID);
+        assertThat(panelState.getId()).isEqualTo("bottom");
         assertThat(panelState.getRole()).isNull();
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
                 BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(0);
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
-                TYPE_ATTRIBUTE)).isEqualTo(0);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getString(
+                TYPE_ATTRIBUTE)).isEqualTo("navigation");
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
                 HIDE_FOR_KEYBOARD_ATTRIBUTE)).isTrue();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(
@@ -146,12 +160,12 @@ public class PanelStateTest {
         PanelState panelState = loader.createPanelState(R.xml.system_bar_left_test);
 
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
-        assertThat(panelState.getId()).isEqualTo(SYSTEM_BAR_PANEL_LEFT_ID);
+        assertThat(panelState.getId()).isEqualTo("left");
         assertThat(panelState.getRole()).isNull();
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
                 BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(10);
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
-                TYPE_ATTRIBUTE)).isEqualTo(1);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getString(
+                TYPE_ATTRIBUTE)).isEqualTo("navigation");
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
                 HIDE_FOR_KEYBOARD_ATTRIBUTE)).isFalse();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
@@ -172,12 +186,12 @@ public class PanelStateTest {
         PanelState panelState = loader.createPanelState(R.xml.system_bar_right_test);
 
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
-        assertThat(panelState.getId()).isEqualTo(SYSTEM_BAR_PANEL_RIGHT_ID);
+        assertThat(panelState.getId()).isEqualTo("right");
         assertThat(panelState.getRole()).isNull();
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
                 BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(2);
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
-                TYPE_ATTRIBUTE)).isEqualTo(2);
+        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getString(
+                TYPE_ATTRIBUTE)).isEqualTo("navigation");
         assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
                 HIDE_FOR_KEYBOARD_ATTRIBUTE)).isFalse();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
@@ -193,9 +207,16 @@ public class PanelStateTest {
         assertThat(variant2.getInsets()).isNotNull();
     }
 
+    @Test(expected = IllegalStateException.class)
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    public void testLoadFromXmlResource_systemBar_notAttachedToSideOfScreen() {
+        XmlModelLoader loader = new XmlModelLoader(mContext);
+        PanelState panelState = loader.createPanelState(R.xml.system_bar_invalid);
+    }
+
     @Test
     public void testAddVariant() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID);
+        PanelState panelState = new PanelState(TEST_PANEL_ID, PanelType.TASK);
         Variant variant = new Variant(VARIANT1, "");
         panelState.addVariant(variant);
         assertThat(panelState.getVariant(VARIANT1)).isEqualTo(variant);
@@ -203,7 +224,7 @@ public class PanelStateTest {
 
     @Test
     public void testAddTransition() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID);
+        PanelState panelState = new PanelState(TEST_PANEL_ID, PanelType.TASK);
         Variant variant1 = new Variant(VARIANT1, "");
         Variant variant2 = new Variant(VARIANT2, "");
         Transition transition = new Transition(variant1, variant2, TEST_EVENT, null, 0, 0, null);
@@ -217,7 +238,7 @@ public class PanelStateTest {
 
     @Test
     public void testSetVariant() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID);
+        PanelState panelState = new PanelState(TEST_PANEL_ID, PanelType.TASK);
         Variant variant1 = new Variant(VARIANT1, "");
         Variant variant2 = new Variant(VARIANT2, "");
         panelState.addVariant(variant1);
@@ -229,7 +250,7 @@ public class PanelStateTest {
 
     @Test
     public void testResetVariant() {
-        PanelState panelState = new PanelState(TEST_PANEL_ID);
+        PanelState panelState = new PanelState(TEST_PANEL_ID, PanelType.TASK);
         Variant variant1 = new Variant(VARIANT1, "");
         Variant variant2 = new Variant(VARIANT2, "");
         panelState.addVariant(variant1);

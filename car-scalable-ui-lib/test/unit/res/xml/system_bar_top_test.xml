@@ -14,10 +14,10 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<SystemBar defaultVariant="@id/variant1" side="top" barZOrder="11" type="3">
+<SystemBar defaultVariant="@id/variant1" id="top" barZOrder="11" type="status">
     <Variant id="@+id/base">
         <Corner radius="10dp" />
-        <Bounds girth="50" />
+        <Bounds width="100%" top="0" height="50"/>
     </Variant>
     <Variant id="@+id/variant1" parent="@id/base">
         <Visibility isVisible="true"/>

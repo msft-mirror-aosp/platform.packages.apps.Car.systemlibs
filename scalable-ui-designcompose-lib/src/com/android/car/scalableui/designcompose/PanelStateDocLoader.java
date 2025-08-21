@@ -30,6 +30,7 @@ import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelState;
+import com.android.car.scalableui.model.PanelType;
 import com.android.car.scalableui.model.Role;
 import com.android.car.scalableui.model.Transition;
 import com.android.car.scalableui.model.Variant;
@@ -119,7 +120,8 @@ public final class PanelStateDocLoader {
             Log.i(TAG, "Panel " + setData.getName() + " ROLE activity " + roleName);
         }
 
-        PanelState result = new PanelState(setData.getName());
+        // TODO: b/437941932 - Support SystemUI & Decor Panels in DC loader
+        PanelState result = new PanelState(setData.getName(), PanelType.TASK);
         result.setRole(roleBuilder.build());
 
         // Add variants

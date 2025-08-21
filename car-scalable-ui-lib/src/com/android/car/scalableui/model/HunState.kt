@@ -22,16 +22,16 @@ import androidx.annotation.NonNull
  *
  * This class uses a custom [HunVariant] to hold variant-specific attributes.
  */
-class HunState(id: String) : PanelState(id) {
+class HunState(id: String, type: @PanelType Int) : PanelState(id, type) {
 
     /**
      * Builder for [HunState] objects.
      */
-    class Builder(@NonNull private val id: String) {
+    class Builder(@NonNull private val id: String, private val type: @PanelType Int) {
         private var defaultVariant: String? = null
         private var displayId: Int? = null
-        private final val variants = mutableListOf<Variant>()
-        private final val transitions = mutableListOf<Transition>()
+        private val variants = mutableListOf<Variant>()
+        private val transitions = mutableListOf<Transition>()
 
         /** Sets default variant */
         fun setDefaultVariant(defaultVariant: String?): Builder = apply {
@@ -72,7 +72,7 @@ class HunState(id: String) : PanelState(id) {
          */
         @NonNull
         fun build(): HunState {
-            val hunState = HunState(id)
+            val hunState = HunState(id, type)
             hunState.setDefaultVariant(defaultVariant)
             displayId?.let { hunState.displayId = it }
             hunState.setVariants(variants)

@@ -16,9 +16,10 @@
 package com.android.car.scalableui.loader.xml;
 
 import static com.android.car.scalableui.Flags.enableExtPanelUpdates;
-import static com.android.car.scalableui.loader.xml.HunTagXmlParser.HUN_TAG;
-import static com.android.car.scalableui.loader.xml.HunTagXmlParser.parseHun;
-import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.PANEL_TAG;
+import static com.android.car.scalableui.loader.xml.HunTagXmlParserKt.HUN_TAG;
+import static com.android.car.scalableui.loader.xml.HunTagXmlParserKt.parseHun;
+import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.DECOR_PANEL_TAG;
+import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.TASK_PANEL_TAG;
 import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.parsePanel;
 import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.SYSTEM_BAR_TAG;
 import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.parseSystemBar;
@@ -28,6 +29,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.model.PanelState;
+import com.android.car.scalableui.model.PanelType;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -54,8 +56,10 @@ public class PanelStateXmlParser {
         if (eventType != XmlPullParser.START_TAG) {
             throw new XmlPullParserException(
                     "Unrecognized tag at the beginning: " + parser.getName());
-        } else if (parser.getName().equals(PANEL_TAG)) {
-            return parsePanel(context, parser);
+        } else if (parser.getName().equals(DECOR_PANEL_TAG)) {
+            return parsePanel(context, parser, PanelType.DECOR);
+        } else if (parser.getName().equals(TASK_PANEL_TAG)) {
+            return parsePanel(context, parser, PanelType.TASK);
         } else if (enableExtPanelUpdates() && parser.getName().equals(SYSTEM_BAR_TAG)) {
             return parseSystemBar(context, parser);
         } else if (enableExtPanelUpdates() && parser.getName().equals(HUN_TAG)) {
