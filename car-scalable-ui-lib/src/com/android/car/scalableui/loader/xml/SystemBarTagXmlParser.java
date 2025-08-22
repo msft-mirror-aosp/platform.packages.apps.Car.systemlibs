@@ -163,7 +163,8 @@ public class SystemBarTagXmlParser {
                 case KEY_FRAME_VARIANT_TAG -> panelState.addVariant(
                         parseKeyFrameVariant(panelState, parser, context));
                 case TRANSITIONS_TAG -> {
-                    List<Transition> transitions = parseTransitions(context, panelState, parser);
+                    List<Transition> transitions = parseTransitions(context, displayId, panelState,
+                            parser);
                     for (Transition transition : transitions) {
                         panelState.addTransition(transition);
                     }
