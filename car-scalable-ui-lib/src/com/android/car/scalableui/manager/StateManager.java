@@ -213,6 +213,9 @@ public class StateManager {
      */
     public static void applyState(@NonNull PanelState panelState) {
         Variant variant = panelState.getCurrentVariant();
+        if (variant == null) {
+            throw new IllegalStateException("PanelState has no current variant" + panelState);
+        }
         String panelId = panelState.getId();
         Panel panel = PanelPool.getInstance().getOrCreatePanel(panelId, panelState.getType());
         panel.setRole(panelState.getRole());
@@ -227,6 +230,7 @@ public class StateManager {
         // KeyFrameVariant might not have safe bounds.
         if (!(variant instanceof KeyFrameVariant)) {
             panel.setSafeBounds(variant.getSafeBounds());
+            panel.setTaskToolbarBounds(variant.getTaskToolbarBounds());
         }
         panel.setPanelControllerMetadata(panelState.getPanelControllerMetadata());
     }

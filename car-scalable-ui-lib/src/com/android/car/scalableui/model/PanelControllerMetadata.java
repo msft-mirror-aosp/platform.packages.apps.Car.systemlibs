@@ -52,6 +52,7 @@ public final class PanelControllerMetadata {
     public static final String PERSISTENT_PACKAGE = "PersistentPackage";
     public static final String DEFAULT_COMPONENT = "DefaultComponent";
     public static final String UPDATABLE_INTENT_FILTER = "UpdateIntentFilter";
+    public static final String TASK_TOOLBAR_CONTROLLER = "TaskToolBarController";
 
     @NonNull
     private final Bundle mConfigurations;
@@ -154,6 +155,11 @@ public final class PanelControllerMetadata {
     @NonNull
     public String getControllerName() {
         return getStringConfiguration(CONTROLLER_NAME_TAG);
+    }
+
+    @Nullable
+    public String getTaskToolBarControllerName() {
+        return getStringConfiguration(TASK_TOOLBAR_CONTROLLER);
     }
 
     /** Returns a {@link PanelControllerMetadata.Builder} objects. */
