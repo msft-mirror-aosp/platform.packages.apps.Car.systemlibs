@@ -34,7 +34,7 @@ android_library_import {
 android_library {
     name: "androidx.car_car-resources-partially-dejetified",
     sdk_version: "current",
-    min_sdk_version: "21",
+    min_sdk_version: "23",
     manifest: "AndroidManifest.xml",
     static_libs: [
         "androidx.car_car-resources-partially-dejetified-nodeps",
