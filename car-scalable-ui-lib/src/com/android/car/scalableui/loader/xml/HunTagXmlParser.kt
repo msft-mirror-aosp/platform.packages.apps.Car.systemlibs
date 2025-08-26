@@ -83,7 +83,12 @@ fun parseHun(context: Context, parser: XmlPullParser): HunState {
                 )
             )
             TRANSITIONS_TAG -> {
-                val transitions = parseTransitions(context, builder.build(), parser)
+                val transitions = parseTransitions(
+                    context,
+                    displayId,
+                    builder.build(),
+                    parser
+                )
                 transitions.forEach { builder.addTransition(it) }
             }
             else -> XmlPullParserHelper.skip(parser)

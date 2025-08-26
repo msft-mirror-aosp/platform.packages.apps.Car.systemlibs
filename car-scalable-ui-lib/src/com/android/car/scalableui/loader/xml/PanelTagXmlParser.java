@@ -231,7 +231,8 @@ public class PanelTagXmlParser {
                 case KEY_FRAME_VARIANT_TAG -> panelState.addVariant(
                         parseKeyFrameVariant(panelState, parser, context));
                 case TRANSITIONS_TAG -> {
-                    List<Transition> transitions = parseTransitions(context, panelState, parser);
+                    List<Transition> transitions = parseTransitions(context, displayId, panelState,
+                            parser);
                     for (Transition transition : transitions) {
                         panelState.addTransition(transition);
                     }
@@ -707,13 +708,13 @@ public class PanelTagXmlParser {
     }
 
     @NonNull
-    static List<Transition> parseTransitions(@NonNull Context context,
+    static List<Transition> parseTransitions(@NonNull Context context, int displayId,
             @NonNull PanelState panelState, @NonNull XmlPullParser parser)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, null, TRANSITIONS_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
         // possible lossy conversion from long to int. we're assuming the default duration can be
-        // convereted to int safely.
+        // converted to int safely.
         int duration = attrs.getAttributeIntValue(null, DEFAULT_DURATION_ATTRIBUTE,
                 (int) DEFAULT_DURATION);
         int interpolatorRef = attrs.getAttributeResourceValue(null, DEFAULT_INTERPOLATOR_ATTRIBUTE,
@@ -726,7 +727,8 @@ public class PanelTagXmlParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
 
             if (parser.getName().equals(TRANSITION_TAG)) {
-                result.add(parseTransition(context, panelState, duration, interpolator, parser));
+                result.add(parseTransition(context, displayId, panelState, duration, interpolator,
+                        parser));
             } else {
                 XmlPullParserHelper.skip(parser);
             }
@@ -735,7 +737,7 @@ public class PanelTagXmlParser {
     }
 
     @NonNull
-    private static Transition parseTransition(@NonNull Context context,
+    private static Transition parseTransition(@NonNull Context context, int displayId,
             @NonNull PanelState panelState, long defaultDuration,
             @Nullable Interpolator defaultInterpolator, @NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
@@ -762,9 +764,10 @@ public class PanelTagXmlParser {
             XmlPullParserHelper.skip(parser); // Should be no nested tags.
         }
 
-        return new Transition.Builder(fromVariant, toVariant).setOnEvent(onEvent,
-                onEventTokens).setAnimator(animator).setDefaultDuration(duration).setDelay(
-                delay).setDefaultInterpolator(interpolator).build();
+        return new Transition.Builder(fromVariant, toVariant)
+                .setOnEvent(onEvent, onEventTokens, displayId)
+                .setAnimator(animator).setDefaultDuration(duration)
+                .setDelay(delay).setDefaultInterpolator(interpolator).build();
     }
 
     /**

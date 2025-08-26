@@ -152,7 +152,7 @@ public final class PanelControllerMetadata {
         return Objects.hash(getConfigurations(), getBreakPoints(), getId());
     }
 
-    @NonNull
+    @Nullable
     public String getControllerName() {
         return getStringConfiguration(CONTROLLER_NAME_TAG);
     }

@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
@@ -252,7 +253,8 @@ public final class PanelStateDocLoader {
                 .setAnimator(animator)
                 .setDefaultDuration(duration)
                 .setDefaultInterpolator(interpolator)
-                .setOnEvent(event.getEventName(), event.getEventTokens())
+                // TODO(b/441073250) get display from doc
+                .setOnEvent(event.getEventName(), event.getEventTokens(), Display.DEFAULT_DISPLAY)
                 .build();
     }
 }
