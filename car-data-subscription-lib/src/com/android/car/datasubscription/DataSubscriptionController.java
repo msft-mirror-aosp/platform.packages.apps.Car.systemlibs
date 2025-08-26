@@ -18,6 +18,7 @@ package com.android.car.datasubscription;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.INTERNET;
+import static com.android.car.datasubscription.DataSubscription.DATA_SUBSCRIPTION_ACTION;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -67,8 +68,6 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         DataSubscriptionViewActionListener {
     private static final boolean DEBUG = Build.IS_DEBUGGABLE;
     private static final String TAG = DataSubscriptionController.class.toString();
-    private static final String DATA_SUBSCRIPTION_ACTION =
-            "android.intent.action.DATA_SUBSCRIPTION";
     private static final String DATA_SUBSCRIPTION_SHARED_PREFERENCE_PATH =
             "com.android.car.systemui.car.qc.DataSubscriptionController";
     // Timeout for network callback in ms
@@ -98,6 +97,10 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                 mNetworkCapabilities = null;
                 mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
                 mIsNetworkCallbackRegistered = false;
+            }
+
+            if (taskInfo.baseIntent.getAction() == DATA_SUBSCRIPTION_ACTION) {
+                mDataSubscriptionStatsLogHelper.logButtonClicked();
             }
             if (taskInfo.topActivity == null || mConnectivityManager == null) {
                 return;
@@ -206,6 +209,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     private int mCurrentActiveDays;
     private int mCurrentStatus;
     private String mUxrPrompt;
+    private DataSubscriptionStatsLogHelper mDataSubscriptionStatsLogHelper;
 
     static final ComponentName CAR_MEDIA_ACTIVITY = new ComponentName(
             "com.android.car.media",
@@ -262,6 +266,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         mUxrPrompt = mDataSubscriptionMessageCreator.getUxrPrompt(
             CarUxRestrictionsUtil.getInstance(mContext).getCurrentRestrictions()
                 .isRequiresDistractionOptimization());
+        mDataSubscriptionStatsLogHelper = new DataSubscriptionStatsLogHelper();
     }
 
     void updateShouldDisplayProactiveMessage() {
@@ -280,6 +285,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                 writeLatestPopupDate();
                 writeLatestPopupCycle();
                 writeLatestPopupActiveDays();
+                mDataSubscriptionStatsLogHelper.logProactiveMessageLaunched();
             }
         }
     }
@@ -295,6 +301,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                     mIsDistractionOptimizationRequired, message, mUxrPrompt);
             if (isMessageDisplayed) {
                 mActivitiesBlocklist.add(topActivity);
+                mDataSubscriptionStatsLogHelper.logReactiveMessageLaunched();
             }
         }
     }
