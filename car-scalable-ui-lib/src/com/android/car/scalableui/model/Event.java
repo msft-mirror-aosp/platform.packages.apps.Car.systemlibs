@@ -16,13 +16,16 @@
 package com.android.car.scalableui.model;
 
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
@@ -49,6 +52,13 @@ public class Event {
     protected final Map<String, String> mTokens = new HashMap<>();
 
     /**
+     * Set of display ids that this event is applicable to. This may include more than just the
+     * display context that triggered the event.
+     */
+    @NonNull
+    protected final Set<Integer> mApplicableDisplays = new ArraySet<>();
+
+    /**
      * Constructs an Event.  Package-private; use the Builder.
      *
      * @param id A unique identifier associated with this event.
@@ -57,9 +67,11 @@ public class Event {
         mId = id;
     }
 
-    protected Event(@NonNull String id, @NonNull Map<String, String> tokens) {
+    protected Event(@NonNull String id, @NonNull Map<String, String> tokens,
+            @NonNull Set<Integer> applicableDisplays) {
         mId = id;
         mTokens.putAll(tokens); // Defensive copy
+        mApplicableDisplays.addAll(applicableDisplays); // Defensive copy
     }
 
     /** Adds a token to this event to be matched against. */
@@ -105,6 +117,14 @@ public class Event {
             return false;
         }
 
+        if (!mApplicableDisplays.isEmpty() && mApplicableDisplays.stream().noneMatch(
+                transitionEvent.mApplicableDisplays::contains)) {
+            // This event contains a display specification while the event specified in the
+            // <Transition> does not - this is not a match.
+            logIfDebuggable("Event displays do not match");
+            return false;
+        }
+
         Map<String, String> transitionTokens = transitionEvent.getTokens();
         if (transitionTokens.isEmpty()) {
             // ids match and transition doesn't specify and additional tokens to match
@@ -145,13 +165,19 @@ public class Event {
                         .stream()
                         .map(entry -> entry.getKey() + "=" + entry.getValue())
                         .collect(Collectors.joining(" , "));
-        return "Event{" + "mId='" + mId + "' mTokens='" + tokenString + "'}";
+        String applicableDisplayString = mApplicableDisplays.isEmpty()
+                ? "empty"
+                : mApplicableDisplays.stream().map(Object::toString).collect(
+                        Collectors.joining(", "));
+        return "Event{" + "mId='" + mId + "' mTokens='" + tokenString
+                + "' mApplicableDisplays='" + applicableDisplayString + "'}";
     }
 
     /** Builder for {@link Event} objects. */
     public static class Builder {
         protected String mId;
         protected Map<String, String> mTokens = new HashMap<>();
+        protected Set<Integer> mApplicableDisplays = new ArraySet<>();
 
         public Builder(@NonNull String id) {
             mId = id;
@@ -175,6 +201,20 @@ public class Event {
                     } // else:  Ignore malformed tokens.
                 }
             }
+            return this;
+        }
+
+        /** Add an applicable display to this event */
+        public Builder addApplicableDisplay(int displayId) {
+            mApplicableDisplays.add(displayId);
+            return this;
+        }
+
+        /**
+         * Add a list of applicable displays to this event.
+         */
+        public Builder addApplicableDisplays(Collection<Integer> displayIds) {
+            mApplicableDisplays.addAll(displayIds);
             return this;
         }
 
@@ -208,7 +248,7 @@ public class Event {
             if (mId == null) {
                 throw new IllegalStateException("Event ID must be set.");
             }
-            return new Event(mId, mTokens);
+            return new Event(mId, mTokens, mApplicableDisplays);
         }
     }
 }

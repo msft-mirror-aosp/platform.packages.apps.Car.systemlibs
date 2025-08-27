@@ -264,7 +264,8 @@ public class PanelStateXmlParser {
                     panelState.addVariant(parseKeyFrameVariant(panelState, parser));
                     break;
                 case TRANSITIONS_TAG:
-                    List<Transition> transitions = parseTransitions(context, panelState, parser);
+                    List<Transition> transitions = parseTransitions(context, displayId, panelState,
+                            parser);
                     for (Transition transition : transitions) {
                         panelState.addTransition(transition);
                     }
@@ -671,7 +672,8 @@ public class PanelStateXmlParser {
 
     @NonNull
     private static List<Transition> parseTransitions(
-            @NonNull Context context, @NonNull PanelState panelState, @NonNull XmlPullParser parser)
+            @NonNull Context context, int displayId, @NonNull PanelState panelState,
+            @NonNull XmlPullParser parser)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, null, TRANSITIONS_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
@@ -692,7 +694,8 @@ public class PanelStateXmlParser {
 
             if (parser.getName().equals(TRANSITION_TAG)) {
                 result.add(
-                        parseTransition(context, panelState, duration, interpolator, parser));
+                        parseTransition(context, displayId, panelState, duration, interpolator,
+                                parser));
             } else {
                 XmlPullParserHelper.skip(parser);
             }
@@ -703,6 +706,7 @@ public class PanelStateXmlParser {
     @NonNull
     private static Transition parseTransition(
             @NonNull Context context,
+            int displayId,
             @NonNull PanelState panelState,
             long defaultDuration,
             @Nullable Interpolator defaultInterpolator,
@@ -732,7 +736,7 @@ public class PanelStateXmlParser {
         }
 
         return new Transition.Builder(fromVariant, toVariant)
-                .setOnEvent(onEvent, onEventTokens)
+                .setOnEvent(onEvent, onEventTokens, displayId)
                 .setAnimator(animator)
                 .setDefaultDuration(duration)
                 .setDefaultInterpolator(interpolator)
