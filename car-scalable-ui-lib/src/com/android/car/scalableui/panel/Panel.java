@@ -258,6 +258,16 @@ public interface Panel {
     Insets getInsets();
 
     /**
+     * The gravity of this panel.
+     */
+    int getGravity();
+
+    /**
+     * The gravity of this panel.
+     */
+    void setGravity(int gravity);
+
+    /**
      * @return The associated leash {@link SurfaceControl}
      */
     @Nullable

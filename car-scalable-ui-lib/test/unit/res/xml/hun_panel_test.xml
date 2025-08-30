@@ -19,7 +19,7 @@
     <Variant id="@+id/base">
     </Variant>
     <Variant id="@+id/variant1" parent="@id/base">
-        <Scrim drawable="@drawable/headsup_scrim" />
+        <Background drawable="@drawable/headsup_scrim" />
         <Visibility isVisible="true" />
         <Bounds left="0" top="10" width="1000" height="200" />
         <Gravity value="TOP" />

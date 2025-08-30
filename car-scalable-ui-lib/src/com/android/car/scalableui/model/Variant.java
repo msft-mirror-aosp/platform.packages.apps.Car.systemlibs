@@ -346,7 +346,7 @@ public class Variant {
         mInsets = insets;
     }
 
-    private void setDecors(@NonNull Set<Decor> decors) {
+    protected void setDecors(@NonNull Set<Decor> decors) {
         mDecors.clear();
         decors.forEach(decor -> {
             mDecors.put(decor.getId(), decor);
@@ -422,7 +422,7 @@ public class Variant {
         @Nullable
         protected Variant mParent;
         @NonNull
-        private Set<Decor> mDecors;
+        protected Set<Decor> mDecors;
 
         public Builder(@NonNull String id, @NonNull String idName) {
             mId = id;

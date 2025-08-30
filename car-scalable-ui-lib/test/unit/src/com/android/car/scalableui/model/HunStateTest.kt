@@ -34,8 +34,8 @@ class HunStateTest {
         val defaultVariant = "closed"
         val displayId = 1
 
-        val variant1 = mock(HunVariant::class.java)
-        val variant2 = mock(HunVariant::class.java)
+        val variant1 = mock(GravityVariant::class.java)
+        val variant2 = mock(GravityVariant::class.java)
         val transition1 = mock(Transition::class.java)
 
         val builder = HunState.Builder(panelId, PanelType.HUN)
