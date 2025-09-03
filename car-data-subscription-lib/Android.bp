@@ -17,9 +17,23 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+genrule {
+    name: "statslog-cardatasubscriptionlib-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module cardatasubscriptionlib" +
+        " --javaPackage com.android.car.datasubscription --javaClass CarDataSubscriptionStatsLog",
+    out: ["com/android/car/datasubscription/CarDataSubscriptionStatsLog.java"],
+}
+
+cardatasubscription_srcs = [
+    "src/**/*.java",
+    ":statslog-cardatasubscriptionlib-java-gen",
+]
+
+
 android_library {
     name: "car-data-subscription-lib",
-    srcs: ["src/**/*.java"],
+    srcs: cardatasubscription_srcs,
     optimize: {
         enabled: false,
     },
