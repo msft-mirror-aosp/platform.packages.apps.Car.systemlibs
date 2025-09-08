@@ -48,6 +48,8 @@ public class PanelState implements Cloneable {
     private final List<Transition> mTransitions = new ArrayList<>();
     @Nullable
     private Restart mRestart;
+    @Nullable
+    private TaskBehavior mTaskBehavior;
 
     @Nullable
     private Animator mRunningAnimator;
@@ -115,6 +117,17 @@ public class PanelState implements Cloneable {
     @Nullable
     public Restart getRestart() {
         return mRestart;
+    }
+
+    /** Add task behavior */
+    public void addTaskBehavior(@NonNull TaskBehavior taskBehavior) {
+        mTaskBehavior = taskBehavior;
+    }
+
+    /** Returns task behavior */
+    @Nullable
+    public TaskBehavior getTaskBehavior() {
+        return mTaskBehavior;
     }
 
     /** Returns current variant */
