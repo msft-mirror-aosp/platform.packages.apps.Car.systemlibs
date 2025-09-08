@@ -53,6 +53,7 @@ import com.android.car.scalableui.model.PanelControllerMetadata;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.Restart;
 import com.android.car.scalableui.model.Role;
+import com.android.car.scalableui.model.TaskBehavior;
 import com.android.car.scalableui.model.Transition;
 import com.android.car.scalableui.model.Variant;
 import com.android.car.scalableui.model.Visibility;
@@ -96,6 +97,10 @@ public class PanelTagXmlParser {
     public static final String RESTART_TAG = "Restart";
     public static final String POLICY_ATTRIBUTE = "policy";
     public static final String MAX_RETRY_ATTRIBUTE = "maxRetry";
+
+    // --- TaskBehavior Tags --
+    public static final String TASK_BEHAVIOR_TAG = "TaskBehavior";
+    public static final String NEW_TASK_LAUNCH_POLICY_ATTRIBUTE = "newTaskLaunchPolicy";
 
     // --- Transition Tags ---
     public static final String TRANSITION_TAG = "Transition";
@@ -283,6 +288,7 @@ public class PanelTagXmlParser {
                     }
                 }
                 case RESTART_TAG -> panelState.addRestart(parseRestart(parser));
+                case TASK_BEHAVIOR_TAG -> panelState.addTaskBehavior(parseTaskBehavior(parser));
                 default -> XmlPullParserHelper.skip(parser);
             }
         }
@@ -300,6 +306,17 @@ public class PanelTagXmlParser {
             XmlPullParserHelper.skip(parser); // Skip any nested tags
         }
         return new Restart(policy, maxRetry);
+    }
+
+    private static TaskBehavior parseTaskBehavior(@NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, null, TASK_BEHAVIOR_TAG);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+        String policy = attrs.getAttributeValue(null, NEW_TASK_LAUNCH_POLICY_ATTRIBUTE);
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.skip(parser); // Skip any nested tags
+        }
+        return new TaskBehavior(policy);
     }
 
     static PanelControllerMetadata createController(@NonNull Context context, int xmlId,
