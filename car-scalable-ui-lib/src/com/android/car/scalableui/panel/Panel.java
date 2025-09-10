@@ -183,12 +183,12 @@ public interface Panel {
      *
      * @param role The new role of this panel.
      */
-    void setRole(@NonNull Role role);
+    void setRole(@Nullable Role role);
 
     /**
      * Gets the role value of this panel.
      */
-    @NonNull
+    @Nullable
     Role getRole();
 
     /**
