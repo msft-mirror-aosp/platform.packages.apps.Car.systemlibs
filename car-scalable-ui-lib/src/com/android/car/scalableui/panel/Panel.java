@@ -266,6 +266,14 @@ public interface Panel {
     void setPanelControllerMetadata(@Nullable PanelControllerMetadata panelControllerMetadata);
 
     /**
+     * Gets the {@link PanelUpdatePublisher}
+     */
+    @Nullable
+    default PanelUpdatePublisher getPanelUpdateObserver() {
+        return null;
+    }
+
+    /**
      * Refresh the panel theme.
      */
     void refreshTheme();
