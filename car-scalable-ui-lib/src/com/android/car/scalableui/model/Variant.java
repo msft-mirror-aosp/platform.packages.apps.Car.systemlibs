@@ -341,9 +341,9 @@ public class Variant {
         String decorString = mDecors.isEmpty()
                 ? "empty"
                 : mDecors.entrySet()
-                        .stream()
-                        .map(entry -> entry.getKey() + "=" + entry.getValue())
-                        .collect(Collectors.joining(" , "));
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(" , "));
 
         return "Variant{"
                 + "\n\tmId=" + mId

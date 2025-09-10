@@ -44,7 +44,7 @@ public class PanelState implements Cloneable {
 
     private final String mId;
     @Nullable
-    private final Role mRole;
+    private Role mRole;
     private final List<Variant> mVariants = new ArrayList<>();
     private final List<Transition> mTransitions = new ArrayList<>();
     @Nullable
@@ -61,11 +61,9 @@ public class PanelState implements Cloneable {
      * Constructor for PanelState.
      *
      * @param id   The ID of the panel.
-     * @param role The role of the panel.
      */
-    public PanelState(@NonNull String id, @NonNull Role role) {
+    public PanelState(@NonNull String id) {
         mId = id;
-        mRole = role;
         mDisplayId = DEFAULT_DISPLAY;
     }
 
@@ -136,6 +134,11 @@ public class PanelState implements Cloneable {
     /** Sets variant with the given id */
     public void setVariant(@NonNull String id) {
         setVariant(id, null);
+    }
+
+    /** Sets role. */
+    public void setRole(@Nullable Role role) {
+        mRole = role;
     }
 
     /** Resets to the default variant */
@@ -371,7 +374,10 @@ public class PanelState implements Cloneable {
         /** Returns the {@link PanelState} instance */
         @NonNull
         public PanelState build() {
-            PanelState panelState = new PanelState(mId, mRole);
+            PanelState panelState = new PanelState(mId);
+            if (mRole != null) {
+                panelState.setRole(mRole);
+            }
             panelState.setDefaultVariant(mDefaultVariant);
             if (mDisplayId != null) {
                 panelState.setDisplayId(mDisplayId);
