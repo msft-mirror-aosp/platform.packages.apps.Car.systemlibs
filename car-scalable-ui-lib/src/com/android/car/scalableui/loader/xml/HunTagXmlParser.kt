@@ -67,15 +67,16 @@ fun parseHun(context: Context, parser: XmlPullParser): HunState {
     val builder = HunState.Builder(HUN_PANEL_ID, PanelType.HUN)
         .setDefaultVariant(defaultVariant)
         .setDisplayId(displayId)
+    val hunState = builder.build()
 
     while (parser.next() != XmlPullParser.END_TAG) {
         if (parser.eventType != XmlPullParser.START_TAG) continue
         when (parser.name) {
             // A <Variant> tag within a <HunPanel> is parsed as a GravityVariant.
-            VARIANT_TAG -> builder.addVariant(
+            VARIANT_TAG -> hunState.addVariant(
                 parseGravityVariant(
                     context,
-                    builder.build(),
+                    hunState,
                     parser,
                     displayId
                 )
@@ -84,15 +85,16 @@ fun parseHun(context: Context, parser: XmlPullParser): HunState {
                 val transitions = parseTransitions(
                     context,
                     displayId,
-                    builder.build(),
+                    hunState,
                     parser
                 )
-                transitions.forEach { builder.addTransition(it) }
+                transitions.forEach { hunState.addTransition(it) }
             }
             else -> XmlPullParserHelper.skip(parser)
         }
     }
-    return builder.build()
+    hunState.setVariant(defaultVariant) // Set the initial variant
+    return hunState
 }
 
 /**

@@ -52,7 +52,7 @@ class HunTagXmlParserTest {
 
         assertThat(hunState).isNotNull()
         assertThat(hunState.id).isEqualTo("_Hun_Panel")
-        assertThat(hunState.currentVariant?.idName).isEqualTo("base")
+        assertThat(hunState.currentVariant?.idName).isEqualTo("variant2")
 
         val variant1 = hunState.getVariant("@" + R.id.variant1) as GravityVariant?
         assertThat(variant1).isNotNull()
