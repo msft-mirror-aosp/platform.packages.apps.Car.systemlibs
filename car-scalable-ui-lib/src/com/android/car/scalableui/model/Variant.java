@@ -115,6 +115,7 @@ public class Variant {
         mAlpha = base.getAlpha();
         mCornerRadius = base.getCornerRadius();
         mInsets = base.getInsets();
+        mDecors.putAll(base.getDecors());
     }
 
     /**

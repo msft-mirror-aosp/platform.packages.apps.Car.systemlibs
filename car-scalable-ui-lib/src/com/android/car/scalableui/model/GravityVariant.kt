@@ -28,7 +28,7 @@ import com.android.car.scalableui.panel.Panel
  * A specialized version of [Variant] that includes a gravity property.
  */
 open class GravityVariant : Variant {
-    val gravity: Int
+    var gravity: Int
 
     internal constructor(
         id: String,
@@ -41,10 +41,9 @@ open class GravityVariant : Variant {
     internal constructor(
         id: String,
         base: Variant,
-        idName: String,
-        gravity: Int
+        idName: String
     ) : super(id, base, idName) {
-        this.gravity = gravity
+        this.gravity = if (base is GravityVariant) base.gravity else Gravity.NO_GRAVITY
     }
 
     override fun getAnimator(
@@ -89,10 +88,15 @@ open class GravityVariant : Variant {
         /** Returns the [GravityVariant] instance. */
         @NonNull
         override fun build(): GravityVariant {
-            val parentVariant = mParent
-            val variant = parentVariant?.let { GravityVariant(mId, it, mIdName, gravity) }
-                ?: GravityVariant(mId, mIdName, gravity)
+            val localParent = mParent
+            // Let the constructor handle inheritance.
+            val variant = if (localParent != null) {
+                GravityVariant(mId, localParent, mIdName)
+            } else {
+                GravityVariant(mId, mIdName, gravity)
+            }
 
+            // Apply this builder's specific overrides.
             mAlpha?.let { variant.alpha = it }
             mIsVisible?.let { variant.setVisibility(it) }
             mLayer?.let { variant.layer = it }
@@ -101,7 +105,13 @@ open class GravityVariant : Variant {
             mSafeBounds?.let { variant.safeBounds = Rect(it) }
             mCornerRadius?.let { variant.cornerRadius = it }
             mInsets?.let { variant.insets = Insets.of(it.left, it.top, it.right, it.bottom) }
-            variant.setDecors(mDecors)
+            if (mDecors.isNotEmpty()) {
+                variant.setDecors(mDecors)
+            }
+            // Override gravity only if it was explicitly set in this builder.
+            if (gravity != Gravity.NO_GRAVITY) {
+                variant.gravity = gravity
+            }
 
             return variant
         }
