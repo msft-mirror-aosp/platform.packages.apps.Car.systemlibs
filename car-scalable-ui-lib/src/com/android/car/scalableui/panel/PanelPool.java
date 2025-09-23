@@ -78,6 +78,7 @@ public class PanelPool {
      * Clears all panels from the pool.
      */
     public void clearPanels() {
+        mPanels.forEach((id, panel) -> panel.destroy());
         mPanels.clear();
     }
 

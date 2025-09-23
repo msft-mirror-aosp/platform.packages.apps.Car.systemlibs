@@ -303,4 +303,9 @@ public interface Panel {
      * Refresh the panel theme.
      */
     void refreshTheme();
+
+    /**
+     * Destroys the panel.
+     */
+    void destroy();
 }
