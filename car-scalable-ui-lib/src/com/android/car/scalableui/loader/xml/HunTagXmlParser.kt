@@ -26,6 +26,7 @@ import com.android.car.scalableui.loader.xml.PanelTagXmlParser.BOUNDS_TAG
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.DEFAULT_VARIANT_ATTRIBUTE
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.DISPLAY_ID
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.ID_ATTRIBUTE
+import com.android.car.scalableui.loader.xml.PanelTagXmlParser.INSETS_TAG
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.PARENT_ATTRIBUTE
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.TRANSITIONS_TAG
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.VARIANT_TAG
@@ -33,6 +34,7 @@ import com.android.car.scalableui.loader.xml.PanelTagXmlParser.VISIBILITY_TAG
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.getIdName
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.getVariantBackgroundParser
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.getVariantBoundsParser
+import com.android.car.scalableui.loader.xml.PanelTagXmlParser.getVariantInsetsParser
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.getVariantVisibilityParser
 import com.android.car.scalableui.loader.xml.PanelTagXmlParser.parseTransitions
 import com.android.car.scalableui.model.GravityVariant
@@ -124,6 +126,7 @@ private fun parseGravityVariant(
         BOUNDS_TAG to getVariantBoundsParser(BOUNDS_TAG),
         BACKGROUND_TAG to getVariantBackgroundParser(HUN_PANEL_ID),
         GRAVITY_TAG to getVariantGravityParser(),
+        INSETS_TAG to getVariantInsetsParser(),
     )
 
     while (parser.next() != XmlPullParser.END_TAG) {
