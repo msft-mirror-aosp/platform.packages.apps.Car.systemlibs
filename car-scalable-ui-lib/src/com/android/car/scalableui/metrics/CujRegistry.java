@@ -43,7 +43,7 @@ public class CujRegistry {
             new CujDefinition(
                     Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME,
                     PANEL_APP_GRID,
-                    event -> event.getId().equals("_System_OnHomeEvent"),
+                    event -> "_System_OnHomeEvent".equals(event.getId()),
                     Map.of(PANEL_APP_GRID, IS_VISIBLE),
                     Map.of(PANEL_APP_GRID, IS_NOT_VISIBLE)
             ),
@@ -52,7 +52,7 @@ public class CujRegistry {
             new CujDefinition(
                     Cuj.CUJ_LAUNCHER_OPEN_ALL_APPS,
                     PANEL_APP_GRID,
-                    event -> event.getId().equals("_System_TaskOpenEvent"),
+                    event -> "_System_TaskOpenEvent".equals(event.getId()),
                     Map.of(PANEL_APP_GRID, IS_NOT_VISIBLE),
                     Map.of(PANEL_APP_GRID, IS_VISIBLE)
             ),
@@ -61,7 +61,7 @@ public class CujRegistry {
             new CujDefinition(
                     Cuj.CUJ_LAUNCHER_APP_LAUNCH_FROM_ICON,
                     APP_PANEL,
-                    event -> event.getId().equals("_System_TaskOpenEvent"),
+                    event -> "_System_TaskOpenEvent".equals(event.getId()),
                     Map.of(APP_PANEL, IS_NOT_VISIBLE),
                     Map.of(APP_PANEL, IS_VISIBLE, PANEL_APP_GRID, IS_NOT_VISIBLE)
             ),
@@ -69,7 +69,7 @@ public class CujRegistry {
             new CujDefinition(
                     Cuj.CUJ_LAUNCHER_TASKBAR_ALL_APPS_CLOSE_BACK,
                     PANEL_APP_GRID,
-                    event -> event.getId().equals("close_app_grid"),
+                    event -> "close_app_grid".equals(event.getId()),
                     Map.of(PANEL_APP_GRID, IS_VISIBLE),
                     Map.of(PANEL_APP_GRID, IS_NOT_VISIBLE, APP_PANEL, IS_NOT_VISIBLE)
             ),
@@ -77,7 +77,7 @@ public class CujRegistry {
             new CujDefinition(
                     Cuj.CUJ_SCREEN_OFF_SHOW_AOD,
                     PANEL_CALM_MODE,
-                    event -> event.getId().equals("_System_TaskOpenEvent"),
+                    event -> "_System_TaskOpenEvent".equals(event.getId()),
                     Map.of(PANEL_CALM_MODE, IS_NOT_VISIBLE),
                     Map.of(PANEL_CALM_MODE, IS_VISIBLE)
             )
