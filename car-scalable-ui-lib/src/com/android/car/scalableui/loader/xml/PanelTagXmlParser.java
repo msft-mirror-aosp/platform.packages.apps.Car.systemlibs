@@ -33,6 +33,7 @@ import android.hardware.display.DisplayManager;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.util.Xml;
 import android.view.Display;
 import android.view.View;
@@ -816,6 +817,17 @@ public class PanelTagXmlParser {
             }
             if (resType.equals("integer")) {
                 return context.getResources().getInteger(resId);
+            }
+            if (resType.equals("attr")) {
+                TypedValue typedValue = new TypedValue();
+                if (context.getTheme().resolveAttribute(resId, typedValue, true)) {
+                    if (typedValue.type == TypedValue.TYPE_DIMENSION) {
+                        return TypedValue.complexToDimensionPixelSize(
+                                typedValue.data,
+                                context.getResources().getDisplayMetrics()
+                        );
+                    }
+                }
             }
 
             // fraction and string types will be used as string to be parsed
