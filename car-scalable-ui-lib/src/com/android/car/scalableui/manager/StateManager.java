@@ -134,7 +134,7 @@ public class StateManager {
             }
             Transition transition = panelState.getTransition(event);
             if (transition == null) {
-                Log.e(TAG, "transition is null for " + panelState.getId());
+                logIfDebuggable("No transition for " + panelState.getId());
                 panelTransactionBuilder.addLockedPanelId(panelState.getId());
                 continue;
             }
