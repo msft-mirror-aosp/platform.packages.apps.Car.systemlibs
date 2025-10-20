@@ -15,6 +15,9 @@
  */
 package com.android.car.scalableui.model;
 
+import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.CONTROLLER_NAME_TAG;
+import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.TASK_TOOLBAR_CONTROLLER_TAG;
+
 import android.os.Bundle;
 import android.util.Log;
 
@@ -38,21 +41,6 @@ import java.util.Objects;
  */
 public final class PanelControllerMetadata {
     public static final String TAG = PanelControllerMetadata.class.getSimpleName();
-
-    public static final String CONTROLLER_NAME_TAG = "ControllerName";
-    public static final String VIEW_TAG = "View";
-    public static final String EVENT_ID_TAG = "EventId";
-    public static final String DRAG_DEC_EVENT_ID_TAG = "dragDecreaseEventId";
-    public static final String DRAG_INC_EVENT_ID_TAG = "dragIncreaseEventId";
-    public static final String OVERLAY_PANEL_ID = "overlayPanelId";
-    public static final String BACKGROUND_COLOR = "backgroundColor";
-    public static final String ORIENTATION_TAG = "Orientation";
-    public static final String SNAPTHREADHOLD_TAG = "SnapThreadhold";
-    public static final String PERSISTENT_ACTIVITY = "PersistentActivity";
-    public static final String PERSISTENT_PACKAGE = "PersistentPackage";
-    public static final String DEFAULT_COMPONENT = "DefaultComponent";
-    public static final String UPDATABLE_INTENT_FILTER = "UpdateIntentFilter";
-    public static final String TASK_TOOLBAR_CONTROLLER = "TaskToolBarController";
 
     @NonNull
     private final Bundle mConfigurations;
@@ -159,7 +147,7 @@ public final class PanelControllerMetadata {
 
     @Nullable
     public String getTaskToolBarControllerName() {
-        return getStringConfiguration(TASK_TOOLBAR_CONTROLLER);
+        return getStringConfiguration(TASK_TOOLBAR_CONTROLLER_TAG);
     }
 
     /** Returns a {@link PanelControllerMetadata.Builder} objects. */
@@ -220,8 +208,7 @@ public final class PanelControllerMetadata {
         /** Returns the {@link PanelControllerMetadata} instance */
         public PanelControllerMetadata build() {
             if (!mConfigurations.containsKey(CONTROLLER_NAME_TAG)) {
-                Log.e(TAG, "Controller name or view name cannot be empty"
-                        + " controller = " + mConfigurations.getString(CONTROLLER_NAME_TAG, null));
+                Log.e(TAG, "Controller name cannot be empty");
             }
             if (mBreakPoints != null) {
                 mBreakPoints.sort(Comparator.comparing(
