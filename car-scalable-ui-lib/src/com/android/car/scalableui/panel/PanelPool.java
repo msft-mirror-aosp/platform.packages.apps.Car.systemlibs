@@ -16,9 +16,14 @@
 
 package com.android.car.scalableui.panel;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.util.HashMap;
+import com.android.car.scalableui.model.PanelType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -32,7 +37,7 @@ import java.util.function.Predicate;
 public class PanelPool {
     private static final PanelPool sInstance = new PanelPool();
 
-    private final HashMap<String, Panel> mPanels = new HashMap<>();
+    private final ConcurrentHashMap<String, Panel> mPanels = new ConcurrentHashMap<>();
     private PanelCreatorDelegate mDelegate;
 
     /**
@@ -49,10 +54,11 @@ public class PanelPool {
         /**
          * Creates a panel object.
          *
-         * @param id given identifier for the panel.
+         * @param id given id for the panel.
+         * @param type given {@link PanelType} for the panel.
          * @return the panel object.
          */
-        Panel createPanel(String id);
+        Panel createPanel(String id, @PanelType int type);
     }
 
 
@@ -64,7 +70,7 @@ public class PanelPool {
      *
      * @param delegate The delegate to set.
      */
-    public void setDelegate(PanelCreatorDelegate delegate) {
+    public void setDelegate(@NonNull PanelCreatorDelegate delegate) {
         mDelegate = delegate;
     }
 
@@ -72,24 +78,35 @@ public class PanelPool {
      * Clears all panels from the pool.
      */
     public void clearPanels() {
+        mPanels.forEach((id, panel) -> panel.destroy());
         mPanels.clear();
     }
 
     /**
      * Retrieves a panel with the given ID.
      *
-     * <p>If a panel with the given ID already exists in the pool, it is returned. Otherwise, a new
-     * panel is created using the {@link PanelCreatorDelegate}, added to the pool, and returned.
+     * <p>If a panel with the given ID already exists in the pool, it is returned. Otherwise,
+     * return {@code null}
      *
      * @param id The ID of the panel to retrieve.
      * @return The panel with the given ID.
      */
-    public Panel getPanel(String id) {
-        Panel panel = mPanels.get(id);
-        if (panel == null) {
-            panel = mDelegate.createPanel(id);
-            mPanels.put(id, panel);
-        }
+    @NonNull
+    public Panel getOrCreatePanel(@NonNull String id, @PanelType int type) {
+        return mPanels.computeIfAbsent(id, key -> mDelegate.createPanel(id, type));
+    }
+
+    /**
+     * Retrieves a panel with the given ID.
+     *
+     * <p>If a panel with the given ID already exists in the pool, it is returned. Otherwise,
+     * return {@code null}
+     *
+     * @param id The ID of the panel to retrieve.
+     * @return The panel with the given ID.
+     */
+    @Nullable
+    public Panel getPanel(@NonNull String id) {
         return mPanels.get(id);
     }
 
@@ -100,7 +117,7 @@ public class PanelPool {
      * @return The first panel matching the predicate, or null if none is found.
      */
     @Nullable
-    public Panel getPanel(Predicate<Panel> predicate) {
+    public Panel getPanel(@NonNull Predicate<Panel> predicate) {
         for (Panel panel : mPanels.values()) {
             if (predicate.test(panel)) return panel;
         }
@@ -108,9 +125,26 @@ public class PanelPool {
     }
 
     /**
+     * Retrieves a panels with the given {@link Predicate}.
+     *
+     * @param predicate A predicate that defines the criteria for selecting panels.
+     * @return The panels matching the predicate, or empty list if none are found.
+     */
+    @NonNull
+    public List<Panel> getPanels(@NonNull Predicate<Panel> predicate) {
+        List<Panel> panels = new ArrayList<>();
+        for (Panel panel : mPanels.values()) {
+            if (predicate.test(panel)) {
+                panels.add(panel);
+            }
+        }
+        return panels;
+    }
+
+    /**
      * Executes a given {@link Consumer} on all the panels.
      */
-    public void forEach(Consumer<Panel> consumer) {
+    public void forEach(@NonNull Consumer<Panel> consumer) {
         mPanels.forEach((id, panel) -> consumer.accept(panel));
     }
 }

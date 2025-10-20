@@ -23,7 +23,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.car.scalableui.Flags
 import com.android.car.scalableui.model.Event
-import com.android.car.scalableui.model.HunVariant
+import com.android.car.scalableui.model.GravityVariant
 import com.android.car.scalableui.unit.R
 import com.google.common.truth.Truth.assertThat
 import java.io.IOException
@@ -48,23 +48,23 @@ class HunTagXmlParserTest {
         ) {
             eventType = parser.next()
         }
-        val hunState = HunTagXmlParser.parseHun(context, parser)
+        val hunState = parseHun(context, parser)
 
         assertThat(hunState).isNotNull()
         assertThat(hunState.id).isEqualTo("_Hun_Panel")
-        assertThat(hunState.currentVariant?.idName).isEqualTo("base")
+        assertThat(hunState.currentVariant?.idName).isEqualTo("variant2")
 
-        val variant1 = hunState.getVariant("@" + R.id.variant1) as HunVariant?
+        val variant1 = hunState.getVariant("@" + R.id.variant1) as GravityVariant?
         assertThat(variant1).isNotNull()
         assertThat(variant1?.isVisible).isTrue()
         assertThat(variant1?.gravity).isEqualTo(Gravity.TOP)
-        assertThat(variant1?.scrim).isNotNull()
+        assertThat(variant1?.decors).isNotEmpty()
 
-        val variant2 = hunState.getVariant("@" + R.id.variant2) as HunVariant?
+        val variant2 = hunState.getVariant("@" + R.id.variant2) as GravityVariant?
         assertThat(variant2).isNotNull()
         assertThat(variant2?.isVisible).isFalse()
         assertThat(variant2?.gravity).isEqualTo(Gravity.TOP)
-        assertThat(variant2?.scrim).isNull()
+        assertThat(variant2?.decors).isEmpty()
 
         val event1 = Event.Builder("event1").build()
         val transition1 = hunState.getTransition(event1)

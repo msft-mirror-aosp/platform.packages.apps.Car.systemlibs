@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Describes a KeyframeEvent in the system. This is the same as a standard {@link Event} but
@@ -33,8 +34,9 @@ public class KeyFrameEvent extends Event {
      * @param id       A unique identifier associated with this event.
      * @param fraction A fraction value (between 0 and 1).
      */
-    public KeyFrameEvent(@NonNull String id, float fraction, @NonNull Map<String, String> tokens) {
-        super(id, tokens);
+    public KeyFrameEvent(@NonNull String id, float fraction, @NonNull Map<String, String> tokens,
+            @NonNull Set<Integer> applicableDisplays) {
+        super(id, tokens, applicableDisplays);
         mFraction = fraction;
     }
 
@@ -84,7 +86,7 @@ public class KeyFrameEvent extends Event {
                         "KeyFrameEvent ID must be set with valid fraction." + mId + " "
                                 + mFraction);
             }
-            return new KeyFrameEvent(mId, mFraction, mTokens);
+            return new KeyFrameEvent(mId, mFraction, mTokens, mApplicableDisplays);
         }
     }
 }

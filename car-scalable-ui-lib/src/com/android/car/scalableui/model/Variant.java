@@ -70,6 +70,8 @@ public class Variant {
     private Insets mInsets;
     @NonNull
     private final Map<String, Decor> mDecors;
+    @NonNull
+    private Rect mTaskToolbarBounds;
 
     /**
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
@@ -84,6 +86,7 @@ public class Variant {
 
         mBounds = new Rect();
         mSafeBounds = new Rect();
+        mTaskToolbarBounds = new Rect();
         mIsVisible = Visibility.DEFAULT_VISIBILITY;
         mLayer = Layer.DEFAULT_LAYER;
         mCanFocusOnTransition = Focus.DEFAULT_FOCUS_ON_TRANSITION;
@@ -112,6 +115,7 @@ public class Variant {
         mAlpha = base.getAlpha();
         mCornerRadius = base.getCornerRadius();
         mInsets = base.getInsets();
+        mDecors.putAll(base.getDecors());
     }
 
     /**
@@ -300,6 +304,15 @@ public class Variant {
         mSafeBounds = safeBounds;
     }
 
+    @NonNull
+    public Rect getTaskToolbarBounds() {
+        return mTaskToolbarBounds;
+    }
+
+    protected void setTaskToolbarBounds(@NonNull Rect taskToolbarBounds) {
+        mTaskToolbarBounds = taskToolbarBounds;
+    }
+
     /**
      * Returns the corner radius of the variant.
      *
@@ -334,7 +347,7 @@ public class Variant {
         mInsets = insets;
     }
 
-    private void setDecors(@NonNull Set<Decor> decors) {
+    protected void setDecors(@NonNull Set<Decor> decors) {
         mDecors.clear();
         decors.forEach(decor -> {
             mDecors.put(decor.getId(), decor);
@@ -368,6 +381,7 @@ public class Variant {
                 + "\n\tmCanFocusOnTransition=" + mCanFocusOnTransition
                 + "\n\tmBounds=" + mBounds
                 + "\n\tmSafeBounds=" + mSafeBounds
+                + "\n\tmTaskToolbarBounds=" + mTaskToolbarBounds
                 + "\n\tmCornerRadius=" + mCornerRadius
                 + "\n\tmInsets=" + mInsets
                 + "\n\tmDecors=" + decorString
@@ -401,13 +415,15 @@ public class Variant {
         @Nullable
         protected Rect mSafeBounds;
         @Nullable
+        protected Rect mTaskToolbarBounds;
+        @Nullable
         protected Integer mCornerRadius;
         @Nullable
         protected Insets mInsets;
         @Nullable
         protected Variant mParent;
         @NonNull
-        private Set<Decor> mDecors;
+        protected Set<Decor> mDecors;
 
         public Builder(@NonNull String id, @NonNull String idName) {
             mId = id;
@@ -451,6 +467,14 @@ public class Variant {
          */
         public Builder setSafeBounds(@NonNull Rect safeBounds) {
             mSafeBounds = safeBounds;
+            return this;
+        }
+
+        /**
+         * Sets TaskToolBar bounds. This is an area used to show TaskToolBar.
+         */
+        public Builder setTaskToolbarBounds(@NonNull Rect taskToolbarBounds) {
+            mTaskToolbarBounds = taskToolbarBounds;
             return this;
         }
 
@@ -507,6 +531,9 @@ public class Variant {
                 variant.setSafeBounds(new Rect(mSafeBounds)); // Defensive copy
             } else if (mBounds != null) {
                 variant.setSafeBounds(new Rect(mBounds)); // Defensive copy
+            }
+            if (mTaskToolbarBounds != null) {
+                variant.setTaskToolbarBounds(new Rect(mTaskToolbarBounds)); // Defensive copy
             }
             if (mCornerRadius != null) {
                 variant.setCornerRadius(mCornerRadius);

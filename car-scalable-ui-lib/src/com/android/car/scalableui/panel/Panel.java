@@ -64,6 +64,21 @@ public interface Panel {
     void setSafeBounds(@NonNull Rect safeBounds);
 
     /**
+     * Gets the bounds of the task toolbar associated with this panel.
+     *
+     * @return The bounding rectangle of the task toolbar.
+     */
+    @NonNull
+    Rect getTaskToolbarBounds();
+
+    /**
+     * Sets the bounds of the task toolbar associated with this panel.
+     *
+     * @param bounds The new bounding rectangle for the task toolbar.
+     */
+    void setTaskToolbarBounds(@NonNull Rect bounds);
+
+    /**
      * Gets the layer of this panel.
      * Panels with higher layer values are drawn on top of panels with lower layer values.
      *
@@ -243,6 +258,16 @@ public interface Panel {
     Insets getInsets();
 
     /**
+     * The gravity of this panel.
+     */
+    int getGravity();
+
+    /**
+     * The gravity of this panel.
+     */
+    void setGravity(int gravity);
+
+    /**
      * @return The associated leash {@link SurfaceControl}
      */
     @Nullable
@@ -278,4 +303,9 @@ public interface Panel {
      * Refresh the panel theme.
      */
     void refreshTheme();
+
+    /**
+     * Destroys the panel.
+     */
+    void destroy();
 }

@@ -124,7 +124,7 @@ public class Role {
             if (mLayoutId == 0
                     && !mIsDefault
                     && mPersistedActivities.isEmpty()) {
-                throw new IllegalStateException("Role is not initialized correctly!");
+                return DEFAULT_ROLE;
             }
 
             if (mLayoutId != 0) {

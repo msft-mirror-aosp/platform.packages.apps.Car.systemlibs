@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 
@@ -30,6 +31,7 @@ import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelState;
+import com.android.car.scalableui.model.PanelType;
 import com.android.car.scalableui.model.Role;
 import com.android.car.scalableui.model.Transition;
 import com.android.car.scalableui.model.Variant;
@@ -119,7 +121,8 @@ public final class PanelStateDocLoader {
             Log.i(TAG, "Panel " + setData.getName() + " ROLE activity " + roleName);
         }
 
-        PanelState result = new PanelState(setData.getName());
+        // TODO: b/437941932 - Support SystemUI & Decor Panels in DC loader
+        PanelState result = new PanelState(setData.getName(), PanelType.TASK);
         result.setRole(roleBuilder.build());
 
         // Add variants
@@ -250,7 +253,8 @@ public final class PanelStateDocLoader {
                 .setAnimator(animator)
                 .setDefaultDuration(duration)
                 .setDefaultInterpolator(interpolator)
-                .setOnEvent(event.getEventName(), event.getEventTokens())
+                // TODO(b/441073250) get display from doc
+                .setOnEvent(event.getEventName(), event.getEventTokens(), Display.DEFAULT_DISPLAY)
                 .build();
     }
 }

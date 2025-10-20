@@ -15,53 +15,59 @@
  */
 package com.android.car.scalableui.model
 
+import android.animation.Animator
+import android.animation.ValueAnimator
 import android.graphics.Insets
 import android.graphics.Rect
-import android.graphics.drawable.Drawable
 import android.view.Gravity
+import android.view.animation.Interpolator
 import androidx.annotation.NonNull
-import androidx.annotation.Nullable
+import com.android.car.scalableui.panel.Panel
 
 /**
- * A specialized version of [Variant] for Heads-Up Notifications (Huns).
- *
- * This class extends the base [Variant] to include Hun-specific properties like a scrim drawable.
+ * A specialized version of [Variant] that includes a gravity property.
  */
-open class HunVariant : Variant {
-    @get:Nullable
-    val scrim: Drawable?
-    val gravity: Int
+open class GravityVariant : Variant {
+    var gravity: Int
+
     internal constructor(
         id: String,
         idName: String,
-        scrim: Drawable?,
         gravity: Int
     ) : super(id, idName) {
-        this.scrim = scrim
         this.gravity = gravity
     }
 
     internal constructor(
         id: String,
         base: Variant,
-        idName: String,
-        scrim: Drawable?,
-        gravity: Int
+        idName: String
     ) : super(id, base, idName) {
-        this.scrim = scrim
-        this.gravity = gravity
+        this.gravity = if (base is GravityVariant) base.gravity else Gravity.NO_GRAVITY
     }
 
-    /** Builder for [HunVariant] objects. */
-    class Builder(id: String, idName: String) : Variant.Builder(id, idName) {
-        private var scrim: Drawable? = null
-        private var gravity: Int = Gravity.NO_GRAVITY
+    override fun getAnimator(
+        panel: Panel,
+        toVariant: Variant,
+        duration: Long,
+        delay: Long,
+        interpolator: Interpolator?
+    ): Animator? {
+        val animator = super.getAnimator(panel, toVariant, duration, delay, interpolator)
+        if (toVariant is GravityVariant && animator is ValueAnimator) {
+            animator.addUpdateListener {
+                panel.gravity = toVariant.gravity
+            }
+        }
+        return animator
+    }
 
-        /** Sets the scrim for this variant. */
-        fun setScrim(scrim: Drawable?): Builder = apply { this.scrim = scrim }
+    /** Builder for [GravityVariant] objects. */
+    open class Builder(id: String, idName: String) : Variant.Builder(id, idName) {
+        protected var gravity: Int = Gravity.NO_GRAVITY
 
         /** Sets the gravity for this variant. */
-        fun setGravity(gravity: Int): Builder = apply { this.gravity = gravity }
+        open fun setGravity(gravity: Int): Builder = apply { this.gravity = gravity }
 
         // Override parent methods to return the correct builder type for chaining.
         override fun setParent(parent: Variant?): Builder = apply { super.setParent(parent) }
@@ -77,16 +83,20 @@ open class HunVariant : Variant {
         override fun setCornerRadius(cornerRadius: Int): Builder =
             apply { super.setCornerRadius(cornerRadius) }
         override fun setInsets(insets: Insets): Builder = apply { super.setInsets(insets) }
+        override fun addDecor(decor: Decor): Builder = apply { super.addDecor(decor) }
 
-        /** Returns the [HunVariant] instance. */
+        /** Returns the [GravityVariant] instance. */
         @NonNull
-        override fun build(): HunVariant {
-            // Create a local, immutable copy of mParent to avoid smart cast errors.
-            val parentVariant = mParent
-            val variant = parentVariant?.let { HunVariant(mId, it, mIdName, scrim, gravity) }
-                ?: HunVariant(mId, mIdName, scrim, gravity)
+        override fun build(): GravityVariant {
+            val localParent = mParent
+            // Let the constructor handle inheritance.
+            val variant = if (localParent != null) {
+                GravityVariant(mId, localParent, mIdName)
+            } else {
+                GravityVariant(mId, mIdName, gravity)
+            }
 
-            // Apply properties from the builder to the new variant instance
+            // Apply this builder's specific overrides.
             mAlpha?.let { variant.alpha = it }
             mIsVisible?.let { variant.setVisibility(it) }
             mLayer?.let { variant.layer = it }
@@ -95,8 +105,38 @@ open class HunVariant : Variant {
             mSafeBounds?.let { variant.safeBounds = Rect(it) }
             mCornerRadius?.let { variant.cornerRadius = it }
             mInsets?.let { variant.insets = Insets.of(it.left, it.top, it.right, it.bottom) }
+            if (mDecors.isNotEmpty()) {
+                variant.setDecors(mDecors)
+            }
+            // Override gravity only if it was explicitly set in this builder.
+            if (gravity != Gravity.NO_GRAVITY) {
+                variant.gravity = gravity
+            }
 
             return variant
         }
+    }
+
+    @NonNull
+    override fun toString(): String {
+        val decorString = if (decors.isEmpty()) {
+            "empty"
+        } else {
+            decors.entries.joinToString(" , ") { (key, value) -> "$key=$value" }
+        }
+
+        return "GravityVariant{" +
+          " mIdName=" + idName +
+          " mAlpha=" + alpha +
+          " mIsVisible=" + isVisible +
+          " mLayer=" + layer +
+          " mCanFocusOnTransition=" + canFocusOnTransition() +
+          " mBounds=" + bounds +
+          " mSafeBounds=" + safeBounds +
+          " mCornerRadius=" + cornerRadius +
+          " mInsets=" + insets +
+          " mDecors=" + decorString +
+          " mGravity=" + gravity +
+          '}'
     }
 }

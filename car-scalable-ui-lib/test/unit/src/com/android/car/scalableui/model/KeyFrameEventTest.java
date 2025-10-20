@@ -22,17 +22,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RunWith(AndroidJUnit4.class)
 public class KeyFrameEventTest {
 
     @Test
     public void keyFrameEvent_toString_returnsCorrectFormat() {
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("key1", "value1");
-        KeyFrameEvent keyFrameEvent = new KeyFrameEvent("testEvent", 0.5f, tokens);
+        KeyFrameEvent keyFrameEvent = new KeyFrameEvent.Builder("testEvent", 0.5f)
+                .addToken("key1", "value1")
+                .build();
         String expectedString =
                 "KeyFrameEvent{mId=testEvent, mTokens={key1=value1}, mFraction=0.5}";
         assertThat(keyFrameEvent.toString()).isEqualTo(expectedString);
@@ -40,7 +37,7 @@ public class KeyFrameEventTest {
 
     @Test
     public void keyFrameEvent_getFraction_returnsCorrectValue() {
-        KeyFrameEvent keyFrameEvent = new KeyFrameEvent("testEvent", 0.75f, new HashMap<>());
+        KeyFrameEvent keyFrameEvent = new KeyFrameEvent.Builder("testEvent", 0.75f).build();
         assertThat(keyFrameEvent.getFraction()).isEqualTo(0.75f);
     }
 

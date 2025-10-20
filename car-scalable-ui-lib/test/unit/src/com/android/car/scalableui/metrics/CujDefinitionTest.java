@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.car.scalableui.model.Event;
 import com.android.car.scalableui.model.PanelState;
+import com.android.car.scalableui.model.PanelType;
 import com.android.car.scalableui.model.Variant;
 
 import org.junit.Test;
@@ -195,7 +196,7 @@ public class CujDefinitionTest {
         Variant currentVariant = new Variant.Builder(panelId, panelId).setVisibility(
                 isVisible).build();
         listOfVariants.add(currentVariant);
-        return new PanelState.Builder(panelId)
+        return new PanelState.Builder(panelId, PanelType.TASK)
                 .setVariants(listOfVariants)
                 .setDefaultVariant(panelId)
                 .build();

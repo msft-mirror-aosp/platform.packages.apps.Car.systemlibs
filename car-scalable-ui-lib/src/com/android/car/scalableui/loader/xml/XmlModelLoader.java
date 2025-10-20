@@ -19,6 +19,8 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.android.car.scalableui.model.Action;
 import com.android.car.scalableui.model.PanelState;
 
@@ -41,6 +43,7 @@ public class XmlModelLoader {
     }
 
     /** Creates a {@link PanelState} using the given xml resource */
+    @Nullable
     public PanelState createPanelState(int resourceId) {
         try (XmlResourceParser parser = mContext.getResources().getXml(resourceId)) {
             PanelState ps = PanelStateXmlParser.parse(mContext, parser);
@@ -51,7 +54,8 @@ public class XmlModelLoader {
         }
     }
 
-    /** Creates a list of {@link actions} using the given xml resource */
+    /** Creates a list of {@link Action}s using the given xml resource */
+    @Nullable
     public List<Action> createActions(int resourceId) {
         try (XmlResourceParser parser = mContext.getResources().getXml(resourceId)) {
             List<Action> actions = ActionXmlParser.parse(mContext, parser);

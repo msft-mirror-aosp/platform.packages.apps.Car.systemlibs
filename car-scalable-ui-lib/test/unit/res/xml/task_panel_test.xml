@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<Panel id="panel_id" defaultVariant="@id/variant1" role="@string/default_config">
+<TaskPanel id="panel_id" defaultVariant="@id/variant1" role="@string/default_config">
     <Variant id="@+id/base">
         <Layer layer="2"/>
     </Variant>
@@ -37,4 +37,4 @@
         <Transition onEvent="event1" toVariant="@id/variant1"/>
         <Transition onEvent="event1" toVariant="@id/variant2"/>
     </Transitions>
-</Panel>
+</TaskPanel>
