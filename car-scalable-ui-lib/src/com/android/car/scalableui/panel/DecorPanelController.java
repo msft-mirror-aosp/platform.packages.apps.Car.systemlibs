@@ -40,8 +40,8 @@ public interface DecorPanelController {
     interface Factory<T extends DecorPanelController> {
         /**
          * Create an instance of the DecorPanelController implementation using the provided
-         * {@link PanelControllerMetadata}.
+         * {@link PanelControllerMetadata} for a given panelId.
          */
-        T create(PanelControllerMetadata metadata);
+        T create(String panelId, PanelControllerMetadata metadata);
     }
 }
