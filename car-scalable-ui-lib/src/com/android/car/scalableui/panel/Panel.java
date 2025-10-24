@@ -26,6 +26,8 @@ import androidx.annotation.Nullable;
 import com.android.car.scalableui.model.PanelControllerMetadata;
 import com.android.car.scalableui.model.Role;
 
+import java.io.PrintWriter;
+
 /**
  * Represents a rectangular panel that can be displayed on the screen.
  * Panels have properties such as bounds, layer, visibility, and alpha.
@@ -308,4 +310,9 @@ public interface Panel {
      * Destroys the panel.
      */
     void destroy();
+
+    /**
+     * Dumps the panel details to the provided {@link PrintWriter}.
+     */
+    void dump(@NonNull PrintWriter pw);
 }
