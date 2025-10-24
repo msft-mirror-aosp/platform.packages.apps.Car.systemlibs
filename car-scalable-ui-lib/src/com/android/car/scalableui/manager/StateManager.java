@@ -122,6 +122,16 @@ public class StateManager {
         return handleEvents(Collections.singletonList(event));
     }
 
+    /** See {@link #handleEvents} */
+    public static PanelTransaction handleEvent(@NonNull Event event, boolean force) {
+        return handleEvents(Collections.singletonList(event), force);
+    }
+
+    /** See {@link #handleEvents} */
+    public static PanelTransaction handleEvents(List<Event> events) {
+        return handleEvents(events, /* force= */ false);
+    }
+
     /**
      * Handles one or more events by triggering state transitions for panels with matching
      * transitions. This method iterates through all registered panel definitions, checks if any
@@ -129,8 +139,9 @@ public class StateManager {
      * and applies the transition (including animations) if found.
      *
      * @param events The events to be handled.
+     * @param force If the transition should apply even if the variants are considered the same
      */
-    public static PanelTransaction handleEvents(List<Event> events) {
+    public static PanelTransaction handleEvents(List<Event> events, boolean force) {
         logIfDebuggable("handleEvents " + events);
         PanelTransaction.Builder panelTransactionBuilder = new PanelTransaction.Builder();
 
@@ -173,7 +184,7 @@ public class StateManager {
                 Log.e(TAG, "toVariant is null for " + panel.getPanelId() + ", transition="
                         + toVariant);
                 continue;
-            } else if (Objects.equals(fromVariant, toVariant)
+            } else if (!force && Objects.equals(fromVariant, toVariant)
                     && !(toVariant instanceof KeyFrameVariant)) {
                 // Fraction in KeyFrameVariant is not updated at this point, cannot use for
                 // comparison.
