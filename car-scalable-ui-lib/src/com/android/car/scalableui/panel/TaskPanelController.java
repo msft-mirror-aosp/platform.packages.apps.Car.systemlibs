@@ -35,6 +35,11 @@ import java.util.Set;
  */
 public interface TaskPanelController {
     /**
+     * Initializes the panel controller.
+     */
+    void init();
+
+    /**
      * Gets the default component to be displayed on the panel.
      *
      * @return An {@link Intent} that can be used to start the default component,
@@ -79,8 +84,8 @@ public interface TaskPanelController {
     interface Factory<T extends TaskPanelController> {
         /**
          * Create an instance of the TaskPanelController implementation using the provided
-         * {@link PanelControllerMetadata}.
+         * {@link PanelControllerMetadata} for a given panelId.
          */
-        T create(PanelControllerMetadata metadata);
+        T create(String panelId, PanelControllerMetadata metadata);
     }
 }

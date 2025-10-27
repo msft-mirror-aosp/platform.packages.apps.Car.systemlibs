@@ -214,12 +214,17 @@ public class PanelState implements Cloneable {
     /** Returns transition for the given event */
     @Nullable
     public Transition getTransition(@Nullable Event event) {
+        return getTransition(event, getCurrentVariant());
+    }
+
+    /** Returns transition for the given event and from variant values */
+    @Nullable
+    public Transition getTransition(@Nullable Event event, @Nullable Variant fromVariant) {
         if (event == null) {
             return null;
         }
         // If both onEvent and fromVariant matches
-        String currentVariantId =
-                (getCurrentVariant() != null) ? getCurrentVariant().getId() : null;
+        String currentVariantId = (fromVariant != null) ? fromVariant.getId() : null;
         Transition result = getTransitionInternal(event, currentVariantId);
 
         if (result != null) {

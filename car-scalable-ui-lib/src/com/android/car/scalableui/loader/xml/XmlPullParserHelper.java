@@ -46,4 +46,25 @@ public class XmlPullParserHelper {
             }
         }
     }
+
+    /**
+     * Reads the text content from the current XML element.
+     *
+     * <p>This helper function assumes the parser is currently positioned on a START_TAG. It reads
+     * the text from the subsequent TEXT event and consumes the corresponding END_TAG to advance
+     * the parser.
+     *
+     * @param parser The XmlPullParser instance, positioned at a START_TAG.
+     * @return The text content of the element, or an empty string if the element is empty.
+     * @throws IOException if an I/O error occurs.
+     * @throws XmlPullParserException if the parser encounters an unexpected event type.
+     */
+    static String readText(XmlPullParser parser) throws IOException, XmlPullParserException {
+        String result = "";
+        if (parser.next() == XmlPullParser.TEXT) {
+            result = parser.getText();
+            parser.nextTag();
+        }
+        return result;
+    }
 }

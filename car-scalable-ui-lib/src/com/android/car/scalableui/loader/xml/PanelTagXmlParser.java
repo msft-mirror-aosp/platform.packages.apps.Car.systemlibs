@@ -157,10 +157,21 @@ public class PanelTagXmlParser {
     public static final String PIXEL = "px";
     // --- Controller Tags ---
     public static final String CONTROLLER_TAG = "Controller";
-    // --- Config Tags ---
-    public static final String CONGIF_TAG = "Config";
-    public static final String CONGIF_KEY_TAG = "key";
-    public static final String CONGIF_VALUE_TAG = "value";
+    // --- Controller Metadata Tags ---
+    public static final String CONTROLLER_NAME_TAG = "ControllerName";
+    public static final String VIEW_TAG = "View";
+    public static final String EVENT_ID_TAG = "EventId";
+    public static final String DRAG_DEC_EVENT_ID_TAG = "DragDecreaseEventId";
+    public static final String DRAG_INC_EVENT_ID_TAG = "DragIncreaseEventId";
+    public static final String OVERLAY_PANEL_ID_TAG = "OverlayPanelId";
+    public static final String BACKGROUND_COLOR_TAG = "BackgroundColor";
+    public static final String ORIENTATION_TAG = "Orientation";
+    public static final String SNAPTHREADHOLD_TAG = "SnapThreadhold";
+    public static final String PERSISTENT_ACTIVITY_TAG = "PersistentActivity";
+    public static final String PERSISTENT_PACKAGE_TAG = "PersistentPackage";
+    public static final String DEFAULT_COMPONENT_TAG = "DefaultComponent";
+    public static final String UPDATABLE_INTENT_FILTER_TAG = "UpdateIntentFilter";
+    public static final String TASK_TOOLBAR_CONTROLLER_TAG = "TaskToolBarController";
     // --- BreakPoints Tags ---
     public static final String BREAKPOINTS_TAG = "BreakPoints";
     public static final String BREAKPOINT_TAG = "BreakPoint";
@@ -347,18 +358,32 @@ public class PanelTagXmlParser {
 
             String name = parser.getName();
             switch (name) {
-                //TODO(b/439937106):Deprecate CONFIG_TAG
-                case CONGIF_TAG:
-                    String key = attrs.getAttributeValue(null, CONGIF_KEY_TAG);
-                    String value = attrs.getAttributeValue(null, CONGIF_VALUE_TAG);
-                    builder.addConfiguration(key, value);
-                    parser.next();
-                    break;
                 case BREAKPOINTS_TAG:
                     builder.addBreakPoints(parseBreakPoints(context, parser, displayId));
-                    parser.next();
+                    break;
+                case CONTROLLER_NAME_TAG:
+                case VIEW_TAG:
+                case EVENT_ID_TAG:
+                case DRAG_DEC_EVENT_ID_TAG:
+                case DRAG_INC_EVENT_ID_TAG:
+                case OVERLAY_PANEL_ID_TAG:
+                case BACKGROUND_COLOR_TAG:
+                case ORIENTATION_TAG:
+                case SNAPTHREADHOLD_TAG:
+                case PERSISTENT_ACTIVITY_TAG:
+                case PERSISTENT_PACKAGE_TAG:
+                case DEFAULT_COMPONENT_TAG:
+                case UPDATABLE_INTENT_FILTER_TAG:
+                case TASK_TOOLBAR_CONTROLLER_TAG:
+                    String value = XmlPullParserHelper.readText(parser);
+                    if (value != null) {
+                        builder.addConfiguration(name, value);
+                    } else {
+                        Log.e(TAG, "No value for Controller Tag: " + name);
+                    }
                     break;
                 default:
+                    Log.w(TAG, "Unsupported Controller Tag: " + name);
                     XmlPullParserHelper.skip(parser);
             }
         }
