@@ -147,4 +147,14 @@ public class PanelPool {
     public void forEach(@NonNull Consumer<Panel> consumer) {
         mPanels.forEach((id, panel) -> consumer.accept(panel));
     }
+
+    /**
+     * Executes a given {@link Consumer} on the panels with given id.
+     */
+    public void executeOnPanel(@NonNull String id, @NonNull Consumer<Panel> consumer) {
+        Panel panel = PanelPool.getInstance().getPanel(id);
+        if (panel != null) {
+            consumer.accept(panel);
+        }
+    }
 }

@@ -81,6 +81,7 @@ public class StateManager {
 
     /**
      * Get shallow copy of the current PanelStates {@link StateManager#mPanelStates}
+     *
      * @return Snapshot of the current Map of PanelState.
      *
      */
@@ -294,28 +295,32 @@ public class StateManager {
      * Resets all the panels.
      */
     public static void handlePanelReset() {
-        for (PanelState panelState : getInstance().mPanelStates.values()) {
-            Panel panel = PanelPool.getInstance().getPanel(panelState.getId());
-            if (panel != null) {
-                panel.reset();
-            }
-        }
+        PanelPool.getInstance().forEach(Panel::reset);
     }
-
 
     /**
      * Reloads {@link PanelState}.
      */
-    public static void reloadPanelState(List<PanelState> panelStates) {
-        for (PanelState panelState : panelStates) {
-            if (sInstance.mPanelStates.put(panelState.getId(), panelState) != null) {
-                if (DEBUG) {
-                    Log.w(TAG, "PanelState with id=" + panelState.getId() + " got reloaded");
-                }
+    public static void reloadPanelState(@NonNull Map<String, PanelState> newPanelStates) {
+        // Remove panels that no longer exist.
+        getInstance().getPanelStates().forEach((id, panelState) -> {
+            if (!newPanelStates.containsKey(id)) {
+                getInstance().mPanelStates.remove(id);
+                PanelPool.getInstance().executeOnPanel(id, Panel::destroy);
             }
-            applyState(panelState);
-            handlePanelReset();
-        }
+        });
+        // Add new panels.
+        newPanelStates.forEach((id, panelState) -> {
+            Log.d(TAG, "update or add " + id);
+            if (getInstance().mPanelStates.containsKey(id)) {
+                Log.d(TAG, "update " + id);
+                updatePanelState(panelState);
+                // Remove old panel. WM try to set state for old panel after orientation change,
+                // cause states from scalableUI to not apply correctly.
+                PanelPool.getInstance().executeOnPanel(id, Panel::destroy);
+            }
+            addState(panelState);
+        });
     }
 
     /**
@@ -333,6 +338,29 @@ public class StateManager {
         for (PanelState panelState : getInstance().mPanelStates.values()) {
             pw.println(panelState.toShortString());
         }
+    }
+
+    /**
+     * Finds the currently active variant from {@code panelStates}, applies the new state to it.
+     */
+    private static void updatePanelState(PanelState panelState) {
+        Variant currentVariant = getInstance().mPanelStates.get(
+                panelState.getId()).getCurrentVariant();
+        if (currentVariant != null) {
+            String variantId = currentVariant.getId();
+            Variant targetVariant = panelState.getVariant(variantId);
+            logIfDebuggable("updatePanel, found variant by id " + targetVariant);
+            if (targetVariant == null) {
+                String variantIdName = currentVariant.getIdName();
+                targetVariant = panelState.getVariantByName(variantIdName);
+                logIfDebuggable("updatePanel, found variant by name " + targetVariant);
+            }
+            if (targetVariant != null) {
+                panelState.setVariant(targetVariant.getId());
+            }
+        }
+
+        applyState(panelState);
     }
 
     @VisibleForTesting
