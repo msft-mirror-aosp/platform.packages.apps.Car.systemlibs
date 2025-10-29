@@ -32,6 +32,8 @@ import com.android.car.scalableui.panel.Panel;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Collections;
+
 @RunWith(AndroidJUnit4.class)
 public class TransitionTest {
 
@@ -44,13 +46,13 @@ public class TransitionTest {
     public void testTransitionCreation() {
         Variant fromVariant = new Variant(FROM_VARIANT_ID, TO_VARIANT_NAME);
         Variant toVariant = new Variant(TO_VARIANT_ID, TO_VARIANT_NAME);
-        Transition transition = new Transition(fromVariant, toVariant, TEST_EVENT, null, 500, 0,
+        Transition transition = new Transition(fromVariant, toVariant,
+                Collections.singletonList(TEST_EVENT), null, 500, 0,
                 new AccelerateDecelerateInterpolator());
 
         assertThat(transition.getFromVariant()).isEqualTo(fromVariant);
         assertThat(transition.getToVariant()).isEqualTo(toVariant);
-        assertThat(transition.getOnEvent()).isNotNull();
-        assertThat(transition.getOnEvent().getId()).isEqualTo(TEST_EVENT.getId());
+        assertThat(transition.isTriggeredBy(TEST_EVENT)).isTrue();
     }
 
     @Test
@@ -59,7 +61,8 @@ public class TransitionTest {
         when(panel.getInsets()).thenReturn(mock(Insets.class));
         Variant fromVariant = new Variant(FROM_VARIANT_ID, TO_VARIANT_NAME);
         Variant toVariant = new Variant(TO_VARIANT_ID, TO_VARIANT_NAME);
-        Transition transition = new Transition(fromVariant, toVariant, TEST_EVENT, null, 500, 0,
+        Transition transition = new Transition(fromVariant, toVariant,
+                Collections.singletonList(TEST_EVENT), null, 500, 0,
                 new AccelerateDecelerateInterpolator());
 
         Animator animator = transition.getAnimator(panel, fromVariant);
@@ -71,7 +74,8 @@ public class TransitionTest {
     public void testGetAnimator_sameFromAndToVariant() {
         Panel panel = mock(Panel.class);
         Variant variant = new Variant(FROM_VARIANT_ID, TO_VARIANT_NAME);
-        Transition transition = new Transition(variant, variant, TEST_EVENT, null, 500, 0,
+        Transition transition = new Transition(variant, variant,
+                Collections.singletonList(TEST_EVENT), null, 500, 0,
                 new AccelerateDecelerateInterpolator());
 
         Animator animator = transition.getAnimator(panel, variant);

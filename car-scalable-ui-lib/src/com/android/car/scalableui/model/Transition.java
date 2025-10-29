@@ -26,6 +26,8 @@ import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.panel.Panel;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -42,7 +44,7 @@ public class Transition {
 
     @Nullable private final Variant mFromVariant;
     @NonNull private final Variant mToVariant;
-    @Nullable private final Event mOnEvent;
+    @NonNull private final List<Event> mEvents;
     @Nullable private final Animator mAnimator;
     @NonNull private final Interpolator mDefaultInterpolator;
     private final long mDefaultDuration;
@@ -61,7 +63,7 @@ public class Transition {
     Transition(
             @Nullable Variant fromVariant,
             @NonNull Variant toVariant,
-            @Nullable Event onEvent,
+            @NonNull List<Event> events,
             @Nullable Animator animator,
             long defaultDuration,
             long delay,
@@ -69,7 +71,7 @@ public class Transition {
         mFromVariant = fromVariant;
         mToVariant = toVariant;
         mAnimator = animator;
-        mOnEvent = onEvent;
+        mEvents = events;
         mDelay = delay;
         mDefaultDuration = defaultDuration >= 0 ? defaultDuration : DEFAULT_DURATION;
         mDefaultInterpolator =
@@ -129,13 +131,17 @@ public class Transition {
     }
 
     /**
-     * Returns the event that triggers the transition.
+     * Returns true if the event triggers the transition.
      *
-     * @return The event that triggers the transition.
+     * @return The event that is checked against the transition.
      */
-    @Nullable
-    public Event getOnEvent() {
-        return mOnEvent;
+    public boolean isTriggeredBy(Event event) {
+        for (Event e : mEvents) {
+            if (event.isMatch(e)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -144,7 +150,7 @@ public class Transition {
         return "Transition{"
                 + "mFromVariant=" + (mFromVariant != null ? mFromVariant : "null")
                 + ", mToVariant=" + (mToVariant != null ? mToVariant : "null")
-                + ", mOnEvent=" + mOnEvent
+                + ", mEvents=" + mEvents
                 + ", mAnimator=" + mAnimator
                 + ", mDefaultInterpolator=" + mDefaultInterpolator
                 + ", mDefaultDuration=" + mDefaultDuration
@@ -156,7 +162,7 @@ public class Transition {
     public static class Builder {
         @Nullable private Variant mFromVariant; // Now nullable
         @NonNull private Variant mToVariant;
-        @Nullable private Event mOnEvent;
+        @NonNull private List<Event> mEvents;
         @Nullable private Animator mAnimator;
         @Nullable private Interpolator mDefaultInterpolator;
         @Nullable private Long mDefaultDuration; // Use boxed type Long
@@ -165,6 +171,7 @@ public class Transition {
         public Builder(@Nullable Variant fromVariant, @NonNull Variant toVariant) {
             mFromVariant = fromVariant;
             mToVariant = toVariant;
+            mEvents = new ArrayList<>();
         }
 
         /** Sets from variant */
@@ -179,19 +186,15 @@ public class Transition {
             return this;
         }
 
-        /** Sets onEvent */
-        public Builder setOnEvent(@Nullable String eventId, @Nullable String eventTokens,
-                @Nullable Integer applicableDisplayId) {
-            if (eventId == null) {
-                mOnEvent = null;
-            } else {
-                Event.Builder builder = new Event.Builder(eventId)
-                        .addTokensFromString(eventTokens);
-                if (applicableDisplayId != null) {
-                    builder.addApplicableDisplay(applicableDisplayId);
-                }
-                mOnEvent = builder.build();
-            }
+        /** Adds to the list of events that can trigger this transition */
+        public Builder addEvents(@NonNull List<Event> events) {
+            mEvents.addAll(events);
+            return this;
+        }
+
+        /** Adds an event that can trigger this transition */
+        public Builder addEvent(@NonNull Event event) {
+            mEvents.add(event);
             return this;
         }
 
@@ -225,7 +228,7 @@ public class Transition {
             return new Transition(
                     mFromVariant,
                     mToVariant,
-                    mOnEvent,
+                    mEvents,
                     mAnimator,
                     mDefaultDuration != null ? mDefaultDuration : DEFAULT_DURATION,
                     mDelay,

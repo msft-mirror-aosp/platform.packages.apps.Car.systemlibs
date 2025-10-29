@@ -15,6 +15,9 @@
  */
 package com.android.car.scalableui.loader.xml;
 
+import static com.android.car.scalableui.loader.xml.EventTagXmlParserKt.EVENT_TAG;
+import static com.android.car.scalableui.loader.xml.EventTagXmlParserKt.parseEvent;
+
 import android.content.Context;
 import android.content.Intent;
 import android.util.AttributeSet;
@@ -23,7 +26,6 @@ import android.util.Xml;
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.model.Action;
-import com.android.car.scalableui.model.Event;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -43,13 +45,6 @@ public class ActionXmlParser {
     public static final String ACTIONS_TAG = "Actions";
     public static final String ACTION_TAG = "Action";
     public static final String INTENT_ATTRIBUTE = "intent";
-
-    // --- Event Tags ---
-    public static final String EVENT_TAG = "Event";
-    public static final String ID_ATTRIBUTE = "id";
-    public static final String PANEL_ATTRIBUTE = "panel";
-    public static final String COMPONENT_NAME_ATTRIBUTE = "componentName";
-    public static final String PACKAGE_NAME_ATTRIBUTE = "packageName";
 
     @NonNull
     static List<Action> parse(@NonNull Context context, @NonNull XmlPullParser parser)
@@ -97,29 +92,13 @@ public class ActionXmlParser {
             String name = parser.getName();
             switch (name) {
                 case EVENT_TAG:
-                    builder.addTrigger(parseEvent(context, parser));
+                    builder.addTrigger(parseEvent(parser));
                     break;
                 default:
                     XmlPullParserHelper.skip(parser);
             }
         }
 
-        return builder.build();
-    }
-
-    @NonNull
-    private static Event parseEvent(@NonNull Context context, @NonNull XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        parser.require(XmlPullParser.START_TAG, null, EVENT_TAG);
-        AttributeSet attrs = Xml.asAttributeSet(parser);
-
-        String id = attrs.getAttributeValue(null, ID_ATTRIBUTE);
-        String panel = attrs.getAttributeValue(null, PANEL_ATTRIBUTE);
-        String componentName = attrs.getAttributeValue(null, COMPONENT_NAME_ATTRIBUTE);
-        String packageName = attrs.getAttributeValue(null, PACKAGE_NAME_ATTRIBUTE);
-
-        Event.Builder builder = new Event.Builder(id);
-        builder.setPanelId(panel).setComponentName(componentName).setPackageName(packageName);
         return builder.build();
     }
 }

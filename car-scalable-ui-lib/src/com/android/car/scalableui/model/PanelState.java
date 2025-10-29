@@ -237,7 +237,7 @@ public class PanelState implements Cloneable {
     @Nullable
     private Transition getTransitionInternal(@NonNull Event event, @Nullable String fromVariant) {
         for (Transition transition : mTransitions) {
-            if (event.isMatch(transition.getOnEvent())
+            if (transition.isTriggeredBy(event)
                     && transition.getFromVariant() != null
                     && transition.getFromVariant().getId().equals(fromVariant)) {
                 return transition;
@@ -249,7 +249,7 @@ public class PanelState implements Cloneable {
     @Nullable
     private Transition getTransitionInternal(@NonNull Event event) {
         for (Transition transition : mTransitions) {
-            if (event.isMatch(transition.getOnEvent()) && transition.getFromVariant() == null) {
+            if (transition.isTriggeredBy(event) && transition.getFromVariant() == null) {
                 return transition;
             }
         }
