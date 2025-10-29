@@ -20,5 +20,5 @@
     <string name="data_subscription_uxr_prompt" msgid="5193649388140182481">"পাৰ্ক কৰোঁতে আঁচনি চাওক।"</string>
     <string name="data_subscription_non_uxr_prompt" msgid="1057691358030888113">"উপলব্ধ আঁচনিসমূহ চাবলৈ টিপক।"</string>
     <string name="data_subscription_expiring_soon_proactive_prompt" msgid="8401642708194844399">"আপোনাৰ ইণ্টাৰনেটৰ আঁচনিৰ ম্যাদ %s দিনত উকলিব।"</string>
-    <!-- format error in translation for data_subscription_expiring_soon_reactive_prompt (5175499184629921473) -->
+    <string name="data_subscription_expiring_soon_reactive_prompt" msgid="5175499184629921473">"%1$sক ইণ্টাৰনেটৰ প্ৰয়োজন। আঁচনি %2$s দিনত শেষ হ’ব।"</string>
 </resources>
