@@ -183,12 +183,12 @@ public interface Panel {
      *
      * @param role The new role of this panel.
      */
-    void setRole(@NonNull Role role);
+    void setRole(@Nullable Role role);
 
     /**
      * Gets the role value of this panel.
      */
-    @NonNull
+    @Nullable
     Role getRole();
 
     /**
@@ -264,6 +264,14 @@ public interface Panel {
      * Sets the {@link PanelControllerMetadata}
      */
     void setPanelControllerMetadata(@Nullable PanelControllerMetadata panelControllerMetadata);
+
+    /**
+     * Gets the {@link PanelUpdatePublisher}
+     */
+    @Nullable
+    default PanelUpdatePublisher getPanelUpdateObserver() {
+        return null;
+    }
 
     /**
      * Refresh the panel theme.

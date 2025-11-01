@@ -34,10 +34,12 @@ android_test {
 
     static_libs: [
         "car-scalable-ui-lib",
+        "com_android_car_scalableui_flags_lib",
         "androidx.test.core",
         "androidx.test.rules",
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
+        "flag-junit",
         "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "truth",

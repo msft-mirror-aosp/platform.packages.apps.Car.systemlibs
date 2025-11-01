@@ -20,5 +20,5 @@
     <string name="data_subscription_uxr_prompt" msgid="5193649388140182481">"पार्क केल्यावर प्लॅन पहा."</string>
     <string name="data_subscription_non_uxr_prompt" msgid="1057691358030888113">"उपलब्ध प्लॅन पाहण्यासाठी टॅप करा."</string>
     <string name="data_subscription_expiring_soon_proactive_prompt" msgid="8401642708194844399">"तुमचा इंटरनेट प्लॅन %s दिवसांमध्ये एक्सपायर होईल."</string>
-    <!-- format error in translation for data_subscription_expiring_soon_reactive_prompt (5175499184629921473) -->
+    <string name="data_subscription_expiring_soon_reactive_prompt" msgid="5175499184629921473">"%1$s साठी इंटरनेट आवश्यक आहे. प्लॅन %2$s दिवसांमध्ये संपेल."</string>
 </resources>

@@ -14,27 +14,24 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<Panel id="panel_id" defaultVariant="@id/variant1" role="@string/default_config">
+<SystemBar defaultVariant="@id/variant1" side="bottom" barZOrder="0" type="0" hideForKeyboard="true">
     <Variant id="@+id/base">
-        <Layer layer="2"/>
+        <Corner radius="10dp" />
+        <Bounds girth="50" />
     </Variant>
     <Variant id="@+id/variant1" parent="@id/base">
         <Visibility isVisible="true"/>
         <Alpha alpha="0.8" />
-        <Bounds left="0" top="10" width="20" height="30" />
-        <Corner radius="10dp" />
     </Variant>
 
     <Variant id="@+id/variant2" parent="@id/base">
         <Visibility isVisible="false"/>
-        <Alpha alpha="@integer/app_grid_panel_alpha" />
-        <Bounds left="0" top="0" width="20" height="30" />
+        <Alpha alpha="1.0" />
         <Insets left="0" top="0" right="20" bottom="30" />
-        <Layer layer="@integer/app_grid_panel_layer" />
     </Variant>
 
     <Transitions>
         <Transition onEvent="event1" toVariant="@id/variant1"/>
         <Transition onEvent="event1" toVariant="@id/variant2"/>
     </Transitions>
-</Panel>
+</SystemBar>

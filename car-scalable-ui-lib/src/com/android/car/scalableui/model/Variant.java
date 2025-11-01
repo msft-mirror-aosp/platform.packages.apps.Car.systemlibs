@@ -320,9 +320,6 @@ public class Variant {
     }
 
     private void setDecors(@NonNull Set<Decor> decors) {
-        if (!enableDecor()) {
-            return;
-        }
         mDecors.clear();
         decors.forEach(decor -> {
             mDecors.put(decor.getId(), decor);
@@ -344,21 +341,21 @@ public class Variant {
         String decorString = mDecors.isEmpty()
                 ? "empty"
                 : mDecors.entrySet()
-                        .stream()
-                        .map(entry -> entry.getKey() + "=" + entry.getValue())
-                        .collect(Collectors.joining(" , "));
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(" , "));
 
         return "Variant{"
-                + "mId='" + mId
-                + ", mAlpha=" + mAlpha
-                + ", mIsVisible=" + mIsVisible
-                + ", mLayer=" + mLayer
-                + ", mCanFocusOnTransition=" + mCanFocusOnTransition
-                + ", mBounds=" + mBounds
-                + ", mSafeBounds=" + mSafeBounds
-                + ", mCornerRadius=" + mCornerRadius
-                + ", mInsets=" + mInsets
-                + ", mDecors" + decorString
+                + "\n\tmId=" + mId
+                + "\n\tmAlpha=" + mAlpha
+                + "\n\tmIsVisible=" + mIsVisible
+                + "\n\tmLayer=" + mLayer
+                + "\n\tmCanFocusOnTransition=" + mCanFocusOnTransition
+                + "\n\tmBounds=" + mBounds
+                + "\n\tmSafeBounds=" + mSafeBounds
+                + "\n\tmCornerRadius=" + mCornerRadius
+                + "\n\tmInsets=" + mInsets
+                + "\n\tmDecors=" + decorString
                 + '}';
     }
 
@@ -459,9 +456,7 @@ public class Variant {
 
         /** Adds decor */
         public Builder addDecor(Decor decor) {
-            if (enableDecor()) {
-                mDecors.add(decor);
-            }
+            mDecors.add(decor);
             return this;
         }
 

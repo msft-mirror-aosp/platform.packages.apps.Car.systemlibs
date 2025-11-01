@@ -175,13 +175,17 @@ public class Transition {
         }
 
         /** Sets onEvent */
-        public Builder setOnEvent(@Nullable String eventId, @Nullable String eventTokens) {
+        public Builder setOnEvent(@Nullable String eventId, @Nullable String eventTokens,
+                @Nullable Integer applicableDisplayId) {
             if (eventId == null) {
                 mOnEvent = null;
             } else {
-                mOnEvent = new Event.Builder(eventId)
-                        .addTokensFromString(eventTokens)
-                        .build();
+                Event.Builder builder = new Event.Builder(eventId)
+                        .addTokensFromString(eventTokens);
+                if (applicableDisplayId != null) {
+                    builder.addApplicableDisplay(applicableDisplayId);
+                }
+                mOnEvent = builder.build();
             }
             return this;
         }

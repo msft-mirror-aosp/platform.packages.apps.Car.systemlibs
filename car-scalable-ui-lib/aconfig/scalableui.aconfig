@@ -21,3 +21,10 @@ flag {
     description: "This flag controls enabling optional decor on task panel."
     bug: "415493921"
 }
+
+flag {
+    name: "scalable_ui_applicable_displays"
+    namespace: "car_sys_exp"
+    description: "This flag controls filtering of events via applicable displays."
+    bug: "439667783"
+}
