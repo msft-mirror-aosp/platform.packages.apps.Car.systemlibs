@@ -261,4 +261,24 @@ public class PanelStateTest {
         panelState.resetVariant();
         assertThat(panelState.getCurrentVariant()).isEqualTo(variant1);
     }
+
+    @Test
+    public void testGetVariantByName() {
+        PanelState panelState = new PanelState(TEST_PANEL_ID, PanelType.TASK);
+        Variant variant1 = new Variant("id1", "name1");
+        Variant variant2 = new Variant("id2", "name2");
+        panelState.addVariant(variant1);
+        panelState.addVariant(variant2);
+
+        assertThat(panelState.getVariantByName("name2")).isEqualTo(variant2);
+    }
+
+    @Test
+    public void testGetVariantByName_notFound_returnsNull() {
+        PanelState panelState = new PanelState(TEST_PANEL_ID, PanelType.TASK);
+        Variant variant1 = new Variant("id1", "name1");
+        panelState.addVariant(variant1);
+
+        assertThat(panelState.getVariantByName("non_existent_name")).isNull();
+    }
 }
