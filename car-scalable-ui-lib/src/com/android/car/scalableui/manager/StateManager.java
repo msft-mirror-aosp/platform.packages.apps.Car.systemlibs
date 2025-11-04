@@ -203,6 +203,13 @@ public class StateManager {
                 logIfDebuggable("No animator for " + panelState.getId());
                 panelState.setVariant(toVariant.getId(), appliedEvent);
                 applyState(panelState);
+                // Instantly apply both the before and after panel state change runnables for this
+                // particular panelId.
+                Map<String, PanelState> panelStatesCopy = sInstance.createPanelStateCopy();
+                sInstance.getBeforePanelStateChangeRunnable(Set.of(panelState.getId()),
+                        panelStatesCopy).run();
+                sInstance.getAfterPanelStateChangeRunnable(Set.of(panelState.getId()),
+                        panelStatesCopy).run();
             }
             logIfDebuggable(
                     "add transition for " + panelState.getId() + " for event " + appliedEvent);
