@@ -249,12 +249,16 @@ public final class PanelStateDocLoader {
         Log.i(TAG, "    addTransition " + event.getEventName() + ", " + event.getEventTokens()
                 + " -> from " + (fromVariant != null ? fromVariant.getId() : "NULL") + " to "
                 + toVariant.getId());
+        com.android.car.scalableui.model.Event.Builder builder =
+                new com.android.car.scalableui.model.Event.Builder(event.getEventName());
+        builder.addTokensFromString(event.getEventTokens());
+        // TODO(b/441073250) get display from doc
+        builder.addApplicableDisplay(Display.DEFAULT_DISPLAY);
         return new Transition.Builder(fromVariant, toVariant)
                 .setAnimator(animator)
                 .setDefaultDuration(duration)
                 .setDefaultInterpolator(interpolator)
-                // TODO(b/441073250) get display from doc
-                .setOnEvent(event.getEventName(), event.getEventTokens(), Display.DEFAULT_DISPLAY)
+                .addEvent(builder.build())
                 .build();
     }
 }
