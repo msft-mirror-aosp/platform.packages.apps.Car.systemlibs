@@ -164,8 +164,6 @@ public class PanelTagXmlParser {
     public static final String CONTROLLER_NAME_TAG = "ControllerName";
     public static final String VIEW_TAG = "View";
     public static final String EVENT_ID_TAG = "EventId";
-    public static final String DRAG_DEC_EVENT_ID_TAG = "DragDecreaseEventId";
-    public static final String DRAG_INC_EVENT_ID_TAG = "DragIncreaseEventId";
     public static final String OVERLAY_PANEL_ID_TAG = "OverlayPanelId";
     public static final String BACKGROUND_COLOR_TAG = "BackgroundColor";
     public static final String ORIENTATION_TAG = "Orientation";
@@ -367,8 +365,6 @@ public class PanelTagXmlParser {
                 case CONTROLLER_NAME_TAG:
                 case VIEW_TAG:
                 case EVENT_ID_TAG:
-                case DRAG_DEC_EVENT_ID_TAG:
-                case DRAG_INC_EVENT_ID_TAG:
                 case OVERLAY_PANEL_ID_TAG:
                 case BACKGROUND_COLOR_TAG:
                 case ORIENTATION_TAG:
