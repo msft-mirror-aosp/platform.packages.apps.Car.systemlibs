@@ -17,6 +17,8 @@ package com.android.car.scalableui.loader.xml;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.car.scalableui.loader.xml.EventTagXmlParserKt.EVENT_TAG;
+import static com.android.car.scalableui.loader.xml.EventTagXmlParserKt.parseEvent;
 import static com.android.car.scalableui.model.Alpha.DEFAULT_ALPHA;
 import static com.android.car.scalableui.model.Focus.DEFAULT_FOCUS_ON_TRANSITION;
 import static com.android.car.scalableui.model.Layer.DEFAULT_LAYER;
@@ -49,6 +51,7 @@ import com.android.car.scalableui.model.Bounds;
 import com.android.car.scalableui.model.BreakPoint;
 import com.android.car.scalableui.model.Corner;
 import com.android.car.scalableui.model.Decor;
+import com.android.car.scalableui.model.Event;
 import com.android.car.scalableui.model.Focus;
 import com.android.car.scalableui.model.KeyFrameVariant;
 import com.android.car.scalableui.model.Layer;
@@ -797,6 +800,13 @@ public class PanelTagXmlParser {
         String to = attrs.getAttributeValue(null, TO_VARIANT_ATTRIBUTE);
         String onEvent = attrs.getAttributeValue(null, ON_EVENT_ATTRIBUTE);
         String onEventTokens = attrs.getAttributeValue(null, ON_EVENT_TOKENS_ATTRIBUTE);
+        List<Event> events = new ArrayList<>();
+        if (onEvent != null) {
+            Event.Builder builder = new Event.Builder(onEvent)
+                    .addTokensFromString(onEventTokens)
+                    .addApplicableDisplay(displayId);
+            events.add(builder.build());
+        }
         int animatorId = attrs.getAttributeResourceValue(null, ANIMATOR_ATTRIBUTE, 0);
         Animator animator = animatorId == 0 ? null : AnimatorInflater.loadAnimator(context,
                 animatorId);
@@ -810,11 +820,17 @@ public class PanelTagXmlParser {
         Variant toVariant = panelState.getVariant(to);
 
         while (parser.next() != XmlPullParser.END_TAG) {
-            XmlPullParserHelper.skip(parser); // Should be no nested tags.
+            if (parser.getEventType() != XmlPullParser.START_TAG) continue;
+
+            if (parser.getName().equals(EVENT_TAG)) {
+                events.add(parseEvent(parser, displayId));
+            } else {
+                XmlPullParserHelper.skip(parser);
+            }
         }
 
         return new Transition.Builder(fromVariant, toVariant)
-                .setOnEvent(onEvent, onEventTokens, displayId)
+                .addEvents(events)
                 .setAnimator(animator).setDefaultDuration(duration)
                 .setDelay(delay).setDefaultInterpolator(interpolator).build();
     }
