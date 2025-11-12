@@ -18,6 +18,7 @@ package com.android.car.datasubscription;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.INTERNET;
+
 import static com.android.car.datasubscription.DataSubscription.DATA_SUBSCRIPTION_ACTION;
 
 import android.annotation.SuppressLint;
@@ -94,7 +95,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
             if (mIsNetworkCallbackRegistered && mConnectivityManager != null) {
                 mNetworkCallback.mNetwork = null;
                 mNetworkCallback.mTopActivity = null;
-                mNetworkCapabilities = null;
+
                 mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
                 mIsNetworkCallbackRegistered = false;
             }
@@ -146,26 +147,29 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                     }
                 }
 
-                mTopLabel = appInfo.loadLabel(mContext.getPackageManager());
                 int uid = appInfo.uid;
-                mNetworkCallback.mTopActivity = topActivity;
-                mLatch = new CountDownLatch(NETWORK_CALLBACK_LATCH_COUNT);
-                mConnectivityManager.registerDefaultNetworkCallbackForUid(uid, mNetworkCallback,
+
+                CharSequence topLabel = appInfo.loadLabel(mContext.getPackageManager());
+                DataSubscriptionNetworkCallback networkCallback =
+                        new DataSubscriptionNetworkCallback(topActivity, topLabel);
+
+                mConnectivityManager.registerDefaultNetworkCallbackForUid(uid, networkCallback,
                         mMainHandler);
-                mIsNetworkCallbackRegistered = true;
                 // since we don't have the option of using the synchronous call of getting the
                 // default network by UID, we need to set a timeout period to make sure the network
                 // from the callback is updated correctly before deciding to display the message
                 //TODO: b/336869328 use the synchronous call to update network status
                 mBackgroundExecutor.execute(() -> {
                     try {
-                        mLatch.await(CALLBACK_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+                        networkCallback.mLatch.await(CALLBACK_TIMEOUT_MS, TimeUnit.MILLISECONDS);
                     } catch (InterruptedException e) {
                         Log.e(TAG, "error updating network callback" + e);
                     } finally {
-                        if (mNetworkCallback.mNetwork == null) {
-                            mNetworkCapabilities = null;
-                            updateShouldDisplayReactiveMessageForApp(mTopLabel, topActivity);
+                        mConnectivityManager.unregisterNetworkCallback(networkCallback);
+                        if (networkCallback.mNetwork == null) {
+                            updateShouldDisplayReactiveMessageForApp(
+                                    networkCallback.mTopLabel, topActivity,
+                                    /*networkCapabilities*/ null);
                         }
                     }
                 });
@@ -199,8 +203,6 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
 
     private boolean mShouldDisplayReactiveMessage;
     private String mTopPackage;
-    private CharSequence mTopLabel;
-    private NetworkCapabilities mNetworkCapabilities;
     private boolean mIsUxRestrictionsListenerRegistered;
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mEditor;
@@ -248,7 +250,6 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                 R.string.connectivity_flow_app));
         mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mConnectivityManager = mContext.getSystemService(ConnectivityManager.class);
-        mNetworkCallback = new DataSubscriptionNetworkCallback();
         mActivitiesBlocklist = new HashSet<>();
         mPackagesBlocklist = new HashSet<>();
 
@@ -291,9 +292,11 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     }
 
     private void updateShouldDisplayReactiveMessageForApp(CharSequence appLabel,
-                                                          String topActivity) {
-        mShouldDisplayReactiveMessage = mNetworkCapabilities == null
-                || (!isSuspendedNetwork() && !isValidNetwork());
+                                                          String topActivity,
+                                                          NetworkCapabilities networkCapabilities) {
+        mShouldDisplayReactiveMessage = networkCapabilities == null
+                || (!isSuspendedNetwork(networkCapabilities)
+                && !isValidNetwork(networkCapabilities));
         if (mShouldDisplayReactiveMessage && mDataSubscriptionMessageEventListener != null) {
             String message = mDataSubscriptionMessageCreator.getReactiveMessageForStatus(
                     mCurrentStatus, appLabel);
@@ -349,13 +352,13 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
         mDataSubscriptionMessageEventListener = dataSubscriptionMessageEventListener;
     }
 
-    boolean isValidNetwork() {
-        return mNetworkCapabilities.hasCapability(
+    boolean isValidNetwork(NetworkCapabilities networkCapabilities) {
+        return networkCapabilities.hasCapability(
                 NetworkCapabilities.NET_CAPABILITY_VALIDATED);
     }
 
-    boolean isSuspendedNetwork() {
-        return !mNetworkCapabilities.hasCapability(
+    boolean isSuspendedNetwork(NetworkCapabilities networkCapabilities) {
+        return !networkCapabilities.hasCapability(
                 NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED);
     }
 
@@ -380,8 +383,16 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
 
 
     public class DataSubscriptionNetworkCallback extends ConnectivityManager.NetworkCallback {
+        CountDownLatch mLatch;
         Network mNetwork;
         String mTopActivity;
+        CharSequence mTopLabel;
+
+        DataSubscriptionNetworkCallback(String topActivity, CharSequence topLabel) {
+            mTopActivity = topActivity;
+            mTopLabel = topLabel;
+            mLatch = new CountDownLatch(NETWORK_CALLBACK_LATCH_COUNT);
+        }
 
         @Override
         public void onAvailable(@NonNull Network network) {
@@ -399,8 +410,7 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
                 Log.d(TAG, "onCapabilitiesChanged " + network);
             }
             mNetwork = network;
-            mNetworkCapabilities = networkCapabilities;
-            updateShouldDisplayReactiveMessageForApp(mTopLabel, mTopActivity);
+            updateShouldDisplayReactiveMessageForApp(mTopLabel, mTopActivity, networkCapabilities);
         }
     }
 
@@ -518,16 +528,6 @@ public class DataSubscriptionController implements DataSubscription.DataSubscrip
     @VisibleForTesting
     boolean getShouldDisplayReactiveMessage() {
         return mShouldDisplayReactiveMessage;
-    }
-
-    @VisibleForTesting
-    void setNetworkCallback(DataSubscriptionNetworkCallback callback) {
-        mNetworkCallback = callback;
-    }
-
-    @VisibleForTesting
-    void setIsCallbackRegistered(boolean value) {
-        mIsNetworkCallbackRegistered = value;
     }
 
     @VisibleForTesting
