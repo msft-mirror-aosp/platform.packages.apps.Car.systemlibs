@@ -147,6 +147,7 @@ public class StateManager {
             Log.e(TAG, "No events provided");
             return panelTransactionBuilder.build();
         }
+        panelTransactionBuilder.setTransactionEvents(events);
         HashSet<String> changedPanelIds = new HashSet<>();
         List<Event> appliedEvents = new ArrayList<>();
         // Make a ShallowCopy of the currentPanelStates.
