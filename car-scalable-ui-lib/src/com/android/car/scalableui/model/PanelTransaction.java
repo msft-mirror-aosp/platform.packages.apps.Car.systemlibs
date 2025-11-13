@@ -16,12 +16,15 @@
 package com.android.car.scalableui.model;
 
 import android.animation.Animator;
+import android.os.SystemClock;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,16 +39,21 @@ public class PanelTransaction {
     private final HashSet<String> mLockededPanelIdSet;
     /** A set of panel ids who's animations should be merged with the next transaction. */
     private final HashSet<String> mMergeAnimationPanelIds = new HashSet<>();
+    private final List<Event> mTransactionEvents;
+    private final long mBuildTime;
     private boolean mHasWindowChanges;
 
     private Runnable mAnimationStartCallbackRunnable;
     private Runnable mAnimationEndCallbackRunnable;
 
     public PanelTransaction(Map<String, Transition> transactionMap,
-            Map<String, Animator> animatorMap, Set<String> lockededPanelIdSet) {
+            Map<String, Animator> animatorMap, Set<String> lockededPanelIdSet,
+            List<Event> transactionEvents) {
         mTransactionMap = new HashMap<>(transactionMap);
         mAnimatorMap = new HashMap<>(animatorMap);
         mLockededPanelIdSet = new HashSet<>(lockededPanelIdSet);
+        mTransactionEvents = new ArrayList<>(transactionEvents);
+        mBuildTime = SystemClock.elapsedRealtime();
     }
 
     /** Returns a set of entries representing the transactions in this object. */
@@ -81,6 +89,20 @@ public class PanelTransaction {
      */
     public boolean shouldMergePanelAnimation(@NonNull String panelId) {
         return mMergeAnimationPanelIds.contains(panelId);
+    }
+
+    /**
+     * Returns the set of events that were sent in the creation of this transaction.
+     */
+    public List<Event> getTransactionEvents() {
+        return mTransactionEvents;
+    }
+
+    /**
+     * Returns a timestamp of when this PanelTransaction was built.
+     */
+    public long getBuildTime() {
+        return mBuildTime;
     }
 
     /**
@@ -147,6 +169,7 @@ public class PanelTransaction {
         private Runnable mAnimationEndCallbackRunnable;
         private boolean mHasWindowChanges = true;
         private Set<String> mLockedPanelIdSet;
+        private List<Event> mTransactionEvents = new ArrayList<>();
 
         public Builder() {
             mTransactionMap = new HashMap<>();
@@ -219,6 +242,15 @@ public class PanelTransaction {
         }
 
         /**
+         * Set's the events that were sent that led to the creation of this transaction.
+         */
+        @NonNull
+        public Builder setTransactionEvents(@NonNull List<Event> events) {
+            mTransactionEvents = events;
+            return this;
+        }
+
+        /**
          * Builds the {@link PanelTransaction} object.
          *
          * @return The built {@link PanelTransaction} object.
@@ -226,7 +258,7 @@ public class PanelTransaction {
         @NonNull
         public PanelTransaction build() {
             PanelTransaction panelTransaction = new PanelTransaction(mTransactionMap, mAnimatorMap,
-                    mLockedPanelIdSet);
+                    mLockedPanelIdSet, mTransactionEvents);
             panelTransaction.setHasWindowChanges(mHasWindowChanges);
             if (mAnimationStartCallbackRunnable != null) {
                 panelTransaction.setAnimationStartCallbackRunnable(mAnimationStartCallbackRunnable);
