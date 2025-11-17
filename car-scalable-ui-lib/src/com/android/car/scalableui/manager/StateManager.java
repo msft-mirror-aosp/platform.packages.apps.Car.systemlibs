@@ -320,22 +320,18 @@ public class StateManager {
      * Reloads {@link PanelState}.
      */
     public static void reloadPanelState(@NonNull Map<String, PanelState> newPanelStates) {
+        // Remove old panel. WM try to set state for old panel after orientation change,
+        // cause states from scalableUI to not apply correctly.
+        PanelPool.getInstance().clearPanels();
         // Remove panels that no longer exist.
-        getInstance().getPanelStates().forEach((id, panelState) -> {
-            if (!newPanelStates.containsKey(id)) {
-                getInstance().mPanelStates.remove(id);
-                PanelPool.getInstance().executeOnPanel(id, Panel::destroy);
-            }
-        });
+        getInstance().getPanelStates().entrySet().removeIf(
+                entry -> !newPanelStates.containsKey(entry.getKey()));
         // Add new panels.
         newPanelStates.forEach((id, panelState) -> {
-            Log.d(TAG, "update or add " + id);
+            logIfDebuggable("update or add " + id);
             if (getInstance().mPanelStates.containsKey(id)) {
-                Log.d(TAG, "update " + id);
+                logIfDebuggable("update " + id);
                 updatePanelState(panelState);
-                // Remove old panel. WM try to set state for old panel after orientation change,
-                // cause states from scalableUI to not apply correctly.
-                PanelPool.getInstance().executeOnPanel(id, Panel::destroy);
             }
             addState(panelState);
         });

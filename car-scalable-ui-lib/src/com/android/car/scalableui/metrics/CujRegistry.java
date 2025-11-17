@@ -75,7 +75,7 @@ public class CujRegistry {
             ),
             // CUJ: Show Calm mode
             new CujDefinition(
-                    Cuj.CUJ_SCREEN_OFF_SHOW_AOD,
+                    Cuj.CUJ_KEYGUARD_TRANSITION_GONE_TO_AOD,
                     PANEL_CALM_MODE,
                     event -> "_System_TaskOpenEvent".equals(event.getId()),
                     Map.of(PANEL_CALM_MODE, IS_NOT_VISIBLE),
