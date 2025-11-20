@@ -33,6 +33,12 @@ public interface DecorPanelController {
      */
     void refreshTheme();
 
+
+    /**
+     * Destroy the panel controller.
+     */
+    void destroy();
+
     /**
      * Factory for creating an implementation of the DecorPanelController.
      * @param <T> the type of the DecorPanelController implementation

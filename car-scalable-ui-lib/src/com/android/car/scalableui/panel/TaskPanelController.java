@@ -40,6 +40,11 @@ public interface TaskPanelController {
     void init();
 
     /**
+     * Destroy the panel controller.
+     */
+    void destroy();
+
+    /**
      * Gets the default component to be displayed on the panel.
      *
      * @return An {@link Intent} that can be used to start the default component,
