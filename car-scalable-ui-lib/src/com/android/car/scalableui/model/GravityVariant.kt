@@ -80,7 +80,7 @@ open class GravityVariant : Variant {
         override fun setBounds(bounds: Rect): Builder = apply { super.setBounds(bounds) }
         override fun setSafeBounds(safeBounds: Rect): Builder =
             apply { super.setSafeBounds(safeBounds) }
-        override fun setCornerRadius(cornerRadius: Int): Builder =
+        override fun setCornerRadius(cornerRadius: Corner): Builder =
             apply { super.setCornerRadius(cornerRadius) }
         override fun setInsets(insets: Insets): Builder = apply { super.setInsets(insets) }
         override fun addDecor(decor: Decor): Builder = apply { super.addDecor(decor) }

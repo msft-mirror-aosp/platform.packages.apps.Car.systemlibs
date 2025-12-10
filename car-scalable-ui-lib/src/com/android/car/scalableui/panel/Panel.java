@@ -23,6 +23,7 @@ import android.view.SurfaceControl;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.scalableui.model.Corner;
 import com.android.car.scalableui.model.PanelControllerMetadata;
 import com.android.car.scalableui.model.Role;
 
@@ -233,14 +234,14 @@ public interface Panel {
      *
      * @param radius The corner radius
      */
-    void setCornerRadius(int radius);
+    void setCornerRadius(Corner radius);
 
     /**
      * Gets the radius for all four corners of this panel.
      *
      * @return The corner radius
      */
-    int getCornerRadius();
+    Corner getCornerRadius();
 
     /**
      * Returns the ID of the panel.

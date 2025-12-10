@@ -61,7 +61,7 @@ public class Variant {
     private boolean mIsVisible;
     private int mLayer;
     private boolean mCanFocusOnTransition;
-    private int mCornerRadius;
+    private Corner mCornerRadius;
     @NonNull
     private Rect mBounds;
     @NonNull
@@ -91,7 +91,7 @@ public class Variant {
         mLayer = Layer.DEFAULT_LAYER;
         mCanFocusOnTransition = Focus.DEFAULT_FOCUS_ON_TRANSITION;
         mAlpha = Alpha.DEFAULT_ALPHA;
-        mCornerRadius = Corner.DEFAULT_RADIUS;
+        mCornerRadius = Corner.DEFAULT_CORNER;
         mInsets = Insets.NONE;
         mDecors = new HashMap<>();
     }
@@ -157,8 +157,8 @@ public class Variant {
         } else {
             float fromAlpha = panel.getAlpha();
             float toAlpha = toVariant.getAlpha();
-            int fromCornerRadius = panel.getCornerRadius();
-            int toCornerRadius = toVariant.getCornerRadius();
+            Corner fromCornerRadius = panel.getCornerRadius();
+            Corner toCornerRadius = toVariant.getCornerRadius();
             Rect fromBounds = new Rect(panel.getBounds());
             Rect toBounds = new Rect(toVariant.getBounds());
             boolean isVisible = panel.isVisible() || toVariant.isVisible();
@@ -170,6 +170,7 @@ public class Variant {
             valueAnimator.setDuration(duration);
             valueAnimator.setStartDelay(delay);
             valueAnimator.setInterpolator(interpolator);
+            Corner.Builder builder = new Corner.Builder();
             valueAnimator.addUpdateListener(
                     animator -> {
                         panel.setVisibility(isVisible);
@@ -180,9 +181,23 @@ public class Variant {
                         panel.setBounds(bounds);
                         float alpha = mFloatEvaluator.evaluate(fraction, fromAlpha, toAlpha);
                         panel.setAlpha(alpha);
-                        int radius = mIntEvaluator.evaluate(fraction, fromCornerRadius,
-                                toCornerRadius);
-                        panel.setCornerRadius(radius);
+                        builder.setTopLeftRadius(
+                                mIntEvaluator.evaluate(fraction,
+                                        fromCornerRadius.getTopLeftRadius(),
+                                        toCornerRadius.getTopLeftRadius()));
+                        builder.setTopRightRadius(
+                                mIntEvaluator.evaluate(fraction,
+                                        fromCornerRadius.getTopRightRadius(),
+                                        toCornerRadius.getTopRightRadius()));
+                        builder.setBottomLeftRadius(
+                                mIntEvaluator.evaluate(fraction,
+                                        fromCornerRadius.getBottomLeftRadius(),
+                                        toCornerRadius.getBottomLeftRadius()));
+                        builder.setBottomRightRadius(
+                                mIntEvaluator.evaluate(fraction,
+                                        fromCornerRadius.getBottomRightRadius(),
+                                        toCornerRadius.getBottomRightRadius()));
+                        panel.setCornerRadius(builder.build());
                         Rect insets = mRectEvaluator.evaluate(fraction, fromInsets,
                                 toInsets);
                         panel.setInsets(Insets.of(insets));
@@ -318,7 +333,7 @@ public class Variant {
      *
      * @return The corner radius of the variant.
      */
-    public int getCornerRadius() {
+    public Corner getCornerRadius() {
         return mCornerRadius;
     }
 
@@ -327,7 +342,7 @@ public class Variant {
      *
      * @param radius The corner radius to set.
      */
-    protected void setCornerRadius(int radius) {
+    protected void setCornerRadius(Corner radius) {
         mCornerRadius = radius;
     }
 
@@ -369,9 +384,9 @@ public class Variant {
         String decorString = mDecors.isEmpty()
                 ? "empty"
                 : mDecors.entrySet()
-                .stream()
-                .map(entry -> entry.getKey() + "=" + entry.getValue())
-                .collect(Collectors.joining(" , "));
+                        .stream()
+                        .map(entry -> entry.getKey() + "=" + entry.getValue())
+                        .collect(Collectors.joining(" , "));
 
         return "Variant{"
                 + "\n\tmIdName=" + mIdName
@@ -417,7 +432,7 @@ public class Variant {
         @Nullable
         protected Rect mTaskToolbarBounds;
         @Nullable
-        protected Integer mCornerRadius;
+        protected Corner mCornerRadius;
         @Nullable
         protected Insets mInsets;
         @Nullable
@@ -479,7 +494,7 @@ public class Variant {
         }
 
         /** Sets corner radius */
-        public Builder setCornerRadius(@NonNull Integer cornerRadius) {
+        public Builder setCornerRadius(@NonNull Corner cornerRadius) {
             mCornerRadius = cornerRadius;
             return this;
         }

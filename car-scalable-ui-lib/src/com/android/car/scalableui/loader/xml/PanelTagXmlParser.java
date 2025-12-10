@@ -152,6 +152,10 @@ public class PanelTagXmlParser {
     // --- Corner Tags ---
     public static final String CORNER_TAG = "Corner";
     public static final String RADIUS_ATTRIBUTE = "radius";
+    public static final String TOP_LEFT_RADIUS_ATTRIBUTE = "topLeftRadius";
+    public static final String TOP_RIGHT_RADIUS_ATTRIBUTE = "topRightRadius";
+    public static final String BOTTOM_LEFT_RADIUS_ATTRIBUTE = "bottomLeftRadius";
+    public static final String BOTTOM_RIGHT_RADIUS_ATTRIBUTE = "bottomRightRadius";
     // --- Insets Tags ---
     public static final String INSETS_TAG = "Insets";
     public static final String DIP = "dip";
@@ -544,7 +548,7 @@ public class PanelTagXmlParser {
         }
 
         return new Decor(decorId, /* layer= */ -1, colorRes, drawableRes, alpha,
-            R.layout.background_layout);
+                R.layout.background_layout);
     }
 
     static VariantPropertyParser getVariantVisibilityParser() {
@@ -715,7 +719,7 @@ public class PanelTagXmlParser {
 
     static VariantPropertyParser getVariantCornerParser() {
         return (context, parser, builder, displayId) -> builder.setCornerRadius(
-                parseCorner(context, parser, displayId).getRadius());
+                parseCorner(context, parser, displayId));
     }
 
     @NonNull
@@ -723,13 +727,36 @@ public class PanelTagXmlParser {
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, CORNER_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
-        Integer radius = getDimensionPixelSize(context, attrs, RADIUS_ATTRIBUTE, displayId, false);
+
+        Corner.Builder builder = new Corner.Builder();
+        builder.setRadius(
+                getDimensionPixelSize(context, attrs, RADIUS_ATTRIBUTE, displayId, false));
+        if (!com.android.graphics.surfaceflinger.flags.Flags.setClientDrawnCornerRadii() && (
+                attrs.getAttributeValue(null, TOP_LEFT_RADIUS_ATTRIBUTE) != null
+                        || attrs.getAttributeValue(null, TOP_RIGHT_RADIUS_ATTRIBUTE) != null
+                        || attrs.getAttributeValue(null, BOTTOM_LEFT_RADIUS_ATTRIBUTE) != null
+                        || attrs.getAttributeValue(null, BOTTOM_RIGHT_RADIUS_ATTRIBUTE) != null)) {
+            Log.w(TAG, "Individual corner radius attributes are defined. These are only supported "
+                    + "when the set_client_drawn_corner_radii flag is enabled.");
+        } else if (com.android.graphics.surfaceflinger.flags.Flags.setClientDrawnCornerRadii()) {
+            builder.setTopLeftRadius(
+                    getDimensionPixelSize(context, attrs, TOP_LEFT_RADIUS_ATTRIBUTE, displayId,
+                            false));
+            builder.setTopRightRadius(
+                    getDimensionPixelSize(context, attrs, TOP_RIGHT_RADIUS_ATTRIBUTE, displayId,
+                            false));
+            builder.setBottomLeftRadius(
+                    getDimensionPixelSize(context, attrs, BOTTOM_LEFT_RADIUS_ATTRIBUTE, displayId,
+                            false));
+            builder.setBottomRightRadius(
+                    getDimensionPixelSize(context, attrs, BOTTOM_RIGHT_RADIUS_ATTRIBUTE, displayId,
+                            false));
+        }
 
         while (parser.next() != XmlPullParser.END_TAG) {
             XmlPullParserHelper.skip(parser); // Skip any nested tags
         }
-
-        return new Corner.Builder().setRadius(radius).build();
+        return builder.build();
     }
 
     static VariantPropertyParser getVariantInsetsParser() {
