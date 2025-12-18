@@ -27,8 +27,15 @@ public class CornerTest {
 
     @Test
     public void testCornerCreation() {
-        final int expectedRadius = 2;
-        Corner corner = new Corner(expectedRadius);
-        assertThat(corner.getRadius()).isEqualTo(expectedRadius);
+        final int expectedRadiusTL = 1;
+        final int expectedRadiusTR = 2;
+        final int expectedRadiusBL = 3;
+        final int expectedRadiusBR = 4;
+        Corner corner = new Corner(expectedRadiusTL, expectedRadiusTR, expectedRadiusBL,
+                expectedRadiusBR);
+        assertThat(corner.getTopLeftRadius()).isEqualTo(expectedRadiusTL);
+        assertThat(corner.getTopRightRadius()).isEqualTo(expectedRadiusTR);
+        assertThat(corner.getBottomLeftRadius()).isEqualTo(expectedRadiusBL);
+        assertThat(corner.getBottomRightRadius()).isEqualTo(expectedRadiusBR);
     }
 }

@@ -21,6 +21,7 @@ import android.graphics.Rect;
 import android.view.Gravity;
 
 import com.android.car.scalableui.Flags;
+import com.android.car.scalableui.model.Corner;
 import com.android.car.scalableui.model.PanelControllerMetadata;
 
 /**
@@ -56,7 +57,7 @@ public interface PanelUpdatePublisher {
      * @param radius  Represents the new corner radius of the panel.
      */
     @FlaggedApi(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
-    void postCornerRadius(String panelId, int radius);
+    void postCornerRadius(String panelId, Corner radius);
 
     /**
      * Posts an update about a panel's visibility.

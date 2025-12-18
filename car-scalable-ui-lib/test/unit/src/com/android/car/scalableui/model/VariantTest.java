@@ -44,7 +44,7 @@ public class VariantTest {
         base.setLayer(5);
         base.setCanFocusOnTransition(false);
         base.setAlpha(0.5f);
-        base.setCornerRadius(2);
+        base.setCornerRadius(new Corner.Builder().setRadius(2).build());
 
         Variant variant = new Variant(VARIANT_ID, base, "");
 
@@ -54,7 +54,7 @@ public class VariantTest {
         assertThat(variant.getLayer()).isEqualTo(5);
         assertThat(variant.canFocusOnTransition()).isEqualTo(false);
         assertThat(variant.getAlpha()).isEqualTo(0.5f);
-        assertThat(variant.getCornerRadius()).isEqualTo(2);
+        assertThat(variant.getCornerRadius()).isEqualTo(new Corner.Builder().setRadius(2).build());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class VariantTest {
         assertThat(variant.getLayer()).isEqualTo(0); // Default Layer
         assertThat(variant.canFocusOnTransition()).isEqualTo(true); // Default focus
         assertThat(variant.getAlpha()).isEqualTo(1.0f); // Default Alpha
-        assertThat(variant.getCornerRadius()).isEqualTo(0); // Default Alpha
+        assertThat(variant.getCornerRadius()).isEqualTo(Corner.DEFAULT_CORNER); // Default Corner
     }
 
     @Test
