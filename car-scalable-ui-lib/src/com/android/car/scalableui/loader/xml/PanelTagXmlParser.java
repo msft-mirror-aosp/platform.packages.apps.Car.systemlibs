@@ -890,7 +890,16 @@ public class PanelTagXmlParser {
                                 typedValue.data,
                                 context.getResources().getDisplayMetrics()
                         );
+                    } else {
+                        // Attribute exists, but not a dimen
+                        Log.e(TAG, "Attribute found but type mismatch. Expected DIMENSION for "
+                                + context.getResources().getResourceName(resId)
+                                + " but found type: " + typedValue.type);
                     }
+                } else {
+                    // Attribute is missing from the current theme
+                    Log.e(TAG, "Failed to resolve attribute: "
+                            + context.getResources().getResourceName(resId));
                 }
             }
 
