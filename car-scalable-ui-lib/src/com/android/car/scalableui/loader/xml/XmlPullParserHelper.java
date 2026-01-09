@@ -16,15 +16,27 @@
 
 package com.android.car.scalableui.loader.xml;
 
+import android.content.Context;
+import android.content.res.Resources;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class provides helper methods for working with XmlPullParser.
  */
 public class XmlPullParserHelper {
+    private static final String TAG = XmlPullParserHelper.class.getSimpleName();
+
     /**
      * Skips an XML tag and all its contents.
      *
@@ -64,6 +76,75 @@ public class XmlPullParserHelper {
         if (parser.next() == XmlPullParser.TEXT) {
             result = parser.getText();
             parser.nextTag();
+        }
+        return result;
+    }
+
+    /**
+     * Reads the text from the current XML element and resolves it if it is a string resource like
+     * {@code @string/some_string}. If it's not a resource or the resource cannot be found, the
+     * plain text is returned.
+     *
+     * @param context The context for accessing resources.
+     * @param parser  The XmlPullParser instance, positioned at a START_TAG.
+     * @return The resolved string resource, or the plain text content if it's not a resource.
+     * @throws IOException if an I/O error occurs.
+     * @throws XmlPullParserException if the parser encounters an unexpected event type.
+     */
+    @Nullable
+    static String readStringResource(@NonNull Context context,
+            @NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        String text = readText(parser);
+
+        if (text != null && text.startsWith("@string/")) {
+            int resId = context.getResources().getIdentifier(text.substring(1), null,
+                    context.getPackageName());
+            if (resId != 0) {
+                try {
+                    return context.getResources().getString(resId);
+                } catch (Resources.NotFoundException e) {
+                    Log.w(TAG, "String resource not found for: "
+                            + text, e);
+                }
+            } else {
+                Log.w(TAG, "Could not find resource identifier "
+                        + "for: " + text);
+            }
+        }
+        return text;
+    }
+
+    /**
+     * Reads an array resource value from the current XML element, such as
+     * {@code <PersistentActivityList>@array/activity_list</PersistentActivityList>}.
+     *
+     * @param context The context for accessing resources.
+     * @param parser  The XmlPullParser instance, positioned at a START_TAG.
+     * @return A list of strings from the resolved array resource, or {@code null} if the resource
+     * is not found or the tag's content is not a valid array resource identifier.
+     * @throws IOException if an I/O error occurs.
+     * @throws XmlPullParserException if the parser encounters an unexpected event type.
+     */
+    @NonNull
+    static List<String> readArrayResource(@NonNull Context context,
+            @NonNull XmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        List<String> result = new ArrayList<>();
+        String text = readText(parser);
+
+        if (text != null && text.startsWith("@array/")) {
+            int resId = context.getResources().getIdentifier(text.substring(1), null,
+                    context.getPackageName());
+            if (resId != 0) {
+                try {
+                    return Arrays.asList(context.getResources().getStringArray(resId));
+                } catch (Resources.NotFoundException e) {
+                    Log.w(TAG, "Array resource not found for: " + text, e);
+                }
+            } else {
+                Log.w(TAG, "Could not find resource identifier for: " + text);
+            }
         }
         return result;
     }
