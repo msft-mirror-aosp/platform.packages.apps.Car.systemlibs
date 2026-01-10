@@ -173,6 +173,7 @@ public class PanelTagXmlParser {
     public static final String ORIENTATION_TAG = "Orientation";
     public static final String SNAPTHREADHOLD_TAG = "SnapThreadhold";
     public static final String PERSISTENT_ACTIVITY_TAG = "PersistentActivity";
+    public static final String PERSISTENT_ACTIVITY_LIST_TAG = "PersistentActivityList";
     public static final String PERSISTENT_PACKAGE_TAG = "PersistentPackage";
     public static final String DEFAULT_COMPONENT_TAG = "DefaultComponent";
     public static final String UPDATABLE_INTENT_FILTER_TAG = "UpdateIntentFilter";
@@ -362,6 +363,7 @@ public class PanelTagXmlParser {
             }
 
             String name = parser.getName();
+            String value;
             switch (name) {
                 case BREAKPOINTS_TAG:
                     builder.addBreakPoints(parseBreakPoints(context, parser, displayId));
@@ -373,17 +375,29 @@ public class PanelTagXmlParser {
                 case BACKGROUND_COLOR_TAG:
                 case ORIENTATION_TAG:
                 case SNAPTHREADHOLD_TAG:
-                case PERSISTENT_ACTIVITY_TAG:
                 case PERSISTENT_PACKAGE_TAG:
-                case DEFAULT_COMPONENT_TAG:
                 case UPDATABLE_INTENT_FILTER_TAG:
                 case TASK_TOOLBAR_CONTROLLER_TAG:
-                    String value = XmlPullParserHelper.readText(parser);
+                    value = XmlPullParserHelper.readText(parser);
                     if (value != null) {
                         builder.addConfiguration(name, value);
                     } else {
                         Log.e(TAG, "No value for Controller Tag: " + name);
                     }
+                    break;
+                case DEFAULT_COMPONENT_TAG:
+                case PERSISTENT_ACTIVITY_TAG:
+                    value = XmlPullParserHelper.readStringResource(context, parser);
+                    if (value != null) {
+                        builder.addConfiguration(name, value);
+                    } else {
+                        Log.e(TAG, "No value for Controller Tag: " + name);
+                    }
+                    break;
+                case PERSISTENT_ACTIVITY_LIST_TAG:
+                    List<String> list = XmlPullParserHelper.readArrayResource(context, parser);
+                    list.forEach(stringValue -> builder.addConfiguration(PERSISTENT_ACTIVITY_TAG,
+                            stringValue));
                     break;
                 default:
                     Log.w(TAG, "Unsupported Controller Tag: " + name);
