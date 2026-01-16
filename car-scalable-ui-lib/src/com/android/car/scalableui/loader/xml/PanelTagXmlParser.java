@@ -378,13 +378,6 @@ public class PanelTagXmlParser {
                 case PERSISTENT_PACKAGE_TAG:
                 case UPDATABLE_INTENT_FILTER_TAG:
                 case TASK_TOOLBAR_CONTROLLER_TAG:
-                    value = XmlPullParserHelper.readText(parser);
-                    if (value != null) {
-                        builder.addConfiguration(name, value);
-                    } else {
-                        Log.e(TAG, "No value for Controller Tag: " + name);
-                    }
-                    break;
                 case DEFAULT_COMPONENT_TAG:
                 case PERSISTENT_ACTIVITY_TAG:
                     value = XmlPullParserHelper.readStringResource(context, parser);
