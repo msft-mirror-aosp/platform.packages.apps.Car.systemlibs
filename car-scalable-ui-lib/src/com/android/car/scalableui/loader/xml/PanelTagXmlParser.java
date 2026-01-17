@@ -22,6 +22,8 @@ import static com.android.car.scalableui.loader.xml.EventTagXmlParserKt.parseEve
 import static com.android.car.scalableui.model.Alpha.DEFAULT_ALPHA;
 import static com.android.car.scalableui.model.Focus.DEFAULT_FOCUS_ON_TRANSITION;
 import static com.android.car.scalableui.model.Layer.DEFAULT_LAYER;
+import static com.android.car.scalableui.model.TaskBehavior.NEW_TASK_LAUNCH_POLICY_DEFAULT;
+import static com.android.car.scalableui.model.TaskBehavior.TASK_PROPERTY_DEFAULT;
 import static com.android.car.scalableui.model.Transition.DEFAULT_DURATION;
 import static com.android.car.scalableui.model.Visibility.DEFAULT_VISIBILITY;
 
@@ -100,6 +102,7 @@ public class PanelTagXmlParser {
     public static final String MAX_RETRY_ATTRIBUTE = "maxRetry";
     // --- TaskBehavior Tags --
     public static final String TASK_BEHAVIOR_TAG = "TaskBehavior";
+    public static final String TASK_PROPERTIES_ATTRIBUTE = "taskProperties";
     public static final String NEW_TASK_LAUNCH_POLICY_ATTRIBUTE = "newTaskLaunchPolicy";
     // --- Transitions Tags ---
     public static final String TRANSITIONS_TAG = "Transitions";
@@ -176,6 +179,7 @@ public class PanelTagXmlParser {
     public static final String PERSISTENT_ACTIVITY_LIST_TAG = "PersistentActivityList";
     public static final String PERSISTENT_PACKAGE_TAG = "PersistentPackage";
     public static final String DEFAULT_COMPONENT_TAG = "DefaultComponent";
+    public static final String DEFAULT_INTENT_TAG = "DefaultIntent";
     public static final String UPDATABLE_INTENT_FILTER_TAG = "UpdateIntentFilter";
     public static final String TASK_TOOLBAR_CONTROLLER_TAG = "TaskToolBarController";
     // --- BreakPoints Tags ---
@@ -315,11 +319,18 @@ public class PanelTagXmlParser {
             throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, null, TASK_BEHAVIOR_TAG);
         AttributeSet attrs = Xml.asAttributeSet(parser);
+        String taskProperties = attrs.getAttributeValue(null, TASK_PROPERTIES_ATTRIBUTE);
+        if (taskProperties == null) {
+            taskProperties = TASK_PROPERTY_DEFAULT;
+        }
         String policy = attrs.getAttributeValue(null, NEW_TASK_LAUNCH_POLICY_ATTRIBUTE);
+        if (policy == null) {
+            policy = NEW_TASK_LAUNCH_POLICY_DEFAULT;
+        }
         while (parser.next() != XmlPullParser.END_TAG) {
             XmlPullParserHelper.skip(parser); // Skip any nested tags
         }
-        return new TaskBehavior(policy);
+        return new TaskBehavior(taskProperties, policy);
     }
 
     static PanelControllerMetadata createController(@NonNull Context context, int xmlId,
@@ -379,6 +390,7 @@ public class PanelTagXmlParser {
                 case UPDATABLE_INTENT_FILTER_TAG:
                 case TASK_TOOLBAR_CONTROLLER_TAG:
                 case DEFAULT_COMPONENT_TAG:
+                case DEFAULT_INTENT_TAG:
                 case PERSISTENT_ACTIVITY_TAG:
                     value = XmlPullParserHelper.readStringResource(context, parser);
                     if (value != null) {

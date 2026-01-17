@@ -20,8 +20,18 @@ package com.android.car.scalableui.model
  *
  * @property newTaskLaunchPolicy The policy to use when launching a new task.
  */
-data class TaskBehavior(val newTaskLaunchPolicy: String) {
+data class TaskBehavior(val taskProperties: String, val newTaskLaunchPolicy: String) {
     companion object {
+        /**
+         * The default task property, where tasks will behave normally on this panel.
+         */
+        const val TASK_PROPERTY_DEFAULT = "DEFAULT"
+
+        /**
+         * Panel task property that will cause all tasks on this panel to be untrimmable.
+         */
+        const val TASK_PROPERTY_UNTRIMMABLE = "UNTRIMMABLE"
+
         /**
          * The default policy, where the new task's behavior is determined by the system.
          */
