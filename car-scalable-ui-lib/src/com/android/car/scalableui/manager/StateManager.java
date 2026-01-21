@@ -178,18 +178,21 @@ public class StateManager {
 
             if (fromVariant == null) {
                 logIfDebuggable("fromVariant is null for " + panel.getPanelId());
+                panelTransactionBuilder.addLockedPanelId(panelState.getId());
                 continue;
             } else if (toVariant == null) {
                 // This should never happen, but observe if there is a bad config, add the check
                 // for now and enforce in Transition later.
                 Log.e(TAG, "toVariant is null for " + panel.getPanelId() + ", transition="
                         + toVariant);
+                panelTransactionBuilder.addLockedPanelId(panelState.getId());
                 continue;
             } else if (!force && Objects.equals(fromVariant, toVariant)
                     && !(toVariant instanceof KeyFrameVariant)) {
                 // Fraction in KeyFrameVariant is not updated at this point, cannot use for
                 // comparison.
                 logIfDebuggable("FromVariant is the same as toVariant, " + panelState.getId());
+                panelTransactionBuilder.addLockedPanelId(panelState.getId());
                 continue;
             }
 
