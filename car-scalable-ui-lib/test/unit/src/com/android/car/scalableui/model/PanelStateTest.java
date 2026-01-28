@@ -285,4 +285,25 @@ public class PanelStateTest {
 
         assertThat(panelState.getVariantByName("non_existent_name")).isNull();
     }
+
+    @Test
+    public void testMatches() {
+        PanelState panelState1 = new PanelState(TEST_PANEL_ID, PanelType.TASK);
+        panelState1.setDisplayId(1);
+        Variant variant1 = new Variant("id1", "name1");
+        panelState1.addVariant(variant1);
+
+        PanelState panelState2 = new PanelState(TEST_PANEL_ID, PanelType.TASK);
+        panelState2.setDisplayId(1);
+        Variant variant2 = new Variant("id1", "name1");
+        panelState2.addVariant(variant2);
+
+        assertThat(panelState1.matches(panelState2)).isTrue();
+
+        PanelState panelState3 = new PanelState(TEST_PANEL_ID, PanelType.TASK);
+        panelState3.setDisplayId(2); // Different display ID
+        panelState3.addVariant(variant1);
+
+        assertThat(panelState1.matches(panelState3)).isFalse();
+    }
 }

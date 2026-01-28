@@ -139,7 +139,7 @@ public class StateManager {
      * and applies the transition (including animations) if found.
      *
      * @param events The events to be handled.
-     * @param force If the transition should apply even if the variants are considered the same
+     * @param force  If the transition should apply even if the variants are considered the same
      */
     public static PanelTransaction handleEvents(List<Event> events, boolean force) {
         logIfDebuggable("handleEvents " + events);
@@ -308,34 +308,91 @@ public class StateManager {
         panel.setPanelControllerMetadata(panelState.getPanelControllerMetadata());
     }
 
-    //TODO(b/390006880): make this part of configuration.
-
     /**
-     * Resets all the panels.
+     * Resets all the panels to their current state.
      */
     public static void handlePanelReset() {
         PanelPool.getInstance().forEach(Panel::reset);
     }
 
     /**
-     * Reloads {@link PanelState}.
+     * Reloads the {@link PanelState}.
+     *
+     * <p>This method determines whether to update existing panels in-place or recreate them.
+     * If the new panel states are structurally identical to the current ones (same IDs and
+     * configurations), the panels are updated to preserve the current active variant.
+     * Otherwise, the panels are destroyed and recreated.
+     *
+     * @param newPanelStates The new map of panel states to load.
      */
     public static void reloadPanelState(@NonNull Map<String, PanelState> newPanelStates) {
-        // Remove old panel. WM try to set state for old panel after orientation change,
-        // cause states from scalableUI to not apply correctly.
-        PanelPool.getInstance().clearPanels();
-        // Remove panels that no longer exist.
-        getInstance().getPanelStates().entrySet().removeIf(
-                entry -> !newPanelStates.containsKey(entry.getKey()));
-        // Add new panels.
-        newPanelStates.forEach((id, panelState) -> {
-            logIfDebuggable("update or add " + id);
-            if (getInstance().mPanelStates.containsKey(id)) {
-                logIfDebuggable("update " + id);
-                updatePanelState(panelState);
+        if (matches(getInstance().getPanelStates(), newPanelStates)) {
+            logIfDebuggable("Update panels");
+            for (Map.Entry<String, PanelState> entry : newPanelStates.entrySet()) {
+                PanelState oldPanelState = getInstance().getPanelStates().get(entry.getKey());
+                Variant variant = oldPanelState.getCurrentVariant();
+                PanelState newPanelState = entry.getValue();
+                if (variant != null) {
+                    newPanelState.setVariant(variant.getId());
+                }
+                // Update panel states use new panel
+                getInstance().getPanelStates().put(entry.getKey(), newPanelState);
+                applyState(newPanelState);
             }
-            addState(panelState);
-        });
+            // TODO(b/479583940): support update non-visual properties like controller
+            // Reset panel visual properties
+            handlePanelReset();
+        } else {
+            logIfDebuggable("Recreate panels");
+            // Remove old panel. WM try to set state for old panel after orientation change,
+            // cause states from scalableUI to not apply correctly.
+            PanelPool.getInstance().clearPanels();
+            // Remove panels that no longer exist.
+            getInstance().getPanelStates().entrySet().removeIf(
+                    entry -> !newPanelStates.containsKey(entry.getKey()));
+            // Add new panels.
+            newPanelStates.forEach((id, panelState) -> {
+                logIfDebuggable("update or add " + id);
+                if (getInstance().mPanelStates.containsKey(id)) {
+                    logIfDebuggable("update " + id);
+                    updatePanelState(panelState);
+                }
+                addState(panelState);
+            });
+        }
+    }
+
+    /**
+     * Compares two maps of panel states to determine if they are different.
+     *
+     * <p>This method checks if the keysets (panel IDs) are identical and if the corresponding
+     * {@link PanelState} objects match. It is used to decide whether to recreate panels (if different)
+     * or update them in place (if matching).
+     *
+     * @param oldPanelStates The current map of panel states.
+     * @param newPanelStates The new map of panel states.
+     * @return {@code false} if the maps are different (i.e., a mismatch is found);
+     *         {@code true} if they are the same.
+     */
+    private static boolean matches(Map<String, PanelState> oldPanelStates,
+            Map<String, PanelState> newPanelStates) {
+        if (oldPanelStates.size() != newPanelStates.size()) {
+            return false;
+        }
+        for (Map.Entry<String, PanelState> entry : oldPanelStates.entrySet()) {
+            if (!newPanelStates.containsKey(entry.getKey())) {
+                return false;
+            } else {
+                PanelState oldPanelState = entry.getValue();
+                PanelState newPanelState = newPanelStates.get(entry.getKey());
+                if (!oldPanelState.matches(newPanelState)) {
+                    logIfDebuggable(
+                            entry.getKey() + ", new panel state doesn't match old panel state.");
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
