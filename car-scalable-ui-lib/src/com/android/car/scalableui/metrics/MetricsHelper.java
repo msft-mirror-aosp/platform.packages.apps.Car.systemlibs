@@ -27,6 +27,7 @@ import com.android.car.scalableui.panel.PanelPool;
 import com.android.internal.jank.Cuj;
 import com.android.internal.jank.InteractionJankMonitor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -65,7 +66,7 @@ public class MetricsHelper {
      * {@link MetricsCujMapping}. If a mapping is found, it begins monitoring using
      * {@link InteractionJankMonitor#begin}.
      *
-     * @param event          The {@link Event} that triggered the potential CUJ.
+     * @param events         The list of {@link Event} that triggered the potential CUJ.
      * @param panelAnimators A Set of PanelId {@link  String} to Animator {@link Animator} pairs
      *                       associated with the UI transition for this event.
      * @param stateBefore    A collection representing the {@link PanelState} of relevant UI panels
@@ -73,11 +74,11 @@ public class MetricsHelper {
      * @param stateAfter    A collection representing the {@link PanelState} of relevant UI panels
      *                       *after* the event occurred. Used for CUJ mapping.
      */
-    public void recordJankCuj(Event event,
+    public void recordJankCuj(List<Event> events,
             Set<Map.Entry<String, Animator>> panelAnimators,
             Map<String, PanelState> stateBefore,
             Map<String, PanelState> stateAfter) {
-        Pair<Panel, Integer> cuj = mMetricsCujMapping.getMappedCuj(event, stateBefore, stateAfter);
+        Pair<Panel, Integer> cuj = mMetricsCujMapping.getMappedCuj(events, stateBefore, stateAfter);
         if (cuj == null || cuj.first.getLeash() == null) {
             // No CUJ found
             return;
@@ -167,15 +168,18 @@ public class MetricsHelper {
          * {@link Cuj.CujType} identifier if a match is found; otherwise, {@code null}.
          */
         @Nullable
-        Pair<Panel, Integer> getMappedCuj(Event event, Map<String, PanelState> stateBefore,
+        Pair<Panel, Integer> getMappedCuj(List<Event> events, Map<String, PanelState> stateBefore,
                 Map<String, PanelState> stateAfter) {
             // Iterate through all known CUJ definitions.
             for (CujDefinition definition : CujRegistry.getDefinitions()) {
-                if (definition.matches(event, stateBefore, stateAfter)) {
-                    // We found a matching CUJ.
-                    Panel relevantPanel = mPanelPool.getPanel(definition.getRelevantPanelId());
-                    if (relevantPanel != null) {
-                        return Pair.create(relevantPanel, definition.getCujType());
+                // Iterate all provided events
+                for (Event event : events) {
+                    if (definition.matches(event, stateBefore, stateAfter)) {
+                        // We found a matching CUJ.
+                        Panel relevantPanel = mPanelPool.getPanel(definition.getRelevantPanelId());
+                        if (relevantPanel != null) {
+                            return Pair.create(relevantPanel, definition.getCujType());
+                        }
                     }
                 }
             }

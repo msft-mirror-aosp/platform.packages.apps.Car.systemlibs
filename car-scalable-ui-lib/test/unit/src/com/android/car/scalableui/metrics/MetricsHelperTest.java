@@ -18,6 +18,7 @@ package com.android.car.scalableui.metrics;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -77,12 +78,14 @@ public class MetricsHelperTest {
     public void recordJankCuj_noCujMapping_doesNothing() {
         Event event = new Event.Builder("test_event_id").build();
         Set<Map.Entry<String, Animator>> panelAnimators = Collections.emptySet();
-        Collection<PanelState> initialState = Collections.emptyList();
+        Map<String, PanelState> stateBefore = new HashMap<>();
+        Map<String, PanelState> stateAfter = new HashMap<>();
 
-        when(mMetricsCujMapping.getMappedCuj(any(Event.class), any()))
+        when(mMetricsCujMapping.getMappedCuj(anyList(), any(), any()))
                 .thenReturn(null);
 
-        mMetricsHelper.recordJankCuj(event, panelAnimators, initialState);
+        mMetricsHelper.recordJankCuj(Collections.singletonList(event), panelAnimators, stateBefore,
+                stateAfter);
 
         verify(mInteractionJankMonitor, never()).begin(any(), any(), any(), anyInt());
         verify(mInteractionJankMonitor, never()).end(anyInt());
@@ -95,13 +98,15 @@ public class MetricsHelperTest {
         Animator animator = mock(Animator.class);
         Set<Map.Entry<String, Animator>> panelAnimators = new HashSet<>();
         panelAnimators.add(Map.entry("test_panel_id_1", animator));
-        Collection<PanelState> initialState = Collections.emptyList();
+        Map<String, PanelState> stateBefore = new HashMap<>();
+        Map<String, PanelState> stateAfter = new HashMap<>();
 
         Pair<Panel, Integer> cuj = Pair.create(mPanel, Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
-        when(mMetricsCujMapping.getMappedCuj(any(Event.class), any()))
+        when(mMetricsCujMapping.getMappedCuj(anyList(), any(), any()))
                 .thenReturn(cuj);
 
-        mMetricsHelper.recordJankCuj(event, panelAnimators, initialState);
+        mMetricsHelper.recordJankCuj(Collections.singletonList(event), panelAnimators, stateBefore,
+                stateAfter);
 
         verify(mInteractionJankMonitor).begin(mSurfaceControl, mContext, mHandler,
                 Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
@@ -122,13 +127,15 @@ public class MetricsHelperTest {
         Animator animator = mock(Animator.class);
         Set<Map.Entry<String, Animator>> panelAnimators = new HashSet<>();
         panelAnimators.add(Map.entry("test_panel_id_1", animator));
-        Collection<PanelState> initialState = Collections.emptyList();
+        Map<String, PanelState> stateBefore = new HashMap<>();
+        Map<String, PanelState> stateAfter = new HashMap<>();
 
         Pair<Panel, Integer> cuj = Pair.create(mPanel, Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
-        when(mMetricsCujMapping.getMappedCuj(any(Event.class), any()))
+        when(mMetricsCujMapping.getMappedCuj(anyList(), any(), any()))
                 .thenReturn(cuj);
 
-        mMetricsHelper.recordJankCuj(event, panelAnimators, initialState);
+        mMetricsHelper.recordJankCuj(Collections.singletonList(event), panelAnimators, stateBefore,
+                stateAfter);
 
         verify(mInteractionJankMonitor).begin(mSurfaceControl, mContext, mHandler,
                 Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);

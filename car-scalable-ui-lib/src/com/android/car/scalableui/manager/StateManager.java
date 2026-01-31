@@ -20,7 +20,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.os.Build;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
@@ -36,6 +38,7 @@ import com.android.car.scalableui.panel.PanelPool;
 import com.android.internal.jank.InteractionJankMonitor;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -111,17 +114,42 @@ public class StateManager {
         panel.init();
     }
 
+    /** See {@link #handleEvents} */
+    public static PanelTransaction handleEvent(@NonNull Event event) {
+        return handleEvents(Collections.singletonList(event));
+    }
+
+    /** See {@link #handleEvents} */
+    public static PanelTransaction handleEvent(@NonNull Event event, boolean force) {
+        return handleEvents(Collections.singletonList(event), force);
+    }
+
+    /** See {@link #handleEvents} */
+    public static PanelTransaction handleEvents(List<Event> events) {
+        return handleEvents(events, /* force= */ false);
+    }
+
     /**
-     * Handles an event by triggering state transitions for panels with matching transitions.
-     * This method iterates through all registered panel definitions, checks if any transitions
-     * are defined for the given event, and applies the transition (including animations) if found.
+     * Handles one or more events by triggering state transitions for panels with matching
+     * transitions. This method iterates through all registered panel definitions, checks if any
+     * transitions are defined for the given events in the order of which the events are supplied,
+     * and applies the transition (including animations) if found.
      *
-     * @param event The event to be handled.
+     * @param events The events to be handled.
+     * @param force If the transition should apply even if the variants are considered the same
      */
-    public static PanelTransaction handleEvent(Event event) {
-        logIfDebuggable("handleEvent " + event);
+    public static PanelTransaction handleEvents(List<Event> events, boolean force) {
+        logIfDebuggable("handleEvents " + events);
         PanelTransaction.Builder panelTransactionBuilder = new PanelTransaction.Builder();
+
+        if (events.isEmpty()) {
+            // This shouldn't happen - there should always be at least one event provided.
+            Log.e(TAG, "No events provided");
+            return panelTransactionBuilder.build();
+        }
+        panelTransactionBuilder.setTransactionEvents(events);
         HashSet<String> changedPanelIds = new HashSet<>();
+        List<Event> appliedEvents = new ArrayList<>();
         // Make a ShallowCopy of the currentPanelStates.
         Map<String, PanelState> currentPanelStatesCopy = getCurrentPanelStatesCopy();
         for (PanelState panelState : sInstance.mPanelStates.values()) {
@@ -129,14 +157,18 @@ public class StateManager {
                 Log.e(TAG, "panel state is null");
                 continue;
             }
-            Transition transition = panelState.getTransition(event);
-            if (transition == null) {
-                Log.e(TAG, "transition is null for " + panelState.getId());
+
+            Pair<Transition, Event> toApply = getTransitionForEvents(panelState, events);
+            if (toApply == null) {
+                logIfDebuggable("No transition for " + panelState.getId());
                 panelTransactionBuilder.addLockedPanelId(panelState.getId());
                 continue;
             }
-            Panel panel = PanelPool.getInstance().getPanel(panelState.getId());
 
+            Transition transition = toApply.first;
+            Event appliedEvent = toApply.second;
+
+            Panel panel = PanelPool.getInstance().getPanel(panelState.getId());
             Variant toVariant = transition.getToVariant();
             Variant fromVariant = panelState.getCurrentVariant();
 
@@ -149,7 +181,7 @@ public class StateManager {
                 Log.e(TAG, "toVariant is null for " + panel.getPanelId() + ", transition="
                         + toVariant);
                 continue;
-            } else if (Objects.equals(fromVariant, toVariant)
+            } else if (!force && Objects.equals(fromVariant, toVariant)
                     && !(toVariant instanceof KeyFrameVariant)) {
                 // Fraction in KeyFrameVariant is not updated at this point, cannot use for
                 // comparison.
@@ -162,7 +194,7 @@ public class StateManager {
                 // Update the internal state to the new variant and show the transition animation
                 panelState.onAnimationStart(animator);
                 animator.removeAllListeners();
-                panelState.setVariant(toVariant.getId(), event);
+                panelState.setVariant(toVariant.getId(), appliedEvent);
                 animator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -177,14 +209,16 @@ public class StateManager {
             } else if (!panelState.isAnimating()) {
                 // Force apply the new state if there is no on going animation.
                 logIfDebuggable("No animator for " + panelState.getId());
-                panelState.setVariant(toVariant.getId(), event);
+                panelState.setVariant(toVariant.getId(), appliedEvent);
                 applyState(panelState);
             }
-            logIfDebuggable("add transition for " + panelState.getId());
+            logIfDebuggable(
+                    "add transition for " + panelState.getId() + " for event " + appliedEvent);
             if (toVariant instanceof KeyFrameVariant) {
                 panelTransactionBuilder.setHasWindowChanges(false);
             }
             panelTransactionBuilder.addPanelTransaction(panelState.getId(), transition);
+            appliedEvents.add(appliedEvent);
         }
         if (!changedPanelIds.isEmpty()) {
             // Store copy of existing panel state in case it changes prior to callback
@@ -195,11 +229,39 @@ public class StateManager {
                     sInstance.getAfterPanelStateChangeRunnable(changedPanelIds, panelStatesCopy));
         }
         PanelTransaction panelTransaction = panelTransactionBuilder.build();
-        if (sMetricsHelper != null) {
-            sMetricsHelper.recordJankCuj(event, panelTransaction.getAnimators(),
+        if (sMetricsHelper != null && !appliedEvents.isEmpty()) {
+            sMetricsHelper.recordJankCuj(appliedEvents, panelTransaction.getAnimators(),
                     currentPanelStatesCopy, sInstance.mPanelStates);
         }
         return panelTransactionBuilder.build();
+    }
+
+    /**
+     * Given a particular PanelState and a list of events to be applied (in order), return a
+     * pairing of the Transition to be applied and the Event that is causing it to be applied or
+     * return null if no Event is applying a Transition.
+     */
+    @Nullable
+    private static Pair<Transition, Event> getTransitionForEvents(@NonNull PanelState state,
+            @NonNull List<Event> events) {
+        Transition transition = null;
+        Event appliedEvent = null;
+        for (Event event : events) {
+            Transition newTransition;
+            if (transition != null) {
+                newTransition = state.getTransition(event, transition.getToVariant());
+            } else {
+                newTransition = state.getTransition(event);
+            }
+            if (newTransition != null) {
+                transition = newTransition;
+                appliedEvent = event;
+            }
+        }
+        if (transition == null || appliedEvent == null) {
+            return null;
+        }
+        return Pair.create(transition, appliedEvent);
     }
 
     /**
