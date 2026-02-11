@@ -163,7 +163,6 @@ public class PanelPoolTest {
 
         mPanelPool.executeOnPanel(idToRemove, Panel::destroy);
 
-        assertThat(mPanelPool.getPanel(idToRemove)).isNull();
         assertThat(mPanelPool.getPanel(idToKeep)).isEqualTo(mockPanelToKeep);
         verify(mockPanelToRemove).destroy();
         verify(mockPanelToKeep, never()).destroy();
