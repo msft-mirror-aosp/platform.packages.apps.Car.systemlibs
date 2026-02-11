@@ -74,7 +74,15 @@ public final class PanelControllerMetadata {
      */
     @Nullable
     public List<String> getListConfiguration(@NonNull String key) {
-        return mConfigurations.getStringArrayList(key);
+        Object value = mConfigurations.get(key);
+        if (value instanceof List) {
+            return (List<String>) value;
+        } else if (value instanceof String) {
+            ArrayList<String> list = new ArrayList<>();
+            list.add((String) value);
+            return list;
+        }
+        return null;
     }
 
     /**
