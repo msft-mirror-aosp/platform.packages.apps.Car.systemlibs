@@ -474,8 +474,7 @@ public class StateManagerTest {
         StateManager.addState(oldPanelState);
         StateManager.reloadPanelState(newStates);
 
-        // 4. Verify
-        // Verify the old panel was removed (and thus destroyed)
+        // 4. Verify the old panel was removed (and thus destroyed)
         verify(mockOldPanel).destroy();
         // Verify the new panel was created and initialized
         verify(mockNewPanel).init();
@@ -486,6 +485,43 @@ public class StateManagerTest {
         // Verify the current variant is what we expect
         assertThat(StateManager.getPanelState(TEST_PANEL_ID).getCurrentVariant().getId())
                 .isEqualTo(TO_VARIANT_ID);
+    }
+
+    @Test
+    public void testReloadPanelState_noChange() {
+        // 1. Setup initial state
+        PanelState oldPanelState = new PanelState(TEST_PANEL_ID, PanelType.TASK);
+        Variant fromVariant = new Variant.Builder(FROM_VARIANT_ID, "from_name").build();
+        Variant toVariant = new Variant.Builder(TO_VARIANT_ID, "to_name").build();
+        oldPanelState.addVariant(fromVariant);
+        oldPanelState.addVariant(toVariant);
+        oldPanelState.setVariant(TO_VARIANT_ID); // Current variant is "to"
+
+        Panel mockOldPanel = mock(Panel.class);
+        PanelPool.PanelCreatorDelegate delegate = mock(PanelPool.PanelCreatorDelegate.class);
+        PanelPool.getInstance().setDelegate(delegate);
+        when(delegate.createPanel(TEST_PANEL_ID, PanelType.TASK)).thenReturn(mockOldPanel);
+        PanelPool.getInstance().getOrCreatePanel(TEST_PANEL_ID, PanelType.TASK);
+
+        // 2. Setup new state for reload, same as old state
+        PanelState newPanelState = spy(new PanelState(TEST_PANEL_ID, PanelType.TASK));
+        Variant newFromVariant = new Variant.Builder(FROM_VARIANT_ID, "from_name").build();
+        Variant newToVariant = new Variant.Builder(TO_VARIANT_ID, "to_name").build();
+        newPanelState.addVariant(newFromVariant);
+        newPanelState.addVariant(newToVariant);
+        Map<String, PanelState> newStates = Map.of(TEST_PANEL_ID, newPanelState);
+
+        // 3. Add old state, then execute reload
+        StateManager.addState(oldPanelState);
+        StateManager.reloadPanelState(newStates);
+
+        // 4. Verify
+        // Verify the old panel was NOT removed
+        verify(mockOldPanel, never()).destroy();
+        verify(mockOldPanel).reset();
+
+        // Verify the final state in the manager is the OLD one (since it matched)
+        assertThat(StateManager.getPanelState(TEST_PANEL_ID)).isEqualTo(newPanelState);
     }
 
     private static class TestPanelStateObserver implements StateManager.PanelStateObserver {

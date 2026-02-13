@@ -33,7 +33,9 @@ import com.android.car.scalableui.panel.Panel;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -389,6 +391,7 @@ public class Variant {
                         .collect(Collectors.joining(" , "));
 
         return "Variant{"
+                + "\n\tmId=" + mId
                 + "\n\tmIdName=" + mIdName
                 + "\n\tmAlpha=" + mAlpha
                 + "\n\tmIsVisible=" + mIsVisible
@@ -409,6 +412,73 @@ public class Variant {
     @NonNull
     public Map<String, Decor> getDecors() {
         return mDecors;
+    }
+
+    /**
+     * Checks if this variant has the same critical properties as the provided variant.
+     *
+     * <p>The properties compared in this method are selected based on whether a window transaction
+     * is needed to update the delta value. If a window transaction is required (e.g., for bounds,
+     * visibility, or layer), the value is considered critical.
+     *
+     * <p>Note that properties like corner radius and insets are excluded from this check because
+     * they do not require a window transaction to update.
+     *
+     * @param variant The variant to compare against.
+     * @return {@code true} if the critical properties match; {@code false} otherwise.
+     */
+    public boolean matches(Variant variant) {
+        return Float.compare(mAlpha, variant.mAlpha) == 0
+                && mIsVisible == variant.mIsVisible
+                && mLayer == variant.mLayer
+                && Objects.equals(mId, variant.mId)
+                && Objects.equals(mIdName, variant.mIdName)
+                && Objects.equals(mBounds, variant.mBounds)
+                && Objects.equals(mSafeBounds, variant.mSafeBounds)
+                && Objects.equals(mTaskToolbarBounds, variant.mTaskToolbarBounds);
+    }
+
+    /**
+     * Compares two lists of variants to determine if they represent the same set of critical visual
+     * states.
+     *
+     * <p>This method verifies that both lists have the same size and that every variant in the
+     * new list has a corresponding variant in the old list (matched by ID name) that satisfies
+     * {@link #matches(Variant)}.
+     *
+     * <p>The comparison focuses on properties that require a window transaction to update (e.g.,
+     * bounds, visibility, layer), while ignoring properties that can be updated without one (e.g.,
+     * corner radius, insets). The comparison is order-independent.
+     *
+     * @param oldVariants The list of original variants.
+     * @param newVariants The list of new variants to compare against.
+     * @return {@code true} if both lists contain the same set of critical variants;
+     *         {@code false} otherwise.
+     */
+    public static boolean matchesVariantList(@NonNull List<Variant> oldVariants,
+            @NonNull List<Variant> newVariants) {
+        if (oldVariants.size() != newVariants.size()) {
+            return false;
+        }
+
+        // Use IdName as the key for the map since id is android resource id and may change after
+        // asset update.
+        Map<String, Variant> oldVariantsMap = oldVariants.stream()
+                .collect(Collectors.toMap(
+                        Variant::getIdName,
+                        variant -> variant,
+                        (existing, replacement) -> existing));
+        for (Variant variant : newVariants) {
+            if (!oldVariantsMap.containsKey(variant.getIdName())) {
+                return false;
+            } else {
+                Variant oldVariant = oldVariantsMap.get(variant.getIdName());
+                if (!oldVariant.matches(variant)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /** Builder for {@link Variant} objects. */

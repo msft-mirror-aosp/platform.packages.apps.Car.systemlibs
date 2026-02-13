@@ -55,7 +55,7 @@ public class Transition {
      *
      * @param fromVariant The variant to transition from (can be null).
      * @param toVariant The variant to transition to.
-     * @param onEvent The event that triggers the transition.
+     * @param events The events that trigger the transition.
      * @param animator A custom animator to use for the transition (can be null).
      * @param defaultDuration The default duration of the transition.
      * @param defaultInterpolator The default interpolator to use for the transition.

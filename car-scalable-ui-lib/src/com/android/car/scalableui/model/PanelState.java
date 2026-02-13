@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -353,6 +354,27 @@ public class PanelState implements Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    /**
+     * Checks if this {@code PanelState} matches another, considering only properties that require a
+     * window transaction to update.
+     *
+     * <p>This method compares the panel's identity (ID, type, display ID) and performs a deep
+     * comparison of its variants. If the delta between the two panel states does not require a
+     * window transaction to update (e.g., only corner radius or insets have changed), the states
+     * are considered to match.
+     *
+     * @param that The {@code PanelState} to compare against.
+     * @return {@code true} if the identity matches and the variants match (requiring no window
+     *         transaction to update); {@code false} otherwise.
+     */
+    public boolean matches(PanelState that) {
+        if (that == null) return false;
+        return mDisplayId == that.mDisplayId
+                && mType == that.mType
+                && Objects.equals(mId, that.mId)
+                && Variant.matchesVariantList(mVariants, that.mVariants);
     }
 
     /** Builder for {@link PanelState} objects. */
