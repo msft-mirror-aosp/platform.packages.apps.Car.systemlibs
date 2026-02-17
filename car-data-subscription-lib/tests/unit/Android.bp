@@ -33,10 +33,12 @@ android_test {
         "androidx.test.ext.truth",
         "car-data-subscription-lib",
         "mockito-target-extended-minus-junit4",
+        "oem-token-lib",
     ],
 
     libs: [
         "android.test.base.stubs.system",
+        "token-shared-lib-prebuilt",
     ],
     jni_libs: [
         "libdexmakerjvmtiagent",

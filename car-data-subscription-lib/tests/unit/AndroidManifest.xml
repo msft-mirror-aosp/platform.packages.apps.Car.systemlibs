@@ -21,6 +21,7 @@
 
     <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.car.oem.token" />
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
