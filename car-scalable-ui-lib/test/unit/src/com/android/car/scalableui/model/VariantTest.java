@@ -87,34 +87,37 @@ public class VariantTest {
 
     @Test
     public void testMatches() {
-        Variant variant1 = new Variant.Builder(VARIANT_ID, "variantName")
-                .setAlpha(0.5f)
-                .setVisibility(true)
-                .setLayer(1)
-                .setBounds(new Rect(0, 0, 100, 100))
-                .setSafeBounds(new Rect(10, 10, 90, 90))
-                .setTaskToolbarBounds(new Rect(0, 0, 100, 20))
-                .build();
+        Variant variant1 =
+                new Variant.Builder(VARIANT_ID, "variantName")
+                        .setAlpha(0.5f)
+                        .setVisibility(true)
+                        .setLayer(1)
+                        .setBounds(new Rect(0, 0, 100, 100))
+                        .setSafeBounds(new Rect(10, 10, 90, 90))
+                        .setTaskToolbarBounds(new Rect(0, 0, 100, 20))
+                        .build();
 
-        Variant variant2 = new Variant.Builder(VARIANT_ID, "variantName")
-                .setAlpha(0.5f)
-                .setVisibility(true)
-                .setLayer(1)
-                .setBounds(new Rect(0, 0, 100, 100))
-                .setSafeBounds(new Rect(10, 10, 90, 90))
-                .setTaskToolbarBounds(new Rect(0, 0, 100, 20))
-                .build();
+        Variant variant2 =
+                new Variant.Builder(VARIANT_ID, "variantName")
+                        .setAlpha(0.5f)
+                        .setVisibility(true)
+                        .setLayer(1)
+                        .setBounds(new Rect(0, 0, 100, 100))
+                        .setSafeBounds(new Rect(10, 10, 90, 90))
+                        .setTaskToolbarBounds(new Rect(0, 0, 100, 20))
+                        .build();
 
         assertThat(variant1.matches(variant2)).isTrue();
 
-        Variant variant3 = new Variant.Builder(VARIANT_ID, "variantName")
-                .setAlpha(0.8f) // Different alpha
-                .setVisibility(true)
-                .setLayer(1)
-                .setBounds(new Rect(0, 0, 100, 100))
-                .setSafeBounds(new Rect(10, 10, 90, 90))
-                .setTaskToolbarBounds(new Rect(0, 0, 100, 20))
-                .build();
+        Variant variant3 =
+                new Variant.Builder(VARIANT_ID, "variantName")
+                        .setAlpha(0.8f) // Different alpha
+                        .setVisibility(true)
+                        .setLayer(1)
+                        .setBounds(new Rect(0, 0, 100, 100))
+                        .setSafeBounds(new Rect(10, 10, 90, 90))
+                        .setTaskToolbarBounds(new Rect(0, 0, 100, 20))
+                        .build();
 
         assertThat(variant1.matches(variant3)).isFalse();
     }

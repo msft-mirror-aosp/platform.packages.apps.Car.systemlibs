@@ -46,8 +46,7 @@ public class ActionManagerTest {
     private static final String ACTION_PERMISSION =
             "com.android.car.scalableui.permission.ACTION_BROADCAST_PERMISSION";
 
-    @Mock
-    private Context mMockContext;
+    @Mock private Context mMockContext;
 
     @Before
     public void setUp() {
@@ -156,7 +155,5 @@ public class ActionManagerTest {
         // Verify that sendOrderedBroadcast was still attempted (and thus threw the exception)
         verify(mMockContext, times(1))
                 .sendOrderedBroadcast(eq(problematicIntent), eq(ACTION_PERMISSION));
-
     }
 }
-

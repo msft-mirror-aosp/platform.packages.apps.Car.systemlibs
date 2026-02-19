@@ -31,8 +31,8 @@ import java.util.function.Predicate;
  * A pool for managing {@link Panel} instances.
  *
  * <p>This class provides a centralized mechanism for creating and retrieving panels, ensuring that
- * only one instance of a panel with a given ID exists at a time. It uses a
- * {@link PanelCreatorDelegate} to handle the actual creation of panel instances.
+ * only one instance of a panel with a given ID exists at a time. It uses a {@link
+ * PanelCreatorDelegate} to handle the actual creation of panel instances.
  */
 public class PanelPool {
     private static final PanelPool sInstance = new PanelPool();
@@ -40,16 +40,12 @@ public class PanelPool {
     private final ConcurrentHashMap<String, Panel> mPanels = new ConcurrentHashMap<>();
     private PanelCreatorDelegate mDelegate;
 
-    /**
-     * An instance of the {@link PanelPool}.
-     */
+    /** An instance of the {@link PanelPool}. */
     public static PanelPool getInstance() {
         return sInstance;
     }
 
-    /**
-     * A delegate interface for creating {@link Panel} instances.
-     */
+    /** A delegate interface for creating {@link Panel} instances. */
     public interface PanelCreatorDelegate {
         /**
          * Creates a panel object.
@@ -61,9 +57,7 @@ public class PanelPool {
         Panel createPanel(String id, @PanelType int type);
     }
 
-
-    private PanelPool() {
-    }
+    private PanelPool() {}
 
     /**
      * Sets the {@link PanelCreatorDelegate} to be used for creating panel instances.
@@ -74,9 +68,7 @@ public class PanelPool {
         mDelegate = delegate;
     }
 
-    /**
-     * Clears all panels from the pool.
-     */
+    /** Clears all panels from the pool. */
     public void clearPanels() {
         mPanels.forEach((id, panel) -> panel.destroy());
         mPanels.clear();
@@ -85,8 +77,8 @@ public class PanelPool {
     /**
      * Retrieves a panel with the given ID.
      *
-     * <p>If a panel with the given ID already exists in the pool, it is returned. Otherwise,
-     * return {@code null}
+     * <p>If a panel with the given ID already exists in the pool, it is returned. Otherwise, return
+     * {@code null}
      *
      * @param id The ID of the panel to retrieve.
      * @return The panel with the given ID.
@@ -99,8 +91,8 @@ public class PanelPool {
     /**
      * Retrieves a panel with the given ID.
      *
-     * <p>If a panel with the given ID already exists in the pool, it is returned. Otherwise,
-     * return {@code null}
+     * <p>If a panel with the given ID already exists in the pool, it is returned. Otherwise, return
+     * {@code null}
      *
      * @param id The ID of the panel to retrieve.
      * @return The panel with the given ID.
@@ -141,16 +133,12 @@ public class PanelPool {
         return panels;
     }
 
-    /**
-     * Executes a given {@link Consumer} on all the panels.
-     */
+    /** Executes a given {@link Consumer} on all the panels. */
     public void forEach(@NonNull Consumer<Panel> consumer) {
         mPanels.forEach((id, panel) -> consumer.accept(panel));
     }
 
-    /**
-     * Executes a given {@link Consumer} on the panels with given id.
-     */
+    /** Executes a given {@link Consumer} on the panels with given id. */
     public void executeOnPanel(@NonNull String id, @NonNull Consumer<Panel> consumer) {
         Panel panel = PanelPool.getInstance().getPanel(id);
         if (panel != null) {

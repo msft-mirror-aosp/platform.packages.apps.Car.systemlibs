@@ -31,10 +31,13 @@ public class KeyFrameEvent extends Event {
     /**
      * Constructs a KeyframeEvent.
      *
-     * @param id       A unique identifier associated with this event.
+     * @param id A unique identifier associated with this event.
      * @param fraction A fraction value (between 0 and 1).
      */
-    public KeyFrameEvent(@NonNull String id, float fraction, @NonNull Map<String, String> tokens,
+    public KeyFrameEvent(
+            @NonNull String id,
+            float fraction,
+            @NonNull Map<String, String> tokens,
             @NonNull Set<Integer> applicableDisplays) {
         super(id, tokens, applicableDisplays);
         mFraction = fraction;
@@ -43,8 +46,14 @@ public class KeyFrameEvent extends Event {
     @NonNull
     @Override
     public String toString() {
-        return "KeyFrameEvent{" + "mId=" + mId + ", mTokens=" + mTokens + ", mFraction="
-                + mFraction + "}";
+        return "KeyFrameEvent{"
+                + "mId="
+                + mId
+                + ", mTokens="
+                + mTokens
+                + ", mFraction="
+                + mFraction
+                + "}";
     }
 
     /**
@@ -83,7 +92,9 @@ public class KeyFrameEvent extends Event {
         public KeyFrameEvent build() {
             if (mFraction < 0 || mFraction > 1) {
                 throw new IllegalStateException(
-                        "KeyFrameEvent ID must be set with valid fraction." + mId + " "
+                        "KeyFrameEvent ID must be set with valid fraction."
+                                + mId
+                                + " "
                                 + mFraction);
             }
             return new KeyFrameEvent(mId, mFraction, mTokens, mApplicableDisplays);

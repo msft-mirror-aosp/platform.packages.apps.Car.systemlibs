@@ -114,8 +114,14 @@ public class Transition {
     @Nullable
     public Animator getAnimator(@NonNull Panel panel, @NonNull Variant fromVariant) {
         if (DEBUG) {
-            Log.d(TAG, "panel=" + panel.getPanelId() + "fromVariant=" + fromVariant + ", toVariant"
-                    + mToVariant);
+            Log.d(
+                    TAG,
+                    "panel="
+                            + panel.getPanelId()
+                            + "fromVariant="
+                            + fromVariant
+                            + ", toVariant"
+                            + mToVariant);
         }
         if (Objects.equals(fromVariant.getId(), mToVariant.getId())) {
             return null;
@@ -148,13 +154,20 @@ public class Transition {
     @NonNull
     public String toString() {
         return "Transition{"
-                + "mFromVariant=" + (mFromVariant != null ? mFromVariant : "null")
-                + ", mToVariant=" + (mToVariant != null ? mToVariant : "null")
-                + ", mEvents=" + mEvents
-                + ", mAnimator=" + mAnimator
-                + ", mDefaultInterpolator=" + mDefaultInterpolator
-                + ", mDefaultDuration=" + mDefaultDuration
-                + ", mDelay=" + mDelay
+                + "mFromVariant="
+                + (mFromVariant != null ? mFromVariant : "null")
+                + ", mToVariant="
+                + (mToVariant != null ? mToVariant : "null")
+                + ", mEvents="
+                + mEvents
+                + ", mAnimator="
+                + mAnimator
+                + ", mDefaultInterpolator="
+                + mDefaultInterpolator
+                + ", mDefaultDuration="
+                + mDefaultDuration
+                + ", mDelay="
+                + mDelay
                 + '}';
     }
 
@@ -171,6 +184,11 @@ public class Transition {
         public Builder(@Nullable Variant fromVariant, @NonNull Variant toVariant) {
             mFromVariant = fromVariant;
             mToVariant = toVariant;
+            mEvents = new ArrayList<>();
+        }
+
+        /** Creates a builder with no variants set initially. */
+        public Builder() {
             mEvents = new ArrayList<>();
         }
 
@@ -225,6 +243,9 @@ public class Transition {
         /** Returns the {@link Transition} instance */
         @NonNull
         public Transition build() {
+            if (mToVariant == null) {
+                throw new IllegalStateException("ToVariant must be set for a Transition.");
+            }
             return new Transition(
                     mFromVariant,
                     mToVariant,

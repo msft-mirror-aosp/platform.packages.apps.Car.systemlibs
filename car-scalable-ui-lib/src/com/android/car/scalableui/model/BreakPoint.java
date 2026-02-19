@@ -18,32 +18,26 @@ package com.android.car.scalableui.model;
 import androidx.annotation.NonNull;
 
 /**
- * Represents a specific point (e.g., a position, value, or time) associated with
- * an event identifier.
- * <p>
- * This class is immutable; its state cannot be changed after creation. Instances
- * are typically created using the {@link Builder}.
+ * Represents a specific point (e.g., a position, value, or time) associated with an event
+ * identifier.
  *
+ * <p>This class is immutable; its state cannot be changed after creation. Instances are typically
+ * created using the {@link Builder}.
  */
 public class BreakPoint {
 
     private final int mPoint;
     private final String mEventId;
 
-    /**
-     * Gets the event Id.
-     */
+    /** Gets the event Id. */
     public String getEventId() {
         return mEventId;
     }
 
-    /**
-     * Gets the point.
-     */
+    /** Gets the point. */
     public int getPoint() {
         return mPoint;
     }
-
 
     BreakPoint(int point, String eventId) {
         mPoint = point;
@@ -73,9 +67,6 @@ public class BreakPoint {
 
     @Override
     public String toString() {
-        return "BreakPoint{"
-                + "mPoint=" + mPoint
-                + ", mEventId='" + mEventId
-                + '}';
+        return "BreakPoint{" + "mPoint=" + mPoint + ", mEventId='" + mEventId + '}';
     }
 }

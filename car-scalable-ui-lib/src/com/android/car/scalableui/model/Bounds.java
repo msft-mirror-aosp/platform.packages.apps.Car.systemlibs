@@ -28,10 +28,10 @@ import androidx.annotation.Nullable;
  * <p>The Bounds class supports defining dimensions in the following formats:
  *
  * <ul>
- *   <li><b>Absolute pixels:</b> e.g., <code>left="100"</code></li>
- *   <li><b>Density-independent pixels (dp):</b> e.g., <code>top="50dip"</code></li>
- *   <li><b>Percentage of screen width/height:</b> e.g., <code>right="80%"</code></li>
- *   <li><b>Resource references:</b> e.g., <code>bottom="@dimen/my_bottom_margin"</code></li>
+ *   <li><b>Absolute pixels:</b> e.g., <code>left="100"</code>
+ *   <li><b>Density-independent pixels (dp):</b> e.g., <code>top="50dip"</code>
+ *   <li><b>Percentage of screen width/height:</b> e.g., <code>right="80%"</code>
+ *   <li><b>Resource references:</b> e.g., <code>bottom="@dimen/my_bottom_margin"</code>
  * </ul>
  *
  * <p>It also allows defining either the left and right positions, or the left position and width.
@@ -47,9 +47,9 @@ public class Bounds {
     /**
      * Constructs a Bounds object. Package-private constructor; use the Builder.
      *
-     * @param left   The left position in pixels.
-     * @param top    The top position in pixels.
-     * @param right  The right position in pixels.
+     * @param left The left position in pixels.
+     * @param top The top position in pixels.
+     * @param right The right position in pixels.
      * @param bottom The bottom position in pixels.
      */
     Bounds(int left, int top, int right, int bottom) {

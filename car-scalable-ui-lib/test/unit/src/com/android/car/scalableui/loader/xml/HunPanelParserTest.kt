@@ -22,8 +22,11 @@ import android.view.Gravity
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.car.scalableui.Flags
+import com.android.car.scalableui.loader.xml.parser.HunPanelParser
+import com.android.car.scalableui.loader.xml.parser.ResourceValueParser
 import com.android.car.scalableui.model.Event
 import com.android.car.scalableui.model.GravityVariant
+import com.android.car.scalableui.model.HunState
 import com.android.car.scalableui.unit.R
 import com.google.common.truth.Truth.assertThat
 import java.io.IOException
@@ -33,7 +36,7 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 
 @RunWith(AndroidJUnit4::class)
-class HunTagXmlParserTest {
+class HunPanelParserTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -48,7 +51,13 @@ class HunTagXmlParserTest {
         ) {
             eventType = parser.next()
         }
-        val hunState = parseHun(context, parser)
+        val valueParser = ResourceValueParser()
+        val registry = XmlParserRegistry()
+        CoreParserModule().registerParsers(registry)
+
+        val parserContext = ParserEnv(context, valueParser, registry)
+        val hunTagParser = HunPanelParser()
+        val hunState = hunTagParser.parseTag(parserContext, parser) as HunState
 
         assertThat(hunState).isNotNull()
         assertThat(hunState.id).isEqualTo("_Hun_Panel")
@@ -75,5 +84,35 @@ class HunTagXmlParserTest {
         val transition2 = hunState.getTransition(event2)
         assertThat(transition2).isNotNull()
         assertThat(transition2?.toVariant?.idName).isEqualTo("variant2")
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    fun parseHun_withResourceId_setsDefaultVariantIdName() {
+        val xml = """
+            <HunPanel id="_Hun_Panel" defaultVariant="@+id/variant1">
+            </HunPanel>
+        """.trimIndent()
+
+        val factory = org.xmlpull.v1.XmlPullParserFactory.newInstance()
+        val parser = factory.newPullParser()
+        parser.setInput(java.io.StringReader(xml))
+
+        var eventType = parser.eventType
+        while (eventType != XmlPullParser.START_TAG) {
+            eventType = parser.next()
+        }
+
+        val valueParser = ResourceValueParser()
+        val registry = XmlParserRegistry()
+
+        val parserContext = ParserEnv(context, valueParser, registry)
+        val hunTagParser = HunPanelParser()
+        val hunState = hunTagParser.parseTag(parserContext, parser) as HunState
+
+        assertThat(hunState).isNotNull()
+        hunState.addVariant(GravityVariant.Builder("variant1", "variant1").build())
+        hunState.resetVariant()
+        assertThat(hunState.currentVariant?.idName).isEqualTo("variant1")
     }
 }

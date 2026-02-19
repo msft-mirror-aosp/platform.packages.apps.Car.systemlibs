@@ -15,9 +15,9 @@
  */
 package com.android.car.scalableui.model;
 
-import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.BAR_Z_ORDER_ATTRIBUTE;
-import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.HIDE_FOR_KEYBOARD_ATTRIBUTE;
-import static com.android.car.scalableui.loader.xml.SystemBarTagXmlParser.TYPE_ATTRIBUTE;
+import static com.android.car.scalableui.loader.xml.parser.SystemBarParser.BAR_Z_ORDER_ATTRIBUTE;
+import static com.android.car.scalableui.loader.xml.parser.SystemBarParser.HIDE_FOR_KEYBOARD_ATTRIBUTE;
+import static com.android.car.scalableui.loader.xml.parser.SystemBarParser.TYPE_ATTRIBUTE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -48,6 +48,7 @@ import java.util.Collections;
 public class PanelStateTest {
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+
     private static final String TEST_PANEL_ID = "TEST_PANEL_ID";
     private static final String VARIANT1 = "variant1";
     private static final String VARIANT2 = "variant2";
@@ -110,16 +111,28 @@ public class PanelStateTest {
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
         assertThat(panelState.getId()).isEqualTo("top");
         assertThat(panelState.getRole()).isNull();
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
-                BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(11);
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getString(
-                TYPE_ATTRIBUTE)).isEqualTo("status");
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
-                HIDE_FOR_KEYBOARD_ATTRIBUTE)).isFalse();
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getInt(BAR_Z_ORDER_ATTRIBUTE))
+                .isEqualTo(11);
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getString(TYPE_ATTRIBUTE))
+                .isEqualTo("status");
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getBoolean(HIDE_FOR_KEYBOARD_ATTRIBUTE))
+                .isFalse();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
         assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(0);
-        assertThat(panelState.getCurrentVariant().getBounds().right).isEqualTo(
-                displayMetrics.widthPixels);
+        assertThat(panelState.getCurrentVariant().getBounds().right)
+                .isEqualTo(displayMetrics.widthPixels);
         assertThat(panelState.getCurrentVariant().getBounds().bottom).isEqualTo(50);
         assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
         Variant variant2 = panelState.getVariant("@" + R.id.variant2);
@@ -136,19 +149,31 @@ public class PanelStateTest {
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
         assertThat(panelState.getId()).isEqualTo("bottom");
         assertThat(panelState.getRole()).isNull();
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
-                BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(0);
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getString(
-                TYPE_ATTRIBUTE)).isEqualTo("navigation");
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
-                HIDE_FOR_KEYBOARD_ATTRIBUTE)).isTrue();
-        assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(
-                displayMetrics.heightPixels - 50);
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getInt(BAR_Z_ORDER_ATTRIBUTE))
+                .isEqualTo(0);
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getString(TYPE_ATTRIBUTE))
+                .isEqualTo("navigation");
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getBoolean(HIDE_FOR_KEYBOARD_ATTRIBUTE))
+                .isTrue();
+        assertThat(panelState.getCurrentVariant().getBounds().top)
+                .isEqualTo(displayMetrics.heightPixels - 50);
         assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(0);
-        assertThat(panelState.getCurrentVariant().getBounds().right).isEqualTo(
-                displayMetrics.widthPixels);
-        assertThat(panelState.getCurrentVariant().getBounds().bottom).isEqualTo(
-                displayMetrics.heightPixels);
+        assertThat(panelState.getCurrentVariant().getBounds().right)
+                .isEqualTo(displayMetrics.widthPixels);
+        assertThat(panelState.getCurrentVariant().getBounds().bottom)
+                .isEqualTo(displayMetrics.heightPixels);
         assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
         Variant variant2 = panelState.getVariant("@" + R.id.variant2);
         assertThat(variant2.getAlpha()).isEqualTo(1.0f);
@@ -164,17 +189,29 @@ public class PanelStateTest {
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
         assertThat(panelState.getId()).isEqualTo("left");
         assertThat(panelState.getRole()).isNull();
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
-                BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(10);
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getString(
-                TYPE_ATTRIBUTE)).isEqualTo("navigation");
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
-                HIDE_FOR_KEYBOARD_ATTRIBUTE)).isFalse();
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getInt(BAR_Z_ORDER_ATTRIBUTE))
+                .isEqualTo(10);
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getString(TYPE_ATTRIBUTE))
+                .isEqualTo("navigation");
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getBoolean(HIDE_FOR_KEYBOARD_ATTRIBUTE))
+                .isFalse();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
         assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(0);
         assertThat(panelState.getCurrentVariant().getBounds().right).isEqualTo(50);
-        assertThat(panelState.getCurrentVariant().getBounds().bottom).isEqualTo(
-                displayMetrics.heightPixels);
+        assertThat(panelState.getCurrentVariant().getBounds().bottom)
+                .isEqualTo(displayMetrics.heightPixels);
         assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
         Variant variant2 = panelState.getVariant("@" + R.id.variant2);
         assertThat(variant2.getAlpha()).isEqualTo(1.0f);
@@ -190,19 +227,31 @@ public class PanelStateTest {
         DisplayMetrics displayMetrics = Resources.getSystem().getDisplayMetrics();
         assertThat(panelState.getId()).isEqualTo("right");
         assertThat(panelState.getRole()).isNull();
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getInt(
-                BAR_Z_ORDER_ATTRIBUTE)).isEqualTo(2);
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getString(
-                TYPE_ATTRIBUTE)).isEqualTo("navigation");
-        assertThat(panelState.getPanelControllerMetadata().getConfigurations().getBoolean(
-                HIDE_FOR_KEYBOARD_ATTRIBUTE)).isFalse();
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getInt(BAR_Z_ORDER_ATTRIBUTE))
+                .isEqualTo(2);
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getString(TYPE_ATTRIBUTE))
+                .isEqualTo("navigation");
+        assertThat(
+                        panelState
+                                .getPanelControllerMetadata()
+                                .getConfigurations()
+                                .getBoolean(HIDE_FOR_KEYBOARD_ATTRIBUTE))
+                .isFalse();
         assertThat(panelState.getCurrentVariant().getBounds().top).isEqualTo(0);
-        assertThat(panelState.getCurrentVariant().getBounds().left).isEqualTo(
-                displayMetrics.widthPixels - 50);
-        assertThat(panelState.getCurrentVariant().getBounds().right).isEqualTo(
-                displayMetrics.widthPixels);
-        assertThat(panelState.getCurrentVariant().getBounds().bottom).isEqualTo(
-                displayMetrics.heightPixels);
+        assertThat(panelState.getCurrentVariant().getBounds().left)
+                .isEqualTo(displayMetrics.widthPixels - 50);
+        assertThat(panelState.getCurrentVariant().getBounds().right)
+                .isEqualTo(displayMetrics.widthPixels);
+        assertThat(panelState.getCurrentVariant().getBounds().bottom)
+                .isEqualTo(displayMetrics.heightPixels);
         assertThat(panelState.getCurrentVariant().getId()).isEqualTo("@" + R.id.variant1);
         Variant variant2 = panelState.getVariant("@" + R.id.variant2);
         assertThat(variant2.getAlpha()).isEqualTo(1.0f);
@@ -230,8 +279,15 @@ public class PanelStateTest {
         Variant variant1 = new Variant(VARIANT1, "");
         Variant variant2 = new Variant(VARIANT2, "");
 
-        Transition transition = new Transition(variant1, variant2,
-                Collections.singletonList(TEST_EVENT), null, 0, 0, null);
+        Transition transition =
+                new Transition(
+                        variant1,
+                        variant2,
+                        Collections.singletonList(TEST_EVENT),
+                        null,
+                        0,
+                        0,
+                        null);
         panelState.addTransition(transition);
         panelState.addVariant(variant1);
         panelState.addVariant(variant2);
@@ -284,6 +340,32 @@ public class PanelStateTest {
         panelState.addVariant(variant1);
 
         assertThat(panelState.getVariantByName("non_existent_name")).isNull();
+    }
+
+    @Test
+    public void testGetVariantByIdOrName() {
+        PanelState panelState = new PanelState(TEST_PANEL_ID, PanelType.TASK);
+        Variant variant1 = new Variant("@+id/variant1", "variant1");
+        panelState.addVariant(variant1);
+
+        assertThat(panelState.getVariant("@+id/variant1")).isEqualTo(variant1);
+        assertThat(panelState.getVariant("variant1")).isEqualTo(variant1);
+        assertThat(panelState.getVariant("@id/variant1")).isNull();
+    }
+
+    @Test
+    public void testSetVariantByIdOrName() {
+        PanelState panelState = new PanelState(TEST_PANEL_ID, PanelType.TASK);
+        Variant variant1 = new Variant("@+id/variant1", "variant1");
+        panelState.addVariant(variant1);
+
+        panelState.setVariant("@+id/variant1");
+        assertThat(panelState.getCurrentVariant()).isEqualTo(variant1);
+
+        panelState.resetVariant();
+
+        panelState.setVariant("variant1");
+        assertThat(panelState.getCurrentVariant()).isEqualTo(variant1);
     }
 
     @Test

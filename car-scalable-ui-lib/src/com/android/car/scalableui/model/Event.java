@@ -44,8 +44,7 @@ public class Event {
     private static final String TO_VARIANT_ID_TOKEN_ID = "panelToVariantId";
 
     /** Id string associated with this event. */
-    @NonNull
-    protected final String mId;
+    @NonNull protected final String mId;
 
     /**
      * Token map for this event to be matched against. These tokens are in the format of key:value
@@ -57,11 +56,10 @@ public class Event {
      * Set of display ids that this event is applicable to. This may include more than just the
      * display context that triggered the event.
      */
-    @NonNull
-    protected final Set<Integer> mApplicableDisplays = new ArraySet<>();
+    @NonNull protected final Set<Integer> mApplicableDisplays = new ArraySet<>();
 
     /**
-     * Constructs an Event.  Package-private; use the Builder.
+     * Constructs an Event. Package-private; use the Builder.
      *
      * @param id A unique identifier associated with this event.
      */
@@ -69,7 +67,9 @@ public class Event {
         mId = id;
     }
 
-    protected Event(@NonNull String id, @NonNull Map<String, String> tokens,
+    protected Event(
+            @NonNull String id,
+            @NonNull Map<String, String> tokens,
             @NonNull Set<Integer> applicableDisplays) {
         mId = id;
         mTokens.putAll(tokens); // Defensive copy
@@ -120,8 +120,9 @@ public class Event {
         }
 
         if (scalableUiApplicableDisplays()
-                && !mApplicableDisplays.isEmpty() && mApplicableDisplays.stream().noneMatch(
-                transitionEvent.mApplicableDisplays::contains)) {
+                && !mApplicableDisplays.isEmpty()
+                && mApplicableDisplays.stream()
+                        .noneMatch(transitionEvent.mApplicableDisplays::contains)) {
             // This event contains a display specification while the event specified in the
             // <Transition> does not - this is not a match.
             logIfDebuggable("Event displays do not match");
@@ -162,18 +163,26 @@ public class Event {
     @Override
     @NonNull
     public String toString() {
-        String tokenString = mTokens.isEmpty()
-                ? "empty"
-                : mTokens.entrySet()
-                        .stream()
-                        .map(entry -> entry.getKey() + "=" + entry.getValue())
-                        .collect(Collectors.joining(" , "));
-        String applicableDisplayString = mApplicableDisplays.isEmpty()
-                ? "empty"
-                : mApplicableDisplays.stream().map(Object::toString).collect(
-                        Collectors.joining(", "));
-        return "Event{" + "mId='" + mId + "' mTokens='" + tokenString
-                + "' mApplicableDisplays='" + applicableDisplayString + "'}";
+        String tokenString =
+                mTokens.isEmpty()
+                        ? "empty"
+                        : mTokens.entrySet().stream()
+                                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                                .collect(Collectors.joining(" , "));
+        String applicableDisplayString =
+                mApplicableDisplays.isEmpty()
+                        ? "empty"
+                        : mApplicableDisplays.stream()
+                                .map(Object::toString)
+                                .collect(Collectors.joining(", "));
+        return "Event{"
+                + "mId='"
+                + mId
+                + "' mTokens='"
+                + tokenString
+                + "' mApplicableDisplays='"
+                + applicableDisplayString
+                + "'}";
     }
 
     /** Builder for {@link Event} objects. */
@@ -213,9 +222,7 @@ public class Event {
             return this;
         }
 
-        /**
-         * Add a list of applicable displays to this event.
-         */
+        /** Add a list of applicable displays to this event. */
         public Builder addApplicableDisplays(Collection<Integer> displayIds) {
             mApplicableDisplays.addAll(displayIds);
             return this;

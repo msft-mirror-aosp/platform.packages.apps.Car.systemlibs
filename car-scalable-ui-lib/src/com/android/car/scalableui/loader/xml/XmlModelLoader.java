@@ -19,35 +19,61 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.car.scalableui.loader.xml.parser.ResourceValueParser;
+import com.android.car.scalableui.loader.xml.parser.TagParser;
+import com.android.car.scalableui.loader.xml.parser.ValueParser;
 import com.android.car.scalableui.model.Action;
 import com.android.car.scalableui.model.PanelState;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 
-/**
- * Loads {@link PanelState} from an xml resource.
- */
+/** Loads {@link PanelState} from an xml resource. */
 public class XmlModelLoader {
     private static final String TAG = XmlModelLoader.class.getSimpleName();
 
-    private Context mContext;
+    private final Context mContext;
+    private final XmlParserRegistry mRegistry;
+    private final ParserEnv mParserEnv;
 
     public XmlModelLoader(Context context) {
+        this(context, new CoreParserModule());
+    }
+
+    public XmlModelLoader(Context context, ParserModule... modules) {
+        this(context, new ResourceValueParser(), modules);
+    }
+
+    public XmlModelLoader(Context context, ValueParser valueParser, ParserModule... modules) {
         mContext = context;
+        mRegistry = new XmlParserRegistry();
+        registerParsers(modules);
+        mParserEnv = new ParserEnv(mContext, valueParser, mRegistry);
+    }
+
+    private void registerParsers(ParserModule... modules) {
+        for (ParserModule module : modules) {
+            module.registerParsers(mRegistry);
+        }
     }
 
     /** Creates a {@link PanelState} using the given xml resource */
     @Nullable
     public PanelState createPanelState(int resourceId) {
         try (XmlResourceParser parser = mContext.getResources().getXml(resourceId)) {
-            PanelState ps = PanelStateXmlParser.parse(mContext, parser);
-            return ps;
+            Object result = parseXml(parser, mParserEnv);
+            if (result instanceof PanelState) {
+                return (PanelState) result;
+            } else {
+                Log.e(TAG, "Parsed object is not a PanelState: " + result);
+                return null;
+            }
         } catch (XmlPullParserException | IOException e) {
             Log.e(TAG, "Error parsing xml", e);
             return null;
@@ -56,13 +82,44 @@ public class XmlModelLoader {
 
     /** Creates a list of {@link Action}s using the given xml resource */
     @Nullable
+    @SuppressWarnings("unchecked")
     public List<Action> createActions(int resourceId) {
         try (XmlResourceParser parser = mContext.getResources().getXml(resourceId)) {
-            List<Action> actions = ActionXmlParser.parse(mContext, parser);
-            return actions;
-        } catch (XmlPullParserException | IOException | URISyntaxException e) {
+            Object result = parseXml(parser, mParserEnv);
+            if (result instanceof List) {
+                return (List<Action>) result;
+            } else {
+                Log.e(TAG, "Parsed object is not a List<Action>: " + result);
+                return null;
+            }
+        } catch (XmlPullParserException | IOException e) {
             Log.e(TAG, "Error parsing xml", e);
             return null;
+        }
+    }
+
+    @Nullable
+    private Object parseXml(@NonNull XmlResourceParser parser, @NonNull ParserEnv env)
+            throws XmlPullParserException, IOException {
+        // Consume any START_DOCUMENT, COMMENT, or whitespace events
+        int eventType = parser.getEventType();
+        while (eventType == XmlPullParser.START_DOCUMENT
+                || eventType == XmlPullParser.COMMENT
+                || (eventType == XmlPullParser.TEXT && parser.isWhitespace())) {
+            eventType = parser.next();
+        }
+
+        if (eventType != XmlPullParser.START_TAG) {
+            throw new XmlPullParserException(
+                    "Unrecognized tag at the beginning: " + parser.getName());
+        }
+
+        String tagName = parser.getName();
+        TagParser<?> tagParser = mRegistry.getParser(tagName);
+        if (tagParser != null) {
+            return tagParser.parseTag(env, parser);
+        } else {
+            throw new XmlPullParserException("No parser registered for tag: " + tagName);
         }
     }
 }

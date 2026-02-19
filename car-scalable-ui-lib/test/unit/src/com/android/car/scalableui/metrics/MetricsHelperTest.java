@@ -59,7 +59,6 @@ public class MetricsHelperTest {
     private Handler mHandler;
     private SurfaceControl mSurfaceControl;
 
-
     @Before
     public void setUp() {
         mInteractionJankMonitor = mock(InteractionJankMonitor.class);
@@ -81,11 +80,10 @@ public class MetricsHelperTest {
         Map<String, PanelState> stateBefore = new HashMap<>();
         Map<String, PanelState> stateAfter = new HashMap<>();
 
-        when(mMetricsCujMapping.getMappedCuj(anyList(), any(), any()))
-                .thenReturn(null);
+        when(mMetricsCujMapping.getMappedCuj(anyList(), any(), any())).thenReturn(null);
 
-        mMetricsHelper.recordJankCuj(Collections.singletonList(event), panelAnimators, stateBefore,
-                stateAfter);
+        mMetricsHelper.recordJankCuj(
+                Collections.singletonList(event), panelAnimators, stateBefore, stateAfter);
 
         verify(mInteractionJankMonitor, never()).begin(any(), any(), any(), anyInt());
         verify(mInteractionJankMonitor, never()).end(anyInt());
@@ -102,14 +100,13 @@ public class MetricsHelperTest {
         Map<String, PanelState> stateAfter = new HashMap<>();
 
         Pair<Panel, Integer> cuj = Pair.create(mPanel, Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
-        when(mMetricsCujMapping.getMappedCuj(anyList(), any(), any()))
-                .thenReturn(cuj);
+        when(mMetricsCujMapping.getMappedCuj(anyList(), any(), any())).thenReturn(cuj);
 
-        mMetricsHelper.recordJankCuj(Collections.singletonList(event), panelAnimators, stateBefore,
-                stateAfter);
+        mMetricsHelper.recordJankCuj(
+                Collections.singletonList(event), panelAnimators, stateBefore, stateAfter);
 
-        verify(mInteractionJankMonitor).begin(mSurfaceControl, mContext, mHandler,
-                Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
+        verify(mInteractionJankMonitor)
+                .begin(mSurfaceControl, mContext, mHandler, Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
 
         ArgumentCaptor<Animator.AnimatorListener> listenerCaptor =
                 ArgumentCaptor.forClass(Animator.AnimatorListener.class);
@@ -131,14 +128,13 @@ public class MetricsHelperTest {
         Map<String, PanelState> stateAfter = new HashMap<>();
 
         Pair<Panel, Integer> cuj = Pair.create(mPanel, Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
-        when(mMetricsCujMapping.getMappedCuj(anyList(), any(), any()))
-                .thenReturn(cuj);
+        when(mMetricsCujMapping.getMappedCuj(anyList(), any(), any())).thenReturn(cuj);
 
-        mMetricsHelper.recordJankCuj(Collections.singletonList(event), panelAnimators, stateBefore,
-                stateAfter);
+        mMetricsHelper.recordJankCuj(
+                Collections.singletonList(event), panelAnimators, stateBefore, stateAfter);
 
-        verify(mInteractionJankMonitor).begin(mSurfaceControl, mContext, mHandler,
-                Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
+        verify(mInteractionJankMonitor)
+                .begin(mSurfaceControl, mContext, mHandler, Cuj.CUJ_LAUNCHER_APP_CLOSE_TO_HOME);
 
         ArgumentCaptor<Animator.AnimatorListener> listenerCaptor =
                 ArgumentCaptor.forClass(Animator.AnimatorListener.class);

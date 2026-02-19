@@ -66,10 +66,14 @@ public class Corner {
     @Override
     public String toString() {
         return "Corner{"
-                + "mRadiusTL=" + mRadiusTL
-                + ", mRadiusTR=" + mRadiusTR
-                + ", mRadiusBL=" + mRadiusBL
-                + ", mRadiusBR=" + mRadiusBR
+                + "mRadiusTL="
+                + mRadiusTL
+                + ", mRadiusTR="
+                + mRadiusTR
+                + ", mRadiusBL="
+                + mRadiusBL
+                + ", mRadiusBR="
+                + mRadiusBR
                 + '}';
     }
 
@@ -106,8 +110,7 @@ public class Corner {
         private int mRadiusBL = DEFAULT_RADIUS;
         private int mRadiusBR = DEFAULT_RADIUS;
 
-        public Builder() {
-        }
+        public Builder() {}
 
         /** Sets the radius for all corners. */
         public Builder setRadius(Integer radius) {

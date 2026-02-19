@@ -29,16 +29,14 @@ import androidx.annotation.Nullable;
 /**
  * Represents the role of a {@code Panel} within the system.
  *
- * <p>This class encapsulates an integer value that signifies the role of a UI element. The
- * specific meaning of the role value is determined by the system using it.
+ * <p>This class encapsulates an integer value that signifies the role of a UI element. The specific
+ * meaning of the role value is determined by the system using it.
  */
 public class Role {
     public static Role DEFAULT_ROLE = new Builder().setLayoutId(-1).build();
-    @LayoutRes
-    private final int mLayoutId;
+    @LayoutRes private final int mLayoutId;
     private final boolean mIsDefault;
-    @Nullable
-    private final ComponentName[] mPersistedActivities;
+    @Nullable private final ComponentName[] mPersistedActivities;
 
     private Role(@LayoutRes int layoutId) {
         mLayoutId = layoutId;
@@ -52,16 +50,12 @@ public class Role {
         mPersistedActivities = persistedActivities;
     }
 
-    /**
-     * Returns if the role is the default role
-     */
+    /** Returns if the role is the default role */
     public boolean isDefault() {
         return mIsDefault;
     }
 
-    /**
-     * Inflates the view set in role attribute using the given context
-     */
+    /** Inflates the view set in role attribute using the given context */
     @Nullable
     public View getView(@NonNull Context context) {
         if (mLayoutId == 0) {
@@ -72,9 +66,7 @@ public class Role {
         return inflater.inflate(mLayoutId, null);
     }
 
-    /**
-     * Returns the persisted activities associated with this role.
-     */
+    /** Returns the persisted activities associated with this role. */
     @Nullable
     public ComponentName[] getPersistedActivities() {
         return mPersistedActivities;
@@ -82,11 +74,9 @@ public class Role {
 
     /** Builder for {@link Role} objects. */
     public static class Builder {
-        @LayoutRes
-        private int mLayoutId = 0;
+        @LayoutRes private int mLayoutId = 0;
         protected boolean mIsDefault = false;
-        @NonNull
-        protected ArraySet<ComponentName> mPersistedActivities = new ArraySet<>();
+        @NonNull protected ArraySet<ComponentName> mPersistedActivities = new ArraySet<>();
 
         public Builder() {}
 
@@ -121,17 +111,14 @@ public class Role {
         /** Returns the {@link Role} instance */
         @NonNull
         public Role build() {
-            if (mLayoutId == 0
-                    && !mIsDefault
-                    && mPersistedActivities.isEmpty()) {
+            if (mLayoutId == 0 && !mIsDefault && mPersistedActivities.isEmpty()) {
                 return DEFAULT_ROLE;
             }
 
             if (mLayoutId != 0) {
                 return new Role(mLayoutId);
             } else {
-                return new Role(mIsDefault,
-                        mPersistedActivities.toArray(ComponentName[]::new));
+                return new Role(mIsDefault, mPersistedActivities.toArray(ComponentName[]::new));
             }
         }
     }

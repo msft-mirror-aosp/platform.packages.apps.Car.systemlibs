@@ -34,8 +34,10 @@ public class PanelTransactionTest {
     @Test
     public void testSetPanelTransaction() {
         Transition mockTransition = mock(Transition.class);
-        PanelTransaction transaction = new PanelTransaction.Builder().addPanelTransaction(
-                TEST_PANEL_ID, mockTransition).build();
+        PanelTransaction transaction =
+                new PanelTransaction.Builder()
+                        .addPanelTransaction(TEST_PANEL_ID, mockTransition)
+                        .build();
 
         // Check if the transaction is added correctly
         assertThat(transaction.getPanelTransactionStates()).hasSize(1);
@@ -47,10 +49,11 @@ public class PanelTransactionTest {
 
     @Test
     public void testGetPanelTransactionStates() {
-        PanelTransaction transaction = new PanelTransaction.Builder()
-                .addPanelTransaction(TEST_PANEL_ID, mock(Transition.class))
-                .addPanelTransaction(TEST_PANEL_ID_2, mock(Transition.class))
-                .build();
+        PanelTransaction transaction =
+                new PanelTransaction.Builder()
+                        .addPanelTransaction(TEST_PANEL_ID, mock(Transition.class))
+                        .addPanelTransaction(TEST_PANEL_ID_2, mock(Transition.class))
+                        .build();
 
         // Check if the correct number of transactions are returned
         assertThat(transaction.getPanelTransactionStates()).hasSize(/* expectedSize= */ 2);
@@ -59,8 +62,8 @@ public class PanelTransactionTest {
     @Test
     public void testSetAnimator() {
         Animator mockAnimator = mock(Animator.class);
-        PanelTransaction transaction = new PanelTransaction.Builder().addAnimator(TEST_PANEL_ID,
-                mockAnimator).build();
+        PanelTransaction transaction =
+                new PanelTransaction.Builder().addAnimator(TEST_PANEL_ID, mockAnimator).build();
 
         // Check if the animator is added correctly
         assertThat(transaction.getAnimators()).hasSize(/* expectedSize= */ 1);
@@ -71,10 +74,11 @@ public class PanelTransactionTest {
 
     @Test
     public void testGetAnimators() {
-        PanelTransaction transaction = new PanelTransaction.Builder()
-                .addAnimator(TEST_PANEL_ID, mock(Animator.class))
-                .addAnimator(TEST_PANEL_ID_2, mock(Animator.class))
-                .build();
+        PanelTransaction transaction =
+                new PanelTransaction.Builder()
+                        .addAnimator(TEST_PANEL_ID, mock(Animator.class))
+                        .addAnimator(TEST_PANEL_ID_2, mock(Animator.class))
+                        .build();
 
         // Check if the correct number of animators are returned
         assertThat(transaction.getAnimators()).hasSize(/* expectedSize= */ 2);
@@ -83,9 +87,10 @@ public class PanelTransactionTest {
     @Test
     public void testGetPanelTransactionState_existingId() {
         Transition mockTransition = mock(Transition.class);
-        PanelTransaction transaction = new PanelTransaction.Builder()
-                .addPanelTransaction(TEST_PANEL_ID, mockTransition)
-                .build();
+        PanelTransaction transaction =
+                new PanelTransaction.Builder()
+                        .addPanelTransaction(TEST_PANEL_ID, mockTransition)
+                        .build();
 
         assertThat(transaction.getPanelTransactionState(TEST_PANEL_ID)).isEqualTo(mockTransition);
     }

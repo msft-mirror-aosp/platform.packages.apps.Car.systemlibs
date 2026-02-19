@@ -23,9 +23,8 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 /**
- * Defines the conditions for a specific Critical User Journey (CUJ).
- * This class acts as a "recipe" for identifying a CUJ based on the
- * triggering event and the state of UI panels before and after.
+ * Defines the conditions for a specific Critical User Journey (CUJ). This class acts as a "recipe"
+ * for identifying a CUJ based on the triggering event and the state of UI panels before and after.
  */
 public class CujDefinition {
 
@@ -38,15 +37,18 @@ public class CujDefinition {
     /**
      * Constructs a CujDefinition.
      *
-     * @param cujType         The integer identifier for the CUJ.
+     * @param cujType The integer identifier for the CUJ.
      * @param relevantPanelId The ID of the panel that is the main subject of this CUJ.
-     * @param eventPredicate  A predicate to match the triggering event.
-     * @param preconditions   A map of panel IDs to predicates defining the required state BEFORE
-     *                        the event.
-     * @param postconditions  A map of panel IDs to predicates defining the required state AFTER the
-     *                        event.
+     * @param eventPredicate A predicate to match the triggering event.
+     * @param preconditions A map of panel IDs to predicates defining the required state BEFORE the
+     *     event.
+     * @param postconditions A map of panel IDs to predicates defining the required state AFTER the
+     *     event.
      */
-    public CujDefinition(int cujType, String relevantPanelId, Predicate<Event> eventPredicate,
+    public CujDefinition(
+            int cujType,
+            String relevantPanelId,
+            Predicate<Event> eventPredicate,
             Map<String, Predicate<PanelState>> preconditions,
             Map<String, Predicate<PanelState>> postconditions) {
         this.mCujType = cujType;
@@ -67,13 +69,13 @@ public class CujDefinition {
     /**
      * Checks if this CUJ definition matches the given event and panel states.
      *
-     * @param event       The event that occurred.
+     * @param event The event that occurred.
      * @param stateBefore A map of panel IDs to their states before the event.
-     * @param stateAfter  A map of panel IDs to their states after the event.
+     * @param stateAfter A map of panel IDs to their states after the event.
      * @return {@code true} if all conditions of this CUJ definition are met.
      */
-    public boolean matches(Event event, Map<String, PanelState> stateBefore,
-            Map<String, PanelState> stateAfter) {
+    public boolean matches(
+            Event event, Map<String, PanelState> stateBefore, Map<String, PanelState> stateAfter) {
         // 1. Check if the event matches.
         if (!mEventPredicate.test(event)) {
             return false;
