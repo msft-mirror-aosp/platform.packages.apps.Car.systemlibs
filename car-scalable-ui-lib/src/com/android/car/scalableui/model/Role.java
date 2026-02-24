@@ -26,6 +26,8 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.Collection;
+
 /**
  * Represents the role of a {@code Panel} within the system.
  *
@@ -91,11 +93,23 @@ public class Role {
 
         /** Adds a PersistentActivity */
         public Builder addPersistentActivity(@NonNull String activityComponent) {
+            ComponentName componentName = ComponentName.unflattenFromString(activityComponent);
+            return addPersistentActivity(componentName);
+        }
+
+        /** Adds a PersistentActivity */
+        public Builder addPersistentActivity(@NonNull ComponentName componentName) {
             mLayoutId = 0;
             mIsDefault = false;
-
-            ComponentName componentName = ComponentName.unflattenFromString(activityComponent);
             mPersistedActivities.add(componentName);
+            return this;
+        }
+
+        /** Add PersistentActivities */
+        public Builder addPersistentActivities(@NonNull Collection<ComponentName> componentNames) {
+            mLayoutId = 0;
+            mIsDefault = false;
+            mPersistedActivities.addAll(componentNames);
             return this;
         }
 
