@@ -30,13 +30,6 @@ flag {
 }
 
 flag {
-    name: "scalable_ui_task_focus"
-    namespace: "car_sys_exp"
-    description: "This flag controls enabling task focus logic for ScalableUI."
-    bug: "422571603"
-}
-
-flag {
     name: "scalable_ui_handle_configuration_change"
     namespace: "car_sys_exp"
     description: "This flag controls enabling scalable ui to handle configuration changes."
