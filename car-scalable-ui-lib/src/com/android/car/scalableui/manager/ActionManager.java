@@ -26,15 +26,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages and dispatches {@link Action} objects based on incoming {@link Event}s.
- * This class maintains a list of registered actions and provides a mechanism to
- * trigger these actions via broadcast intents when a matching event occurs.
+ * Manages and dispatches {@link Action} objects based on incoming {@link Event}s. This class
+ * maintains a list of registered actions and provides a mechanism to trigger these actions via
+ * broadcast intents when a matching event occurs.
  *
- * <p>Actions are expected to be defined externally and loaded into the manager
- * using the {@link #setActions(List)} method. When an event is handled,
- * the manager iterates through the registered actions, checks if an action's
- * trigger condition is met by the event, and if so, sends an ordered broadcast
- * with the intent associated with that action.
+ * <p>Actions are expected to be defined externally and loaded into the manager using the {@link
+ * #setActions(List)} method. When an event is handled, the manager iterates through the registered
+ * actions, checks if an action's trigger condition is met by the event, and if so, sends an ordered
+ * broadcast with the intent associated with that action.
  */
 public class ActionManager {
     private static final String TAG = ActionManager.class.getSimpleName();
@@ -45,13 +44,12 @@ public class ActionManager {
 
     private final List<Action> mActions = new ArrayList<>();
 
-    private ActionManager() {
-    }
+    private ActionManager() {}
 
     /**
-     * Handles an event by triggering relevant actions.
-     * This method iterates through all registered action definitions, checks if any actions
-     * are a match for the given event, and triggers such an event by broadcasting an intent.
+     * Handles an event by triggering relevant actions. This method iterates through all registered
+     * action definitions, checks if any actions are a match for the given event, and triggers such
+     * an event by broadcasting an intent.
      *
      * @param event The event to be handled.
      */
@@ -70,9 +68,7 @@ public class ActionManager {
         }
     }
 
-    /**
-     * Reloads {@link Action} list.
-     */
+    /** Reloads {@link Action} list. */
     public static void setActions(List<Action> actions) {
         sInstance.mActions.clear();
         sInstance.mActions.addAll(actions);

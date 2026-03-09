@@ -15,8 +15,8 @@
  */
 package com.android.car.scalableui.model;
 
-import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.CONTROLLER_NAME_TAG;
-import static com.android.car.scalableui.loader.xml.PanelTagXmlParser.TASK_TOOLBAR_CONTROLLER_TAG;
+import static com.android.car.scalableui.loader.xml.parser.PanelControllerParser.CONTROLLER_NAME_TAG;
+import static com.android.car.scalableui.loader.xml.parser.PanelControllerParser.TASK_TOOLBAR_CONTROLLER_TAG;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -31,26 +31,22 @@ import java.util.Objects;
 
 /**
  * Represents immutable metadata associated with a panel controller.
- * <p>
- * This class acts as a data holder for configuration details, breakpoints, and
- * identification for a specific controller. It is designed to be immutable after
- * construction, ensuring that its state cannot change once created.
- * <p>
- * Instances are typically created using the {@link Builder} pattern via the
- * static factory method {@link #builder(String)}.
+ *
+ * <p>This class acts as a data holder for configuration details, breakpoints, and identification
+ * for a specific controller. It is designed to be immutable after construction, ensuring that its
+ * state cannot change once created.
+ *
+ * <p>Instances are typically created using the {@link Builder} pattern via the static factory
+ * method {@link #builder(String)}.
  */
 public final class PanelControllerMetadata {
     public static final String TAG = PanelControllerMetadata.class.getSimpleName();
 
-    @NonNull
-    private final Bundle mConfigurations;
-    @NonNull
-    private final List<BreakPoint> mBreakPoints;
-    @NonNull
-    private final String mId;
+    @NonNull private final Bundle mConfigurations;
+    @NonNull private final List<BreakPoint> mBreakPoints;
+    @NonNull private final String mId;
 
-    public PanelControllerMetadata(String id, List<BreakPoint> breakPoints,
-            Bundle bundle) {
+    public PanelControllerMetadata(String id, List<BreakPoint> breakPoints, Bundle bundle) {
         mId = id;
         mBreakPoints = new ArrayList<>(breakPoints);
         mConfigurations = new Bundle(bundle);
@@ -85,9 +81,7 @@ public final class PanelControllerMetadata {
         return null;
     }
 
-    /**
-     * Returns the bundle containing all configurations.
-     */
+    /** Returns the bundle containing all configurations. */
     @NonNull
     public Bundle getConfigurations() {
         return mConfigurations;
@@ -103,17 +97,13 @@ public final class PanelControllerMetadata {
         return mConfigurations.containsKey(configName);
     }
 
-    /**
-     * Gets the list of breakpoints associated with this controller metadata.
-     */
+    /** Gets the list of breakpoints associated with this controller metadata. */
     @NonNull
     public List<BreakPoint> getBreakPoints() {
         return mBreakPoints;
     }
 
-    /**
-     * Gets the unique identifier for this metadata instance.
-     */
+    /** Gets the unique identifier for this metadata instance. */
     @NonNull
     public String getId() {
         return mId;
@@ -176,7 +166,7 @@ public final class PanelControllerMetadata {
         /**
          * Adds or replaces a key-value pair in the configuration map for the metadata.
          *
-         * @param key   The non-null configuration key.
+         * @param key The non-null configuration key.
          * @param value The non-null configuration value.
          * @return This {@link Builder} instance for fluent chaining.
          */
@@ -198,13 +188,13 @@ public final class PanelControllerMetadata {
 
         /**
          * Sets the list of {@link BreakPoint} for the metadata being built.
-         * <p>
-         * This method <b>replaces</b> any previously added breakpoints. It clears the
-         * current internal list and adds all elements from the provided list. A defensive
-         * copy of the provided list's elements is made.
          *
-         * @param breakPoints The list of {@link BreakPoint} objects to set. If null,
-         *                    the internal list will be cleared. (Consider disallowing null?)
+         * <p>This method <b>replaces</b> any previously added breakpoints. It clears the current
+         * internal list and adds all elements from the provided list. A defensive copy of the
+         * provided list's elements is made.
+         *
+         * @param breakPoints The list of {@link BreakPoint} objects to set. If null, the internal
+         *     list will be cleared. (Consider disallowing null?)
          * @return This {@link Builder} instance for fluent chaining.
          */
         public Builder addBreakPoints(List<BreakPoint> breakPoints) {
@@ -219,9 +209,7 @@ public final class PanelControllerMetadata {
                 Log.e(TAG, "Controller name cannot be empty");
             }
             if (mBreakPoints != null) {
-                mBreakPoints.sort(Comparator.comparing(
-                        BreakPoint::getPoint));
-
+                mBreakPoints.sort(Comparator.comparing(BreakPoint::getPoint));
             }
             return new PanelControllerMetadata(mId, mBreakPoints, mConfigurations);
         }

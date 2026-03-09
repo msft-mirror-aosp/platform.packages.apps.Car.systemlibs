@@ -36,9 +36,12 @@ public class PanelTransaction {
 
     /** A map of panel IDs to panel {@link Animator}s. */
     private final HashMap<String, Animator> mAnimatorMap;
+
     private final HashSet<String> mLockededPanelIdSet;
+
     /** A set of panel ids who's animations should be merged with the next transaction. */
     private final HashSet<String> mMergeAnimationPanelIds = new HashSet<>();
+
     private final List<Event> mTransactionEvents;
     private final long mBuildTime;
     private boolean mHasWindowChanges;
@@ -46,8 +49,10 @@ public class PanelTransaction {
     private Runnable mAnimationStartCallbackRunnable;
     private Runnable mAnimationEndCallbackRunnable;
 
-    public PanelTransaction(Map<String, Transition> transactionMap,
-            Map<String, Animator> animatorMap, Set<String> lockededPanelIdSet,
+    public PanelTransaction(
+            Map<String, Transition> transactionMap,
+            Map<String, Animator> animatorMap,
+            Set<String> lockededPanelIdSet,
             List<Event> transactionEvents) {
         mTransactionMap = new HashMap<>(transactionMap);
         mAnimatorMap = new HashMap<>(animatorMap);
@@ -77,37 +82,28 @@ public class PanelTransaction {
         return mLockededPanelIdSet;
     }
 
-    /**
-     * Add panel id to set of panels that are to be merged with the next PanelTransaction.
-     */
+    /** Add panel id to set of panels that are to be merged with the next PanelTransaction. */
     public void addPanelIdToAnimationMerge(@NonNull String panelId) {
         mMergeAnimationPanelIds.add(panelId);
     }
 
-    /**
-     * Check if a panel id should be merged with the next PanelTransaction.
-     */
+    /** Check if a panel id should be merged with the next PanelTransaction. */
     public boolean shouldMergePanelAnimation(@NonNull String panelId) {
         return mMergeAnimationPanelIds.contains(panelId);
     }
 
-    /**
-     * Returns the set of events that were sent in the creation of this transaction.
-     */
+    /** Returns the set of events that were sent in the creation of this transaction. */
     public List<Event> getTransactionEvents() {
         return mTransactionEvents;
     }
 
-    /**
-     * Returns a timestamp of when this PanelTransaction was built.
-     */
+    /** Returns a timestamp of when this PanelTransaction was built. */
     public long getBuildTime() {
         return mBuildTime;
     }
 
     /**
-     * Adds a {@link Runnable} to be executed when the animations are starting for this
-     * transaction.
+     * Adds a {@link Runnable} to be executed when the animations are starting for this transaction.
      */
     void setAnimationStartCallbackRunnable(@NonNull Runnable runnable) {
         mAnimationStartCallbackRunnable = runnable;
@@ -139,7 +135,6 @@ public class PanelTransaction {
         return mAnimationEndCallbackRunnable;
     }
 
-
     /**
      * Retrieves the {@link Transition} state associated with the given panel ID.
      *
@@ -150,9 +145,7 @@ public class PanelTransaction {
         return mTransactionMap.get(id);
     }
 
-    /**
-     * Return if this Panel transaction contains any window change.
-     */
+    /** Return if this Panel transaction contains any window change. */
     public boolean hasWindowChanges() {
         return mHasWindowChanges;
     }
@@ -180,7 +173,7 @@ public class PanelTransaction {
         /**
          * Adds a {@link Transition} for the panel with the specified ID.
          *
-         * @param id         The ID of the panel.
+         * @param id The ID of the panel.
          * @param transition The transition to apply to the panel.
          * @return The builder instance.
          */
@@ -190,9 +183,7 @@ public class PanelTransaction {
             return this;
         }
 
-        /**
-         * Sets a flag indicating whether the object under construction has window changes.
-         */
+        /** Sets a flag indicating whether the object under construction has window changes. */
         @NonNull
         public Builder setHasWindowChanges(boolean hasWindowChanges) {
             mHasWindowChanges = hasWindowChanges;
@@ -202,7 +193,7 @@ public class PanelTransaction {
         /**
          * Adds a {@link Animator} for the panel with the specified ID.
          *
-         * @param id       The ID of the panel.
+         * @param id The ID of the panel.
          * @param animator The animator to apply to the panel.
          * @return The builder instance.
          */
@@ -232,18 +223,14 @@ public class PanelTransaction {
             return this;
         }
 
-        /**
-         * Adds the ID of a panel that should remain unchanged during this transaction.
-         */
+        /** Adds the ID of a panel that should remain unchanged during this transaction. */
         @NonNull
         public Builder addLockedPanelId(@NonNull String id) {
             mLockedPanelIdSet.add(id);
             return this;
         }
 
-        /**
-         * Set's the events that were sent that led to the creation of this transaction.
-         */
+        /** Set's the events that were sent that led to the creation of this transaction. */
         @NonNull
         public Builder setTransactionEvents(@NonNull List<Event> events) {
             mTransactionEvents = events;
@@ -257,8 +244,9 @@ public class PanelTransaction {
          */
         @NonNull
         public PanelTransaction build() {
-            PanelTransaction panelTransaction = new PanelTransaction(mTransactionMap, mAnimatorMap,
-                    mLockedPanelIdSet, mTransactionEvents);
+            PanelTransaction panelTransaction =
+                    new PanelTransaction(
+                            mTransactionMap, mAnimatorMap, mLockedPanelIdSet, mTransactionEvents);
             panelTransaction.setHasWindowChanges(mHasWindowChanges);
             if (mAnimationStartCallbackRunnable != null) {
                 panelTransaction.setAnimationStartCallbackRunnable(mAnimationStartCallbackRunnable);

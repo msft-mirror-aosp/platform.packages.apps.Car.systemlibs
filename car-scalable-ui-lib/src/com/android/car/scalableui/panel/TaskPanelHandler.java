@@ -15,12 +15,8 @@
  */
 package com.android.car.scalableui.panel;
 
-/**
- * An interface that defines a handler for a task panel.
- */
+/** An interface that defines a handler for a task panel. */
 public interface TaskPanelHandler {
-    /**
-     * Called when an application is installed or uninstalled from the android device.
-     */
+    /** Called when an application is installed or uninstalled from the android device. */
     void onApplicationChanged();
 }

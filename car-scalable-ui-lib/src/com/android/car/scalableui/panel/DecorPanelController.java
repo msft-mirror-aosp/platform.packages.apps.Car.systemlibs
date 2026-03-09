@@ -19,34 +19,26 @@ import android.view.View;
 
 import com.android.car.scalableui.model.PanelControllerMetadata;
 
-/**
- * Interface for DecorPanel controller
- */
+/** Interface for DecorPanel controller */
 public interface DecorPanelController {
-    /**
-     * Returns a {@link View} to show in the decor panel.
-     */
+    /** Returns a {@link View} to show in the decor panel. */
     View getView();
 
-    /**
-     * Refreshes the theme.
-     */
+    /** Refreshes the theme. */
     void refreshTheme();
 
-
-    /**
-     * Destroy the panel controller.
-     */
+    /** Destroy the panel controller. */
     void destroy();
 
     /**
      * Factory for creating an implementation of the DecorPanelController.
+     *
      * @param <T> the type of the DecorPanelController implementation
      */
     interface Factory<T extends DecorPanelController> {
         /**
-         * Create an instance of the DecorPanelController implementation using the provided
-         * {@link PanelControllerMetadata} for a given panelId.
+         * Create an instance of the DecorPanelController implementation using the provided {@link
+         * PanelControllerMetadata} for a given panelId.
          */
         T create(String panelId, PanelControllerMetadata metadata);
     }

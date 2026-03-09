@@ -27,24 +27,20 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Defines the type of a panel in Scalable UI.
- */
-@IntDef(value = {
-        TASK,
-        DECOR,
-        SYSTEM_BAR,
-        HUN
-})
+/** Defines the type of a panel in Scalable UI. */
+@IntDef(value = {TASK, DECOR, SYSTEM_BAR, HUN})
 @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
 @Retention(RetentionPolicy.SOURCE)
 public @interface PanelType {
     /** A panel that hosts a task. */
     int TASK = 0;
+
     /** A panel that hosts decorative elements. */
     int DECOR = 1;
+
     /** A panel that hosts system bars. */
     int SYSTEM_BAR = 2;
+
     /** A panel that hosts Heads-up notifications. */
     int HUN = 3;
 }

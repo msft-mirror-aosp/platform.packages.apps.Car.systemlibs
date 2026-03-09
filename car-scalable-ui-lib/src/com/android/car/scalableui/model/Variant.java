@@ -39,7 +39,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 /**
  * Represents a specific visual state or variant of a {@code Panel}.
  *
@@ -55,8 +54,7 @@ public class Variant {
     private final RectEvaluator mRectEvaluator = new RectEvaluator();
     private final IntEvaluator mIntEvaluator = new IntEvaluator();
 
-    @NonNull
-    protected String mId;
+    @NonNull protected String mId;
 
     public String mIdName;
     private float mAlpha;
@@ -64,22 +62,17 @@ public class Variant {
     private int mLayer;
     private boolean mCanFocusOnTransition;
     private Corner mCornerRadius;
-    @NonNull
-    private Rect mBounds;
-    @NonNull
-    private Rect mSafeBounds;
-    @NonNull
-    private Insets mInsets;
-    @NonNull
-    private final Map<String, Decor> mDecors;
-    @NonNull
-    private Rect mTaskToolbarBounds;
+    @NonNull private Rect mBounds;
+    @NonNull private Rect mSafeBounds;
+    @NonNull private Insets mInsets;
+    @NonNull private final Map<String, Decor> mDecors;
+    @NonNull private Rect mTaskToolbarBounds;
 
     /**
      * Constructs a Variant object with the specified ID. This constructor is package-private and is
      * intended to be used by the VariantBuilder.
      *
-     * @param id     The ID of the variant.
+     * @param id The ID of the variant.
      * @param idName The name of res ID of this variant.
      */
     Variant(@NonNull String id, String idName) {
@@ -104,7 +97,7 @@ public class Variant {
      *
      * <p>If a base variant is provided, the new variant inherits its visual properties.
      *
-     * @param id   The ID of the variant.
+     * @param id The ID of the variant.
      * @param base The optional base variant to inherit properties from.
      */
     Variant(@NonNull String id, @NonNull Variant base, String idName) {
@@ -130,9 +123,7 @@ public class Variant {
         return mId;
     }
 
-    /**
-     * Returns the res ID name of the variant.
-     */
+    /** Returns the res ID name of the variant. */
     @NonNull
     public String getIdName() {
         return mIdName;
@@ -141,9 +132,9 @@ public class Variant {
     /**
      * Creates an animator to transition from the current state of a panel to this variant.
      *
-     * @param panel        The panel to animate.
-     * @param toVariant    The target variant to animate to.
-     * @param duration     The duration of the animation.
+     * @param panel The panel to animate.
+     * @param toVariant The target variant to animate to.
+     * @param duration The duration of the animation.
      * @param interpolator The interpolator to use for the animation.
      * @return An animator that animates the panel's properties to the target variant.
      */
@@ -184,24 +175,27 @@ public class Variant {
                         float alpha = mFloatEvaluator.evaluate(fraction, fromAlpha, toAlpha);
                         panel.setAlpha(alpha);
                         builder.setTopLeftRadius(
-                                mIntEvaluator.evaluate(fraction,
+                                mIntEvaluator.evaluate(
+                                        fraction,
                                         fromCornerRadius.getTopLeftRadius(),
                                         toCornerRadius.getTopLeftRadius()));
                         builder.setTopRightRadius(
-                                mIntEvaluator.evaluate(fraction,
+                                mIntEvaluator.evaluate(
+                                        fraction,
                                         fromCornerRadius.getTopRightRadius(),
                                         toCornerRadius.getTopRightRadius()));
                         builder.setBottomLeftRadius(
-                                mIntEvaluator.evaluate(fraction,
+                                mIntEvaluator.evaluate(
+                                        fraction,
                                         fromCornerRadius.getBottomLeftRadius(),
                                         toCornerRadius.getBottomLeftRadius()));
                         builder.setBottomRightRadius(
-                                mIntEvaluator.evaluate(fraction,
+                                mIntEvaluator.evaluate(
+                                        fraction,
                                         fromCornerRadius.getBottomRightRadius(),
                                         toCornerRadius.getBottomRightRadius()));
                         panel.setCornerRadius(builder.build());
-                        Rect insets = mRectEvaluator.evaluate(fraction, fromInsets,
-                                toInsets);
+                        Rect insets = mRectEvaluator.evaluate(fraction, fromInsets, toInsets);
                         panel.setInsets(Insets.of(insets));
                         if (DEBUG) {
                             Log.d(TAG, "Panel updated: " + panel);
@@ -356,19 +350,17 @@ public class Variant {
         return mInsets;
     }
 
-    /**
-     * Sets insets.
-     * This is essentially the panel's insets.
-     */
+    /** Sets insets. This is essentially the panel's insets. */
     protected void setInsets(@NonNull Insets insets) {
         mInsets = insets;
     }
 
     protected void setDecors(@NonNull Set<Decor> decors) {
         mDecors.clear();
-        decors.forEach(decor -> {
-            mDecors.put(decor.getId(), decor);
-        });
+        decors.forEach(
+                decor -> {
+                    mDecors.put(decor.getId(), decor);
+                });
     }
 
     /**
@@ -383,32 +375,42 @@ public class Variant {
     @Override
     @NonNull
     public String toString() {
-        String decorString = mDecors.isEmpty()
-                ? "empty"
-                : mDecors.entrySet()
-                        .stream()
-                        .map(entry -> entry.getKey() + "=" + entry.getValue())
-                        .collect(Collectors.joining(" , "));
+        String decorString =
+                mDecors.isEmpty()
+                        ? "empty"
+                        : mDecors.entrySet().stream()
+                                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                                .collect(Collectors.joining(" , "));
 
         return "Variant{"
-                + "\n\tmId=" + mId
-                + "\n\tmIdName=" + mIdName
-                + "\n\tmAlpha=" + mAlpha
-                + "\n\tmIsVisible=" + mIsVisible
-                + "\n\tmLayer=" + mLayer
-                + "\n\tmCanFocusOnTransition=" + mCanFocusOnTransition
-                + "\n\tmBounds=" + mBounds
-                + "\n\tmSafeBounds=" + mSafeBounds
-                + "\n\tmTaskToolbarBounds=" + mTaskToolbarBounds
-                + "\n\tmCornerRadius=" + mCornerRadius
-                + "\n\tmInsets=" + mInsets
-                + "\n\tmDecors=" + decorString
+                + "\n\tmId="
+                + mId
+                + "\n\tmIdName="
+                + mIdName
+                + "\n\tmAlpha="
+                + mAlpha
+                + "\n\tmIsVisible="
+                + mIsVisible
+                + "\n\tmLayer="
+                + mLayer
+                + "\n\tmCanFocusOnTransition="
+                + mCanFocusOnTransition
+                + "\n\tmBounds="
+                + mBounds
+                + "\n\tmSafeBounds="
+                + mSafeBounds
+                + "\n\tmTaskToolbarBounds="
+                + mTaskToolbarBounds
+                + "\n\tmCornerRadius="
+                + mCornerRadius
+                + "\n\tmInsets="
+                + mInsets
+                + "\n\tmDecors="
+                + decorString
                 + '}';
     }
 
-    /**
-     * Returns a map of id to {@code Decor} pair.
-     */
+    /** Returns a map of id to {@code Decor} pair. */
     @NonNull
     public Map<String, Decor> getDecors() {
         return mDecors;
@@ -442,9 +444,9 @@ public class Variant {
      * Compares two lists of variants to determine if they represent the same set of critical visual
      * states.
      *
-     * <p>This method verifies that both lists have the same size and that every variant in the
-     * new list has a corresponding variant in the old list (matched by ID name) that satisfies
-     * {@link #matches(Variant)}.
+     * <p>This method verifies that both lists have the same size and that every variant in the new
+     * list has a corresponding variant in the old list (matched by ID name) that satisfies {@link
+     * #matches(Variant)}.
      *
      * <p>The comparison focuses on properties that require a window transaction to update (e.g.,
      * bounds, visibility, layer), while ignoring properties that can be updated without one (e.g.,
@@ -452,22 +454,24 @@ public class Variant {
      *
      * @param oldVariants The list of original variants.
      * @param newVariants The list of new variants to compare against.
-     * @return {@code true} if both lists contain the same set of critical variants;
-     *         {@code false} otherwise.
+     * @return {@code true} if both lists contain the same set of critical variants; {@code false}
+     *     otherwise.
      */
-    public static boolean matchesVariantList(@NonNull List<Variant> oldVariants,
-            @NonNull List<Variant> newVariants) {
+    public static boolean matchesVariantList(
+            @NonNull List<Variant> oldVariants, @NonNull List<Variant> newVariants) {
         if (oldVariants.size() != newVariants.size()) {
             return false;
         }
 
         // Use IdName as the key for the map since id is android resource id and may change after
         // asset update.
-        Map<String, Variant> oldVariantsMap = oldVariants.stream()
-                .collect(Collectors.toMap(
-                        Variant::getIdName,
-                        variant -> variant,
-                        (existing, replacement) -> existing));
+        Map<String, Variant> oldVariantsMap =
+                oldVariants.stream()
+                        .collect(
+                                Collectors.toMap(
+                                        Variant::getIdName,
+                                        variant -> variant,
+                                        (existing, replacement) -> existing));
         for (Variant variant : newVariants) {
             if (!oldVariantsMap.containsKey(variant.getIdName())) {
                 return false;
@@ -483,37 +487,38 @@ public class Variant {
 
     /** Builder for {@link Variant} objects. */
     public static class Builder {
-        @NonNull
-        protected String mId;
-        @NonNull
-        protected String mIdName;
-        @Nullable
-        protected Float mAlpha;
-        @Nullable
-        protected Boolean mIsVisible;
-        @Nullable
-        protected Integer mLayer;
-        @Nullable
-        protected Boolean mCanFocusOnTransition;
-        @Nullable
-        protected Rect mBounds;
-        @Nullable
-        protected Rect mSafeBounds;
-        @Nullable
-        protected Rect mTaskToolbarBounds;
-        @Nullable
-        protected Corner mCornerRadius;
-        @Nullable
-        protected Insets mInsets;
-        @Nullable
-        protected Variant mParent;
-        @NonNull
-        protected Set<Decor> mDecors;
+        @NonNull protected String mId;
+        @NonNull protected String mIdName;
+        @Nullable protected Float mAlpha;
+        @Nullable protected Boolean mIsVisible;
+        @Nullable protected Integer mLayer;
+        @Nullable protected Boolean mCanFocusOnTransition;
+        @Nullable protected Rect mBounds;
+        @Nullable protected Rect mSafeBounds;
+        @Nullable protected Rect mTaskToolbarBounds;
+        @Nullable protected Corner mCornerRadius;
+        @Nullable protected Insets mInsets;
+        @Nullable protected Variant mParent;
+        @Nullable protected String mParentId;
+        @NonNull protected Set<Decor> mDecors;
+        @Nullable protected String mPanelId;
 
         public Builder(@NonNull String id, @NonNull String idName) {
             mId = id;
             mDecors = new HashSet<>();
             mIdName = idName;
+        }
+
+        /** Sets the panel ID this variant belongs to. */
+        public Builder setPanelId(@Nullable String panelId) {
+            mPanelId = panelId;
+            return this;
+        }
+
+        /** Gets the panel ID this variant belongs to. */
+        @Nullable
+        public String getPanelId() {
+            return mPanelId;
         }
 
         /** Sets alpha */
@@ -555,9 +560,7 @@ public class Variant {
             return this;
         }
 
-        /**
-         * Sets TaskToolBar bounds. This is an area used to show TaskToolBar.
-         */
+        /** Sets TaskToolBar bounds. This is an area used to show TaskToolBar. */
         public Builder setTaskToolbarBounds(@NonNull Rect taskToolbarBounds) {
             mTaskToolbarBounds = taskToolbarBounds;
             return this;
@@ -575,9 +578,15 @@ public class Variant {
             return this;
         }
 
-        /** Sets parent */
+        /** Sets the parent variant for this variant. */
         public Builder setParent(@Nullable Variant parent) {
             mParent = parent;
+            return this;
+        }
+
+        /** Sets the parent variant id for this variant. */
+        public Builder setParentId(@Nullable String parentId) {
+            mParentId = parentId;
             return this;
         }
 
@@ -585,6 +594,19 @@ public class Variant {
         public Builder addDecor(Decor decor) {
             mDecors.add(decor);
             return this;
+        }
+
+        /**
+         * Builds the instance of the variant.
+         *
+         * @param panelState the panel state to resolve the parent variant from
+         */
+        @Nullable
+        public Variant build(@NonNull PanelState panelState) {
+            if (mParentId != null) {
+                mParent = panelState.getVariant(mParentId);
+            }
+            return build();
         }
 
         /** Returns the {@link Variant} instance */

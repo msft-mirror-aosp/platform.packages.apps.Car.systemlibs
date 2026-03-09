@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Android Open Source Project
+ * Copyright (C) 2026 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.car.scalableui.loader.xml;
 
-import android.content.Context;
+package com.android.car.scalableui.loader.xml.parser;
 
 import com.android.car.scalableui.model.Variant;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
-
-/**
- * Defines an object that parses a particular TAG to add it to the {@link Variant.Builder}
- */
-interface VariantPropertyParser {
+/** Factory interface for creating Variant Builders. */
+public interface VariantBuilderFactory {
     /**
-     * Parser for a given Variant Tag
+     * Creates a new Variant.Builder.
+     *
+     * @param id The ID of the variant.
+     * @param idName The resource name of the ID.
+     * @return A new Variant.Builder.
      */
-    Variant.Builder parse(Context context, XmlPullParser parser, Variant.Builder builder,
-            int displayId) throws XmlPullParserException, IOException;
+    Variant.Builder create(String id, String idName);
 }

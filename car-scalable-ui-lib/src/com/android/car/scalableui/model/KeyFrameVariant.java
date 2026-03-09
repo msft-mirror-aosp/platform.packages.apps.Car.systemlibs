@@ -34,7 +34,7 @@ import java.util.function.Function;
  *
  * <p>This class defines a series of keyframes, each associated with a {@link Variant} and a frame
  * position. The {@link #setFraction(float)} method sets the current fraction, which determines the
- * interpolation between keyframes.</p>
+ * interpolation between keyframes.
  *
  * <p>KeyFrameVariant allows for smooth transitions between different panel states by interpolating
  * properties such as bounds, visibility, and alpha.
@@ -54,7 +54,7 @@ public class KeyFrameVariant extends Variant {
          * Constructor for KeyFrame.
          *
          * @param framePosition The position of the keyframe (0-100).
-         * @param variant       The variant associated with this keyframe.
+         * @param variant The variant associated with this keyframe.
          */
         public KeyFrame(int framePosition, @NonNull Variant variant) {
             mFramePosition = framePosition;
@@ -63,12 +63,26 @@ public class KeyFrameVariant extends Variant {
 
         /** Builder for {@link KeyFrameVariant} objects. */
         public static class Builder {
-            private final int mFramePosition;
-            private final Variant mVariant;
+            private int mFramePosition;
+            private Variant mVariant;
+
+            public Builder() {}
 
             public Builder(int framePosition, @NonNull Variant variant) {
                 mVariant = variant;
                 mFramePosition = framePosition;
+            }
+
+            /** Sets the frame position for this KeyFrame. */
+            public Builder setFrame(int frame) {
+                mFramePosition = frame;
+                return this;
+            }
+
+            /** Sets the variant for this KeyFrame. */
+            public Builder setVariant(Variant variant) {
+                mVariant = variant;
+                return this;
             }
 
             /** Returns the {@link KeyFrameVariant} instance */
@@ -80,8 +94,10 @@ public class KeyFrameVariant extends Variant {
         @Override
         public String toString() {
             return "KeyFrame{"
-                    + "mFramePosition=" + mFramePosition
-                    + ", mVariant=" + mVariant
+                    + "mFramePosition="
+                    + mFramePosition
+                    + ", mVariant="
+                    + mVariant
                     + '}';
         }
     }
@@ -91,9 +107,9 @@ public class KeyFrameVariant extends Variant {
     /**
      * Constructor for KeyFrameVariant. Package-private, use the Builder.
      *
-     * @param id     The ID of this variant.
+     * @param id The ID of this variant.
      * @param idName The name of res ID of this variant.
-     * @param base   The base variant to inherit properties from.
+     * @param base The base variant to inherit properties from.
      */
     KeyFrameVariant(@NonNull String id, @NonNull Variant base, @NonNull String idName) {
         super(id, base, idName);
@@ -102,7 +118,7 @@ public class KeyFrameVariant extends Variant {
     /**
      * Constructor for KeyFrameVariant. Package-private, use the Builder.
      *
-     * @param id     The ID of this variant.
+     * @param id The ID of this variant.
      * @param idName The name of res ID of this variant.
      */
     KeyFrameVariant(@NonNull String id, @NonNull String idName) {
@@ -230,12 +246,12 @@ public class KeyFrameVariant extends Variant {
      * value (between 0 and 1). It calculates the fraction between the two keyframes, effectively
      * normalizing the overall fraction to the range between the keyframes.
      *
-     * <p>For example, if framePosition1 is 0, framePosition2 is 80, and fraction is 0.5, the
-     * result will be 0.75, because 0.5 lies at 62.5% of the range between 0 and 80.
+     * <p>For example, if framePosition1 is 0, framePosition2 is 80, and fraction is 0.5, the result
+     * will be 0.75, because 0.5 lies at 62.5% of the range between 0 and 80.
      *
      * @param framePosition1 The position of the first keyframe (0-100).
      * @param framePosition2 The position of the second keyframe (0-100).
-     * @param fraction       The overall fraction value (between 0 and 1).
+     * @param fraction The overall fraction value (between 0 and 1).
      * @return The fraction between the two keyframes.
      */
     private float getKeyFrameFraction(int framePosition1, int framePosition2, float fraction) {
@@ -291,19 +307,19 @@ public class KeyFrameVariant extends Variant {
         KeyFrame keyFrame1 = Objects.requireNonNull(before(fraction));
         KeyFrame keyFrame2 = Objects.requireNonNull(after(fraction));
         float fractionInBetween =
-                getKeyFrameFraction(
-                        keyFrame1.mFramePosition, keyFrame2.mFramePosition, fraction);
-        return mRectEvaluator.evaluate(fractionInBetween, rectFunction.apply(keyFrame1),
-                rectFunction.apply(keyFrame2));
+                getKeyFrameFraction(keyFrame1.mFramePosition, keyFrame2.mFramePosition, fraction);
+        return mRectEvaluator.evaluate(
+                fractionInBetween, rectFunction.apply(keyFrame1), rectFunction.apply(keyFrame2));
     }
 
     @NonNull
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("KeyFrameVariant{ mid=")
-                .append(mIdName)
-                .append(", mFraction=")
-                .append(mFraction);
+        StringBuilder sb =
+                new StringBuilder("KeyFrameVariant{ mid=")
+                        .append(mIdName)
+                        .append(", mFraction=")
+                        .append(mFraction);
         for (KeyFrame keyFrame : mKeyFrames) {
             sb.append(", keyFrame=").append(keyFrame);
         }
@@ -335,7 +351,7 @@ public class KeyFrameVariant extends Variant {
      * @return The interpolated alpha.
      */
     private float getAlpha(float fraction) {
-        if (mKeyFrames.isEmpty()) return 1;
+        if (mKeyFrames.isEmpty()) return super.getAlpha();
         KeyFrame keyFrame1 = before(fraction);
         float alpha1 = (Objects.requireNonNull(keyFrame1).mVariant.getAlpha());
         KeyFrame keyFrame2 = after(fraction);
@@ -366,6 +382,16 @@ public class KeyFrameVariant extends Variant {
         /** Returns the {@link KeyFrameVariant} instance */
         @Override
         @NonNull
+        public KeyFrameVariant build(PanelState panelState) {
+            if (mParentId != null) {
+                mParent = panelState.getVariant(mParentId);
+            }
+            return build();
+        }
+
+        /** Returns the {@link KeyFrameVariant} instance */
+        @Override
+        @NonNull
         public KeyFrameVariant build() {
             KeyFrameVariant variant;
             if (mParent != null) {
@@ -383,19 +409,26 @@ public class KeyFrameVariant extends Variant {
             if (mLayer != null) {
                 variant.setLayer(mLayer);
             }
+            if (mCanFocusOnTransition != null) {
+                variant.setCanFocusOnTransition(mCanFocusOnTransition);
+            }
             if (mBounds != null) {
-                variant.setBounds(new Rect(mBounds)); // Defensive copy
+                variant.setBounds(new Rect(mBounds));
             }
             if (mCornerRadius != null) {
                 variant.setCornerRadius(mCornerRadius);
             }
-            variant.setSafeBounds(new Rect((mSafeBounds != null) ? mSafeBounds : mBounds));
+            if (mSafeBounds != null) {
+                variant.setSafeBounds(new Rect(mSafeBounds));
+            } else if (mBounds != null) {
+                variant.setSafeBounds(new Rect(mBounds));
+            }
+
             if (mInsets != null) {
                 variant.setInsets(
                         Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
             }
 
-            // Sort keyframes by frame position after adding them all.
             mKeyFrames.sort(Comparator.comparingInt(o -> o.mFramePosition));
             for (KeyFrame keyFrame : mKeyFrames) {
                 variant.addKeyFrame(keyFrame);
