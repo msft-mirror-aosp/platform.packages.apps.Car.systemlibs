@@ -22,7 +22,6 @@ import android.view.Gravity;
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.loader.xml.ParserEnv;
-import com.android.car.scalableui.loader.xml.XmlChildParser;
 import com.android.car.scalableui.model.GravityVariant;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -32,7 +31,7 @@ import java.io.IOException;
 import java.util.Locale;
 
 /** Parsers {@link Integer} gravity value from XML. */
-public class GravityParser implements TagParser<Integer>, XmlChildParser<GravityVariant.Builder> {
+public class GravityParser implements XmlChildParser<GravityVariant.Builder> {
 
     public static final String GRAVITY_TAG = "Gravity";
     private static final String TAG = GravityParser.class.getSimpleName();
@@ -50,22 +49,7 @@ public class GravityParser implements TagParser<Integer>, XmlChildParser<Gravity
         int mGravity = Gravity.NO_GRAVITY;
     }
 
-    @NonNull
-    @Override
-    public Integer parseTag(@NonNull ParserEnv env, @NonNull XmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, null, GRAVITY_TAG);
 
-        GravityParsingState state = new GravityParsingState();
-        ATTRIBUTES.parse(env, parser, state);
-
-        // Skip any nested content.
-        while (parser.next() != XmlPullParser.END_TAG) {
-            // No nested tags expected.
-        }
-
-        return state.mGravity;
-    }
 
     private static int parseGravity(@NonNull String value) {
         int gravity = Gravity.NO_GRAVITY;
@@ -96,7 +80,16 @@ public class GravityParser implements TagParser<Integer>, XmlChildParser<Gravity
             @NonNull XmlPullParser parser,
             @NonNull GravityVariant.Builder builder)
             throws XmlPullParserException, IOException {
-        Integer gravity = parseTag(env, parser);
-        builder.setGravity(gravity);
+        parser.require(XmlPullParser.START_TAG, null, GRAVITY_TAG);
+
+        GravityParsingState state = new GravityParsingState();
+        ATTRIBUTES.parse(env, parser, state);
+
+        // Skip any nested content.
+        while (parser.next() != XmlPullParser.END_TAG) {
+            // No nested tags expected.
+        }
+
+        builder.setGravity(state.mGravity);
     }
 }

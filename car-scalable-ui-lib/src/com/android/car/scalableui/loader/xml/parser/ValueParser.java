@@ -24,6 +24,8 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.xmlpull.v1.XmlPullParser;
+
 import java.util.List;
 
 /**
@@ -143,4 +145,14 @@ public interface ValueParser {
      */
     @Nullable
     Animator parseAnimator(@NonNull Context context, @Nullable String value);
+
+    /**
+     * Parses an XML resource into an XmlPullParser.
+     *
+     * @param context The context used for resource resolution.
+     * @param value The raw string value.
+     * @return The XmlPullParser, or null if parsing fails.
+     */
+    @Nullable
+    XmlPullParser parseXml(@NonNull Context context, @Nullable String value);
 }

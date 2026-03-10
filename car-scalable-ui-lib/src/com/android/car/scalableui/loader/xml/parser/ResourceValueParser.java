@@ -29,6 +29,8 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.xmlpull.v1.XmlPullParser;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -87,7 +89,7 @@ public class ResourceValueParser extends BaseValueParser {
                         return context.getString(resId);
                     }
                 } catch (Resources.NotFoundException e) {
-                    // Ignore, fallback to raw value
+                    Log.w(TAG, "String resource not found for: " + value, e);
                 }
             }
         }
@@ -130,7 +132,7 @@ public class ResourceValueParser extends BaseValueParser {
                 try {
                     return context.getResources().getInteger(resId);
                 } catch (Resources.NotFoundException e) {
-                    // Ignore, fallback to raw value
+                    Log.w(TAG, "Integer resource not found for: " + value, e);
                 }
             }
         }
@@ -150,7 +152,7 @@ public class ResourceValueParser extends BaseValueParser {
                         return outValue.getFloat();
                     }
                 } catch (Resources.NotFoundException e) {
-                    // Ignore, fallback to raw value
+                    Log.w(TAG, "Float resource not found for: " + value, e);
                 }
             }
         }
@@ -227,6 +229,25 @@ public class ResourceValueParser extends BaseValueParser {
             }
         }
         return super.parseAnimator(context, value);
+    }
+
+    @Nullable
+    @Override
+    public XmlPullParser parseXml(@NonNull Context context, @Nullable String value) {
+        if (value != null && value.startsWith("@")) {
+            int resId = getResourceId(context, value, "xml");
+            if (resId != 0) {
+                try {
+                    String type = context.getResources().getResourceTypeName(resId);
+                    if ("xml".equals(type)) {
+                        return context.getResources().getXml(resId);
+                    }
+                } catch (Resources.NotFoundException e) {
+                    Log.w(TAG, "Xml resource not found for: " + value, e);
+                }
+            }
+        }
+        return super.parseXml(context, value);
     }
 
     private int getResourceId(Context context, String value, String defType) {

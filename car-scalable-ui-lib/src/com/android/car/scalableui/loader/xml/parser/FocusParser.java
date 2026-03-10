@@ -19,7 +19,6 @@ package com.android.car.scalableui.loader.xml.parser;
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.loader.xml.ParserEnv;
-import com.android.car.scalableui.loader.xml.XmlChildParser;
 import com.android.car.scalableui.loader.xml.XmlPullParserHelper;
 import com.android.car.scalableui.model.Focus;
 import com.android.car.scalableui.model.Variant;
@@ -30,7 +29,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /** Parser for {@link Focus} tag. */
-public class FocusParser implements TagParser<Focus>, XmlChildParser<Variant.Builder> {
+public class FocusParser implements XmlChildParser<Variant.Builder> {
     public static final String FOCUS_TAG = "Focus";
     public static final String FOCUS_ON_TRANSITION_ATTRIBUTE = "onTransition";
 
@@ -40,22 +39,6 @@ public class FocusParser implements TagParser<Focus>, XmlChildParser<Variant.Bui
                             FOCUS_ON_TRANSITION_ATTRIBUTE,
                             (builder, value) -> builder.mFocusOnTransition = value)
                     .build();
-
-    @NonNull
-    @Override
-    public Focus parseTag(@NonNull ParserEnv env, @NonNull XmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, null, FOCUS_TAG);
-
-        FocusBuilder builder = new FocusBuilder();
-        ATTRIBUTES.parse(env, parser, builder);
-
-        while (parser.next() != XmlPullParser.END_TAG) {
-            XmlPullParserHelper.throwIfUnknownTag(parser);
-        }
-
-        return builder.build();
-    }
 
     private static class FocusBuilder {
         boolean mFocusOnTransition = Focus.DEFAULT_FOCUS_ON_TRANSITION;
@@ -71,7 +54,15 @@ public class FocusParser implements TagParser<Focus>, XmlChildParser<Variant.Bui
             @NonNull XmlPullParser parser,
             @NonNull Variant.Builder builder)
             throws XmlPullParserException, IOException {
-        Focus focus = parseTag(env, parser);
-        builder.setCanFocusOnTransition(focus.canFocusOnTransition());
+        parser.require(XmlPullParser.START_TAG, null, FOCUS_TAG);
+
+        FocusBuilder focusBuilder = new FocusBuilder();
+        ATTRIBUTES.parse(env, parser, focusBuilder);
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.throwIfUnknownTag(parser);
+        }
+
+        builder.setCanFocusOnTransition(focusBuilder.build().canFocusOnTransition());
     }
 }

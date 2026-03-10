@@ -21,14 +21,10 @@ import android.platform.test.annotations.RequiresFlagsEnabled
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.car.scalableui.Flags
-import com.android.car.scalableui.loader.xml.parser.BackgroundParser
-import com.android.car.scalableui.loader.xml.parser.BoundsParser
-import com.android.car.scalableui.loader.xml.parser.GravityParser
-import com.android.car.scalableui.loader.xml.parser.InsetsParser
 import com.android.car.scalableui.loader.xml.parser.ResourceValueParser
 import com.android.car.scalableui.loader.xml.parser.SystemBarParser
 import com.android.car.scalableui.loader.xml.parser.TransitionParser
-import com.android.car.scalableui.loader.xml.parser.VisibilityParser
+import com.android.car.scalableui.loader.xml.parser.XmlChildParser
 import com.android.car.scalableui.model.PanelState
 import com.android.car.scalableui.model.Variant
 import com.android.car.scalableui.unit.R
@@ -38,6 +34,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
 
 @RunWith(AndroidJUnit4::class)
 class SystemBarParserTest {
@@ -56,11 +53,7 @@ class SystemBarParserTest {
         }
         val valueParser = ResourceValueParser()
         val registry = XmlParserRegistry()
-        registry.registerParser(VisibilityParser.VISIBILITY_TAG, VisibilityParser())
-        registry.registerParser(BoundsParser.BOUNDS_TAG, BoundsParser())
-        registry.registerParser(BackgroundParser.BACKGROUND_TAG, BackgroundParser())
-        registry.registerParser(InsetsParser.INSETS_TAG, InsetsParser())
-        registry.registerParser(GravityParser.GRAVITY_TAG, GravityParser())
+        CoreParserModule().registerParsers(registry)
 
         val parserContext = ParserEnv(context, valueParser, registry)
         val systemBarParser = SystemBarParser()
@@ -99,8 +92,8 @@ class SystemBarParserTest {
                 var depth = 1
                 while (depth > 0) {
                     when (parser.next()) {
-                        org.xmlpull.v1.XmlPullParser.END_TAG -> depth--
-                        org.xmlpull.v1.XmlPullParser.START_TAG -> depth++
+                        XmlPullParser.END_TAG -> depth--
+                        XmlPullParser.START_TAG -> depth++
                     }
                 }
             }
@@ -128,7 +121,7 @@ class SystemBarParserTest {
             </SystemBar>
         """.trimIndent()
 
-        val factory = org.xmlpull.v1.XmlPullParserFactory.newInstance()
+        val factory = XmlPullParserFactory.newInstance()
         val parser = factory.newPullParser()
         parser.setInput(java.io.StringReader(xml))
 

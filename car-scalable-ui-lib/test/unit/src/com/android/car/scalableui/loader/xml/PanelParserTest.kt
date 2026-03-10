@@ -66,6 +66,36 @@ class PanelParserTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    fun parseTaskPanel_withStringResourceController_setsPendingControllerId() {
+        val xml = """
+            <TaskPanel id="panel_id" controller="@string/default_config">
+            </TaskPanel>
+        """.trimIndent()
+
+        val factory = XmlPullParserFactory.newInstance()
+        val parser = factory.newPullParser()
+        parser.setInput(StringReader(xml))
+
+        // Advance to START_TAG
+        var eventType = parser.eventType
+        while (eventType != XmlPullParser.START_TAG) {
+            eventType = parser.next()
+        }
+
+        val valueParser = ResourceValueParser()
+        val registry = XmlParserRegistry()
+
+        val parserContext = ParserEnv(context, valueParser, registry)
+        val panelParser = PanelParser()
+        val panelState = panelParser.parseTag(parserContext, parser)
+
+        assertThat(panelState).isNotNull()
+        // @string/default_config maps to "DEFAULT" in test/unit/res/values/strings.xml
+        assertThat(panelState.pendingControllerId).isEqualTo("DEFAULT")
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
     fun parseTaskPanel_withIdController_setsPendingControllerId() {
         val xml = """
             <TaskPanel id="panel_id" controller="@id/my_controller_id">
@@ -91,5 +121,73 @@ class PanelParserTest {
 
         assertThat(panelState).isNotNull()
         assertThat(panelState.pendingControllerId).isEqualTo("my_controller_id")
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    fun parseTaskPanel_withTaskBehavior_parsesBehaviors() {
+        val xml = """
+            <TaskPanel id="panel_id">
+                <TaskBehavior taskProperties="testProp" newTaskLaunchPolicy="testPolicy" />
+            </TaskPanel>
+        """.trimIndent()
+
+        val factory = XmlPullParserFactory.newInstance()
+        val parser = factory.newPullParser()
+        parser.setInput(StringReader(xml))
+
+        // Advance to START_TAG
+        var eventType = parser.eventType
+        while (eventType != XmlPullParser.START_TAG) {
+            eventType = parser.next()
+        }
+
+        val valueParser = ResourceValueParser()
+        val registry = XmlParserRegistry()
+        com.android.car.scalableui.loader.xml.CoreParserModule().registerParsers(registry)
+
+        val parserContext = ParserEnv(context, valueParser, registry)
+        val panelParser = PanelParser()
+        val panelState = panelParser.parseTag(parserContext, parser)
+
+        assertThat(panelState).isNotNull()
+        assertThat(panelState.taskBehavior).isNotNull()
+        assertThat(panelState.taskBehavior?.taskProperties).isEqualTo("testProp")
+        assertThat(panelState.taskBehavior?.newTaskLaunchPolicy).isEqualTo("testPolicy")
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    fun parseTaskPanel_withSafeBounds_parsesSafeBounds() {
+        val xml = """
+            <TaskPanel id="panel_id">
+                <Variant id="var">
+                    <SafeBounds left="10" top="20" right="30" bottom="40" />
+                </Variant>
+            </TaskPanel>
+        """.trimIndent()
+
+        val factory = XmlPullParserFactory.newInstance()
+        val parser = factory.newPullParser()
+        parser.setInput(StringReader(xml))
+
+        // Advance to START_TAG
+        var eventType = parser.eventType
+        while (eventType != XmlPullParser.START_TAG) {
+            eventType = parser.next()
+        }
+
+        val valueParser = ResourceValueParser()
+        val registry = XmlParserRegistry()
+        com.android.car.scalableui.loader.xml.CoreParserModule().registerParsers(registry)
+
+        val parserContext = ParserEnv(context, valueParser, registry)
+        val panelParser = PanelParser()
+        val panelState = panelParser.parseTag(parserContext, parser)
+
+        assertThat(panelState).isNotNull()
+        val variant = panelState.getVariant("var")
+        assertThat(variant).isNotNull()
+        assertThat(variant!!.safeBounds).isEqualTo(android.graphics.Rect(10, 20, 30, 40))
     }
 }

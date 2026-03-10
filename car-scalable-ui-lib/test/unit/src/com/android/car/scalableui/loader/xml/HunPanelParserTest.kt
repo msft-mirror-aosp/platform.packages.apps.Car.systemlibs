@@ -30,10 +30,12 @@ import com.android.car.scalableui.model.HunState
 import com.android.car.scalableui.unit.R
 import com.google.common.truth.Truth.assertThat
 import java.io.IOException
+import java.io.StringReader
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
 
 @RunWith(AndroidJUnit4::class)
 class HunPanelParserTest {
@@ -94,7 +96,7 @@ class HunPanelParserTest {
             </HunPanel>
         """.trimIndent()
 
-        val factory = org.xmlpull.v1.XmlPullParserFactory.newInstance()
+        val factory = XmlPullParserFactory.newInstance()
         val parser = factory.newPullParser()
         parser.setInput(java.io.StringReader(xml))
 

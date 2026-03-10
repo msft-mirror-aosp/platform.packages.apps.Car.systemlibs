@@ -21,7 +21,6 @@ import android.graphics.Insets;
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.loader.xml.ParserEnv;
-import com.android.car.scalableui.loader.xml.XmlChildParser;
 import com.android.car.scalableui.loader.xml.XmlPullParserHelper;
 import com.android.car.scalableui.model.Variant;
 
@@ -31,7 +30,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /** Parser for {@link Insets} tag. */
-public class InsetsParser implements TagParser<Insets>, XmlChildParser<Variant.Builder> {
+public class InsetsParser implements XmlChildParser<Variant.Builder> {
     public static final String INSETS_TAG = "Insets";
     public static final String LEFT_ATTRIBUTE = "left";
     public static final String TOP_ATTRIBUTE = "top";
@@ -105,11 +104,14 @@ public class InsetsParser implements TagParser<Insets>, XmlChildParser<Variant.B
                             })
                     .build();
 
-    @NonNull
-    @Override
-    public Insets parseTag(@NonNull ParserEnv env, @NonNull XmlPullParser parser)
-            throws IOException, XmlPullParserException {
 
+
+    @Override
+    public void parse(
+            @NonNull ParserEnv env,
+            @NonNull XmlPullParser parser,
+            @NonNull Variant.Builder builder)
+            throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, null, INSETS_TAG);
 
         InsetsParsingState state = new InsetsParsingState();
@@ -119,16 +121,6 @@ public class InsetsParser implements TagParser<Insets>, XmlChildParser<Variant.B
             XmlPullParserHelper.throwIfUnknownTag(parser);
         }
 
-        return Insets.of(state.mLeft, state.mTop, state.mRight, state.mBottom);
-    }
-
-    @Override
-    public void parse(
-            @NonNull ParserEnv env,
-            @NonNull XmlPullParser parser,
-            @NonNull Variant.Builder builder)
-            throws XmlPullParserException, IOException {
-        Insets insets = parseTag(env, parser);
-        builder.setInsets(insets);
+        builder.setInsets(Insets.of(state.mLeft, state.mTop, state.mRight, state.mBottom));
     }
 }

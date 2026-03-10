@@ -22,7 +22,6 @@ import static com.android.car.scalableui.loader.xml.parser.VisibilityParser.VISI
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.loader.xml.ParserEnv;
-import com.android.car.scalableui.loader.xml.XmlChildParser;
 import com.android.car.scalableui.loader.xml.XmlPullParserHelper;
 import com.android.car.scalableui.model.Variant;
 import com.android.car.scalableui.model.Visibility;
@@ -33,7 +32,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /** Parser for {@link Visibility} tag. */
-public class VisibilityParser implements TagParser<Visibility>, XmlChildParser<Variant.Builder> {
+public class VisibilityParser implements XmlChildParser<Variant.Builder> {
 
     public static final String VISIBILITY_TAG = "Visibility";
     public static final String IS_VISIBLE_ATTRIBUTE = "isVisible";
@@ -53,28 +52,21 @@ public class VisibilityParser implements TagParser<Visibility>, XmlChildParser<V
                             })
                     .build();
 
-    @NonNull
-    @Override
-    public Visibility parseTag(@NonNull ParserEnv env, @NonNull XmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, null, VISIBILITY_TAG);
-
-        Visibility.Builder builder = new Visibility.Builder();
-        ATTRIBUTES.parse(env, parser, builder);
-
-        while (parser.next() != XmlPullParser.END_TAG) {
-            XmlPullParserHelper.throwIfUnknownTag(parser);
-        }
-        return builder.build();
-    }
-
     @Override
     public void parse(
             @NonNull ParserEnv env,
             @NonNull XmlPullParser parser,
             @NonNull Variant.Builder builder)
             throws XmlPullParserException, IOException {
-        Visibility visibility = parseTag(env, parser);
-        builder.setVisibility(visibility.isVisible());
+        parser.require(XmlPullParser.START_TAG, null, VISIBILITY_TAG);
+
+        Visibility.Builder visibilityBuilder = new Visibility.Builder();
+        ATTRIBUTES.parse(env, parser, visibilityBuilder);
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.throwIfUnknownTag(parser);
+        }
+
+        builder.setVisibility(visibilityBuilder.build().isVisible());
     }
 }

@@ -25,6 +25,8 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import org.xmlpull.v1.XmlPullParser;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -156,6 +158,12 @@ public class BaseValueParser implements ValueParser {
     @Nullable
     @Override
     public Animator parseAnimator(@NonNull Context context, @Nullable String value) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public XmlPullParser parseXml(@NonNull Context context, @Nullable String value) {
         return null;
     }
 }

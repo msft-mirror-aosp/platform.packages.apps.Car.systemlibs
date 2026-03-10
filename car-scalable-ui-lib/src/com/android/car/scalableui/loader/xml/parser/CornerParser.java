@@ -19,7 +19,6 @@ package com.android.car.scalableui.loader.xml.parser;
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.loader.xml.ParserEnv;
-import com.android.car.scalableui.loader.xml.XmlChildParser;
 import com.android.car.scalableui.loader.xml.XmlPullParserHelper;
 import com.android.car.scalableui.model.Corner;
 import com.android.car.scalableui.model.Variant;
@@ -30,7 +29,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /** Parser for {@link Corner} tag. */
-public class CornerParser implements TagParser<Corner>, XmlChildParser<Variant.Builder> {
+public class CornerParser implements XmlChildParser<Variant.Builder> {
     public static final String CORNER_TAG = "Corner";
     public static final String RADIUS_ATTRIBUTE = "radius";
     private static final AttributeMap<Corner.Builder> ATTRIBUTES =
@@ -51,28 +50,21 @@ public class CornerParser implements TagParser<Corner>, XmlChildParser<Variant.B
                             })
                     .build();
 
-    @NonNull
-    @Override
-    public Corner parseTag(@NonNull ParserEnv env, @NonNull XmlPullParser parser)
-            throws IOException, XmlPullParserException {
-        parser.require(XmlPullParser.START_TAG, null, CORNER_TAG);
-
-        Corner.Builder builder = new Corner.Builder();
-        ATTRIBUTES.parse(env, parser, builder);
-
-        while (parser.next() != XmlPullParser.END_TAG) {
-            XmlPullParserHelper.throwIfUnknownTag(parser);
-        }
-        return builder.build();
-    }
-
     @Override
     public void parse(
             @NonNull ParserEnv env,
             @NonNull XmlPullParser parser,
             @NonNull Variant.Builder builder)
             throws XmlPullParserException, IOException {
-        Corner corner = parseTag(env, parser);
-        builder.setCornerRadius(corner);
+        parser.require(XmlPullParser.START_TAG, null, CORNER_TAG);
+
+        Corner.Builder cornerBuilder = new Corner.Builder();
+        ATTRIBUTES.parse(env, parser, cornerBuilder);
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.throwIfUnknownTag(parser);
+        }
+
+        builder.setCornerRadius(cornerBuilder.build());
     }
 }
