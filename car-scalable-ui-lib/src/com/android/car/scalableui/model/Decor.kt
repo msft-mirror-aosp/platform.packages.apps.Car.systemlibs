@@ -16,6 +16,7 @@
 package com.android.car.scalableui.model
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 
@@ -28,33 +29,40 @@ import android.view.View
  * @property id A unique identifier for this decor. Defaults to "Default decor ID".
  * @property layer The layer level for this decor, used for ordering multiple decors. Defaults to -1.
  * @property colorRes The color resource to be used as the background color. Defaults to -1.
+ * @property drawableRes The drawable resource to be used as the background. Defaults to -1.
  * @property alpha The transparency of the decor, ranging from 0.0 (fully transparent) to 1.0 (fully opaque). Defaults to 1f.
  * @property content The layout resource ID for the decor's view content. Defaults to -1.
+ * @property color The literal color integer for the background. Defaults to 0.
+ * @property drawable The [Drawable] object for the background. Defaults to null.
  */
 data class Decor(
     val id: String = "Default decor ID",
     val layer: Int = -1,
-    // TODO(b/441572972): Instead of resource IDs, consider using Color, Drawable, or View directly
-    //  to improve compatibility with declarative UI frameworks like Compose.
     val colorRes: Int = -1,
     val drawableRes: Int = -1,
     val alpha: Float = 1f,
-    val content: Int = -1
+    val content: Int = -1,
+    val color: Int = 0,
+    val drawable: Drawable? = null
 ) {
 
     /**
      * Inflates and returns the [View] for this decor.
      *
      * This function uses the provided [content] layout resource to create a view and applies the
-     * specified [colorRes] as its background color.
+     * background based on the priority: [drawable], [drawableRes], [color], and then [colorRes].
      *
-     * @param context The [Context] used for inflating the layout and resolving the color resource.
-     * @return The inflated [View] with the background color set.
+     * @param context The [Context] used for inflating the layout and resolving resources.
+     * @return The inflated [View] with the background set.
      */
     fun getView(context: Context): View {
         val view = LayoutInflater.from(context).inflate(content, null)
-        if (drawableRes != -1) {
+        if (drawable != null) {
+            view.background = drawable
+        } else if (drawableRes != -1) {
             view.background = context.getDrawable(drawableRes)
+        } else if (color != 0) {
+            view.setBackgroundColor(color)
         } else if (colorRes != -1) {
             view.setBackgroundColor(context.getColor(colorRes))
         }

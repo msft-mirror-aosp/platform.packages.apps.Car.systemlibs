@@ -14,7 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<SystemBar defaultVariant="@id/variant1" id="top" barZOrder="11" type="status">
+<SystemBar defaultVariant="@id/variant1" id="top" barZOrder="11" type="status" displayId="2">
+
     <Variant id="@+id/base">
         <Corner radius="10dp" />
         <Bounds width="100%" top="0" height="50"/>

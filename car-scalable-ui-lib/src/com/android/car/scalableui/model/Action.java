@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Represents an action, consisting of a required intent.
- * This class provides methods for creating an Action object and retrieving its intent.
+ * Represents an action, consisting of a required intent. This class provides methods for creating
+ * an Action object and retrieving its intent.
  */
 public class Action {
 
@@ -36,8 +36,8 @@ public class Action {
     @NonNull private final List<Event> mEvents;
 
     /**
-     * Constructs an Action object with the specified intent.
-     * Package-private constructor; use the Builder.
+     * Constructs an Action object with the specified intent. Package-private constructor; use the
+     * Builder.
      *
      * @param intent The intent string for this action.
      * @param events The list of events that can trigger this action.
@@ -64,7 +64,7 @@ public class Action {
      * @return True if the action should be triggered by the given event.
      */
     public boolean isTriggeredBy(Event event) {
-        for (Event e: mEvents) {
+        for (Event e : mEvents) {
             if (e.isMatch(event)) {
                 return true;
             }
@@ -84,8 +84,8 @@ public class Action {
     }
 
     /**
-     * Returns a string representation of the Action object.
-     * This includes the action's intent and its associated trigger events.
+     * Returns a string representation of the Action object. This includes the action's intent and
+     * its associated trigger events.
      *
      * @return A string representation of the Action.
      */
@@ -93,10 +93,11 @@ public class Action {
     @NonNull
     public String toString() {
         return "Action { "
-                + "intent='" + mIntent.toUri(0) + "',"
-                + "events=[" + mEvents.stream()
-                .map(Event::toString)
-                .collect(Collectors.joining(", ", "[", "]"))
+                + "intent='"
+                + mIntent.toUri(0)
+                + "',"
+                + "events=["
+                + mEvents.stream().map(Event::toString).collect(Collectors.joining(", ", "[", "]"))
                 + "}";
     }
 
@@ -106,12 +107,30 @@ public class Action {
         @NonNull private List<Event> mEvents = new ArrayList<>();
 
         /**
+         * Creates a builder with no intent set initially. Intent must be set via {@link #setIntent}
+         * before building.
+         */
+        public Builder() {}
+
+        /**
          * Creates a builder with given intent.
          *
          * @param intent The intent.
          */
         public Builder(@NonNull Intent intent) {
             mIntent = intent;
+        }
+
+        /**
+         * Sets the intent for this action.
+         *
+         * @param intent The intent.
+         * @return The Builder instance for chaining.
+         */
+        @NonNull
+        public Builder setIntent(@NonNull Intent intent) {
+            mIntent = intent;
+            return this;
         }
 
         /**

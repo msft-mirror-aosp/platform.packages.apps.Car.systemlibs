@@ -16,8 +16,8 @@
 package com.android.car.scalableui.model;
 
 /**
- * Represents configuration for a blur effect.
- * Instances are immutable and created using the {@link Builder}.
+ * Represents configuration for a blur effect. Instances are immutable and created using the {@link
+ * Builder}.
  */
 public final class Blur {
 
@@ -52,8 +52,8 @@ public final class Blur {
     }
 
     /**
-     * Gets the background color to apply behind the blur effect.
-     * Often represented as an ARGB integer (e.g., 0xAARRGGBB).
+     * Gets the background color to apply behind the blur effect. Often represented as an ARGB
+     * integer (e.g., 0xAARRGGBB).
      *
      * @return The background color as an integer.
      */
@@ -74,17 +74,14 @@ public final class Blur {
         return new Builder();
     }
 
-    /**
-     * Builder class for constructing {@link Blur} instances.
-     */
+    /** Builder class for constructing {@link Blur} instances. */
     public static class Builder {
         private float mCornerRadius = 0.0f;
         private int mBlurRadius = 0;
         private int mBackgroundColor = 0x00000000; // Default value (transparent)
         private boolean mEnableVail;
 
-        public Builder() {
-        }
+        public Builder() {}
 
         /**
          * Sets the corner radius for the blur area.
@@ -131,8 +128,7 @@ public final class Blur {
         }
 
         /**
-         * Builds and returns an immutable {@link Blur} instance
-         * with the configured properties.
+         * Builds and returns an immutable {@link Blur} instance with the configured properties.
          *
          * @return A new {@link Blur} instance.
          */
@@ -144,7 +140,12 @@ public final class Blur {
     @Override
     public String toString() {
         return "Blur{"
-                + "cornerRadius=" + mCornerRadius + ", blurRadius=" + mBlurRadius
-                + ", backgroundColor=" + String.format("0x%08X", mBackgroundColor) + '}';
+                + "cornerRadius="
+                + mCornerRadius
+                + ", blurRadius="
+                + mBlurRadius
+                + ", backgroundColor="
+                + String.format("0x%08X", mBackgroundColor)
+                + '}';
     }
 }

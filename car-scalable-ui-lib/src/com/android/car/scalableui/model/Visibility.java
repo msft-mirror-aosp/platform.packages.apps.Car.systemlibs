@@ -58,7 +58,7 @@ public class Visibility {
 
         public Builder() {}
 
-        /** Set visibility*/
+        /** Set visibility */
         public Builder setIsVisible(boolean isVisible) {
             mIsVisible = isVisible;
             return this;

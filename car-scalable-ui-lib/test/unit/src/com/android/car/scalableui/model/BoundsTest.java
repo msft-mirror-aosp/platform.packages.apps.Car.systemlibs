@@ -39,12 +39,13 @@ public class BoundsTest {
 
     @Test
     public void testBoundsCreation_rect() {
-        Bounds bounds = new Bounds.Builder()
-                .setLeft(TEST_LEFT)
-                .setTop(TEST_TOP)
-                .setRight(TEST_RIGHT)
-                .setBottom(TEST_BOTTOM)
-                .build();
+        Bounds bounds =
+                new Bounds.Builder()
+                        .setLeft(TEST_LEFT)
+                        .setTop(TEST_TOP)
+                        .setRight(TEST_RIGHT)
+                        .setBottom(TEST_BOTTOM)
+                        .build();
 
         Rect rect = bounds.getRect();
 
@@ -56,12 +57,13 @@ public class BoundsTest {
 
     @Test
     public void testBoundsCreation_width_withLeft() {
-        Bounds bounds = new Bounds.Builder()
-                .setLeft(TEST_LEFT)
-                .setTop(TEST_TOP)
-                .setBottom(TEST_BOTTOM)
-                .setWidth(TEST_WIDTH)
-                .build();
+        Bounds bounds =
+                new Bounds.Builder()
+                        .setLeft(TEST_LEFT)
+                        .setTop(TEST_TOP)
+                        .setBottom(TEST_BOTTOM)
+                        .setWidth(TEST_WIDTH)
+                        .build();
 
         Rect rect = bounds.getRect();
 
@@ -73,12 +75,13 @@ public class BoundsTest {
 
     @Test
     public void testBoundsCreation_width_withRight() {
-        Bounds bounds = new Bounds.Builder()
-                .setRight(TEST_RIGHT)
-                .setTop(TEST_TOP)
-                .setBottom(TEST_BOTTOM)
-                .setWidth(TEST_WIDTH)
-                .build();
+        Bounds bounds =
+                new Bounds.Builder()
+                        .setRight(TEST_RIGHT)
+                        .setTop(TEST_TOP)
+                        .setBottom(TEST_BOTTOM)
+                        .setWidth(TEST_WIDTH)
+                        .build();
 
         Rect rect = bounds.getRect();
 
@@ -90,12 +93,13 @@ public class BoundsTest {
 
     @Test
     public void testBoundsCreation_height_withTop() {
-        Bounds bounds = new Bounds.Builder()
-                .setLeft(TEST_LEFT)
-                .setTop(TEST_TOP)
-                .setRight(TEST_RIGHT)
-                .setHeight(TEST_HEIGHT)
-                .build();
+        Bounds bounds =
+                new Bounds.Builder()
+                        .setLeft(TEST_LEFT)
+                        .setTop(TEST_TOP)
+                        .setRight(TEST_RIGHT)
+                        .setHeight(TEST_HEIGHT)
+                        .build();
 
         Rect rect = bounds.getRect();
 
@@ -107,12 +111,13 @@ public class BoundsTest {
 
     @Test
     public void testBoundsCreation_height_withBottom() {
-        Bounds bounds = new Bounds.Builder()
-                .setLeft(TEST_LEFT)
-                .setRight(TEST_RIGHT)
-                .setBottom(TEST_BOTTOM)
-                .setHeight(TEST_HEIGHT)
-                .build();
+        Bounds bounds =
+                new Bounds.Builder()
+                        .setLeft(TEST_LEFT)
+                        .setRight(TEST_RIGHT)
+                        .setBottom(TEST_BOTTOM)
+                        .setHeight(TEST_HEIGHT)
+                        .build();
 
         Rect rect = bounds.getRect();
 
@@ -124,16 +129,17 @@ public class BoundsTest {
 
     @Test
     public void testBoundsCreation_withOffset() {
-        Bounds bounds = new Bounds.Builder()
-                .setLeft(TEST_LEFT)
-                .setTop(TEST_TOP)
-                .setRight(TEST_RIGHT)
-                .setBottom(TEST_BOTTOM)
-                .setLeftOffset(TEST_LEFT_OFFSET)
-                .setTopOffset(TEST_TOP_OFFSET)
-                .setRightOffset(TEST_RIGHT_OFFSET)
-                .setBottomOffset(TEST_BOTTOM_OFFSET)
-                .build();
+        Bounds bounds =
+                new Bounds.Builder()
+                        .setLeft(TEST_LEFT)
+                        .setTop(TEST_TOP)
+                        .setRight(TEST_RIGHT)
+                        .setBottom(TEST_BOTTOM)
+                        .setLeftOffset(TEST_LEFT_OFFSET)
+                        .setTopOffset(TEST_TOP_OFFSET)
+                        .setRightOffset(TEST_RIGHT_OFFSET)
+                        .setBottomOffset(TEST_BOTTOM_OFFSET)
+                        .build();
 
         Rect rect = bounds.getRect();
 

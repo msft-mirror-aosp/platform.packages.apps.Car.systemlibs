@@ -180,10 +180,11 @@ public class PanelPoolTest {
 
         AtomicInteger count = new AtomicInteger(0);
 
-        mPanelPool.forEach(panel -> {
-            count.incrementAndGet();
-            panel.getPanelId();
-        });
+        mPanelPool.forEach(
+                panel -> {
+                    count.incrementAndGet();
+                    panel.getPanelId();
+                });
 
         assertThat(count.get()).isEqualTo(2);
         verify(mockPanel1).getPanelId();

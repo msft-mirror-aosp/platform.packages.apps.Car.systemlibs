@@ -27,9 +27,8 @@ public class KeyFrameEventTest {
 
     @Test
     public void keyFrameEvent_toString_returnsCorrectFormat() {
-        KeyFrameEvent keyFrameEvent = new KeyFrameEvent.Builder("testEvent", 0.5f)
-                .addToken("key1", "value1")
-                .build();
+        KeyFrameEvent keyFrameEvent =
+                new KeyFrameEvent.Builder("testEvent", 0.5f).addToken("key1", "value1").build();
         String expectedString =
                 "KeyFrameEvent{mId=testEvent, mTokens={key1=value1}, mFraction=0.5}";
         assertThat(keyFrameEvent.toString()).isEqualTo(expectedString);
@@ -43,45 +42,46 @@ public class KeyFrameEventTest {
 
     @Test
     public void keyFrameEventBuilder_addToken_addsTokenCorrectly() {
-        KeyFrameEvent keyFrameEvent = new KeyFrameEvent.Builder("testEvent", 0.25f)
-                .addToken("tokenKey", "tokenValue")
-                .build();
+        KeyFrameEvent keyFrameEvent =
+                new KeyFrameEvent.Builder("testEvent", 0.25f)
+                        .addToken("tokenKey", "tokenValue")
+                        .build();
 
         assertThat(keyFrameEvent.getTokens()).containsExactly("tokenKey", "tokenValue");
     }
 
     @Test
     public void keyFrameEventBuilder_addTokensFromString_addsMultipleTokensCorrectly() {
-        KeyFrameEvent keyFrameEvent = new KeyFrameEvent.Builder("testEvent", 0.25f)
-                .addTokensFromString("key1=value1;key2=value2")
-                .build();
+        KeyFrameEvent keyFrameEvent =
+                new KeyFrameEvent.Builder("testEvent", 0.25f)
+                        .addTokensFromString("key1=value1;key2=value2")
+                        .build();
 
         assertThat(keyFrameEvent.getTokens()).containsExactly("key1", "value1", "key2", "value2");
     }
 
     @Test
     public void keyFrameEventBuilder_addTokensFromString_withEmptyString_addsNoToken() {
-        KeyFrameEvent keyFrameEvent = new KeyFrameEvent.Builder("testEvent", 0.25f)
-                .addTokensFromString("")
-                .build();
+        KeyFrameEvent keyFrameEvent =
+                new KeyFrameEvent.Builder("testEvent", 0.25f).addTokensFromString("").build();
 
         assertThat(keyFrameEvent.getTokens()).isEmpty();
     }
 
     @Test
     public void keyFrameEventBuilder_addTokensFromString_withNullString_addsNoToken() {
-        KeyFrameEvent keyFrameEvent = new KeyFrameEvent.Builder("testEvent", 0.25f)
-                .addTokensFromString(null)
-                .build();
+        KeyFrameEvent keyFrameEvent =
+                new KeyFrameEvent.Builder("testEvent", 0.25f).addTokensFromString(null).build();
 
         assertThat(keyFrameEvent.getTokens()).isEmpty();
     }
 
     @Test
     public void keyFrameEventBuilder_addTokensFromString_withMalformedString_onlyAddsValidToken() {
-        KeyFrameEvent keyFrameEvent = new KeyFrameEvent.Builder("testEvent", 0.25f)
-                .addTokensFromString("key1=value1;key2;key3=value3")
-                .build();
+        KeyFrameEvent keyFrameEvent =
+                new KeyFrameEvent.Builder("testEvent", 0.25f)
+                        .addTokensFromString("key1=value1;key2;key3=value3")
+                        .build();
 
         assertThat(keyFrameEvent.getTokens()).containsExactly("key1", "value1", "key3", "value3");
     }

@@ -30,8 +30,8 @@ import com.android.car.scalableui.model.Role;
 import java.io.PrintWriter;
 
 /**
- * Represents a rectangular panel that can be displayed on the screen.
- * Panels have properties such as bounds, layer, visibility, and alpha.
+ * Represents a rectangular panel that can be displayed on the screen. Panels have properties such
+ * as bounds, layer, visibility, and alpha.
  */
 public interface Panel {
     /**
@@ -50,8 +50,8 @@ public interface Panel {
     void setBounds(@NonNull Rect bounds);
 
     /**
-     * Gets safe bounds. This is an area generally not overlapped by display cutouts or insets
-     * for display compatibility apps to be drawn within.
+     * Gets safe bounds. This is an area generally not overlapped by display cutouts or insets for
+     * display compatibility apps to be drawn within.
      *
      * @return The bounding safe rectangle.
      */
@@ -59,8 +59,8 @@ public interface Panel {
     Rect getSafeBounds();
 
     /**
-     * Sets safe bounds. This is an area generally not overlapped by display cutouts or insets
-     * for display compatibility apps to be drawn within.
+     * Sets safe bounds. This is an area generally not overlapped by display cutouts or insets for
+     * display compatibility apps to be drawn within.
      *
      * @param safeBounds The new bounding safe rectangle.
      */
@@ -82,8 +82,8 @@ public interface Panel {
     void setTaskToolbarBounds(@NonNull Rect bounds);
 
     /**
-     * Gets the layer of this panel.
-     * Panels with higher layer values are drawn on top of panels with lower layer values.
+     * Gets the layer of this panel. Panels with higher layer values are drawn on top of panels with
+     * lower layer values.
      *
      * @return The layer of this panel.
      */
@@ -167,8 +167,8 @@ public interface Panel {
     void setY2(int y);
 
     /**
-     * Gets the alpha value of this panel.
-     * The alpha value is a float between 0.0 (fully transparent) and 1.0 (fully opaque).
+     * Gets the alpha value of this panel. The alpha value is a float between 0.0 (fully
+     * transparent) and 1.0 (fully opaque).
      *
      * @return The alpha value of this panel.
      */
@@ -196,37 +196,27 @@ public interface Panel {
     boolean isVisible();
 
     /**
-     * Sets the role of this panel.
-     * The role of a panel can be used to identify its purpose or function.
+     * Sets the role of this panel. The role of a panel can be used to identify its purpose or
+     * function.
      *
      * @param role The new role of this panel.
      */
     void setRole(@Nullable Role role);
 
-    /**
-     * Gets the role value of this panel.
-     */
+    /** Gets the role value of this panel. */
     @Nullable
     Role getRole();
 
-    /**
-     * Sets the display ID of the panel.
-     */
+    /** Sets the display ID of the panel. */
     void setDisplayId(int displayId);
 
-    /**
-     * Gets the display ID of the panel.
-     */
+    /** Gets the display ID of the panel. */
     int getDisplayId();
 
-    /**
-     * Initializes the panel.
-     */
+    /** Initializes the panel. */
     void init();
 
-    /**
-     * Reset the panel.
-     */
+    /** Reset the panel. */
     void reset();
 
     /**
@@ -243,15 +233,11 @@ public interface Panel {
      */
     Corner getCornerRadius();
 
-    /**
-     * Returns the ID of the panel.
-     */
+    /** Returns the ID of the panel. */
     @NonNull
     String getPanelId();
 
-    /**
-     * Sets the {@link Insets}
-     */
+    /** Sets the {@link Insets} */
     void setInsets(@NonNull Insets insets);
 
     /**
@@ -260,14 +246,10 @@ public interface Panel {
     @NonNull
     Insets getInsets();
 
-    /**
-     * The gravity of this panel.
-     */
+    /** The gravity of this panel. */
     int getGravity();
 
-    /**
-     * The gravity of this panel.
-     */
+    /** The gravity of this panel. */
     void setGravity(int gravity);
 
     /**
@@ -283,37 +265,25 @@ public interface Panel {
      */
     Context getContext();
 
-    /**
-     * Gets the {@link PanelControllerMetadata}
-     */
+    /** Gets the {@link PanelControllerMetadata} */
     @Nullable
     PanelControllerMetadata getPanelControllerMetadata();
 
-    /**
-     * Sets the {@link PanelControllerMetadata}
-     */
+    /** Sets the {@link PanelControllerMetadata} */
     void setPanelControllerMetadata(@Nullable PanelControllerMetadata panelControllerMetadata);
 
-    /**
-     * Gets the {@link PanelUpdatePublisher}
-     */
+    /** Gets the {@link PanelUpdatePublisher} */
     @Nullable
     default PanelUpdatePublisher getPanelUpdateObserver() {
         return null;
     }
 
-    /**
-     * Refresh the panel theme.
-     */
+    /** Refresh the panel theme. */
     void refreshTheme();
 
-    /**
-     * Destroys the panel.
-     */
+    /** Destroys the panel. */
     void destroy();
 
-    /**
-     * Dumps the panel details to the provided {@link PrintWriter}.
-     */
+    /** Dumps the panel details to the provided {@link PrintWriter}. */
     void dump(@NonNull PrintWriter pw);
 }

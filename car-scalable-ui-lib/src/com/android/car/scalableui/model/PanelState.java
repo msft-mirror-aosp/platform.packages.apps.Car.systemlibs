@@ -46,28 +46,22 @@ public class PanelState implements Cloneable {
     private int mDisplayId;
 
     private final String mId;
-    @Nullable
-    private Role mRole;
+    @Nullable private Role mRole;
     private final List<Variant> mVariants = new ArrayList<>();
     private final List<Transition> mTransitions = new ArrayList<>();
-    @Nullable
-    private Restart mRestart;
-    @Nullable
-    private TaskBehavior mTaskBehavior;
+    @Nullable private Restart mRestart;
+    @Nullable private TaskBehavior mTaskBehavior;
 
-    @Nullable
-    private Animator mRunningAnimator;
-    @Nullable
-    private Variant mCurrentVariant;
-    @Nullable
-    private PanelControllerMetadata mPanelControllerMetadata;
-    @PanelType
-    private int mType;
+    @Nullable private Animator mRunningAnimator;
+    @Nullable private Variant mCurrentVariant;
+    @Nullable private PanelControllerMetadata mPanelControllerMetadata;
+    @Nullable private String mPendingControllerId;
+    @PanelType private int mType;
 
     /**
      * Constructor for PanelState.
      *
-     * @param id   The ID of the panel.
+     * @param id The ID of the panel.
      * @param type The type of the panel.
      */
     public PanelState(@NonNull String id, @PanelType int type) {
@@ -76,9 +70,7 @@ public class PanelState implements Cloneable {
         mDisplayId = DEFAULT_DISPLAY;
     }
 
-    /**
-     * Constructor to copy a PanelState
-     */
+    /** Constructor to copy a PanelState */
     public PanelState(@NonNull PanelState other) {
         mId = other.mId;
         mType = other.mType;
@@ -89,6 +81,7 @@ public class PanelState implements Cloneable {
         mTransitions.addAll(other.mTransitions);
         mRunningAnimator = other.mRunningAnimator;
         mCurrentVariant = other.mCurrentVariant;
+        mPendingControllerId = other.mPendingControllerId;
     }
 
     /** Returns id */
@@ -148,9 +141,9 @@ public class PanelState implements Cloneable {
 
     /** Returns variant with the given id */
     @Nullable
-    public Variant getVariant(@NonNull String id) {
+    public Variant getVariant(@NonNull String idOrName) {
         for (Variant variant : mVariants) {
-            if (variant.getId().equals(id)) {
+            if (variant.getId().equals(idOrName) || variant.getIdName().equals(idOrName)) {
                 return variant;
             }
         }
@@ -186,12 +179,13 @@ public class PanelState implements Cloneable {
     /**
      * Sets variant
      *
-     * @param id    The ID of the variant to set.
+     * @param idOrName The ID or name of the variant to set.
      * @param event The event that triggered the variant change.
      */
-    public void setVariant(@NonNull String id, @Nullable Event event) {
+    public void setVariant(@NonNull String idOrName, @Nullable Event event) {
         for (Variant variant : mVariants) {
-            if (variant != null && variant.getId().equals(id)) {
+            if (variant != null
+                    && (variant.getId().equals(idOrName) || variant.getIdName().equals(idOrName))) {
                 if (DEBUG) Log.d(TAG, "setVariant,  " + variant);
                 mCurrentVariant = variant;
                 if (event != null) {
@@ -309,40 +303,65 @@ public class PanelState implements Cloneable {
         mPanelControllerMetadata = panelControllerMetadata;
     }
 
+    @Nullable
+    public String getPendingControllerId() {
+        return mPendingControllerId;
+    }
+
+    private void setPendingControllerId(@Nullable String pendingControllerId) {
+        mPendingControllerId = pendingControllerId;
+    }
+
     @Override
     @NonNull
     public String toString() {
         return "PanelState{"
-                + "mId='" + mId + '\''
-                + ", mType=" + mType
-                + ", mRole=" + mRole
-                + ", mDefaultVariant='" + mDefaultVariant + '\''
-                + ", mDisplayId=" + mDisplayId
-                + ", mVariants=" + mVariants.stream()
-                .map(Variant::toString)
-                .collect(Collectors.joining(", ", "[", "]"))
-                + ", mTransitions=" + mTransitions.stream()
-                .map(Transition::toString)
-                .collect(Collectors.joining(", ", "[", "]"))
-                + ", mRunningAnimator=" + mRunningAnimator
+                + "mId='"
+                + mId
+                + '\''
+                + ", mType="
+                + mType
+                + ", mRole="
+                + mRole
+                + ", mDefaultVariant='"
+                + mDefaultVariant
+                + '\''
+                + ", mDisplayId="
+                + mDisplayId
+                + ", mVariants="
+                + mVariants.stream()
+                        .map(Variant::toString)
+                        .collect(Collectors.joining(", ", "[", "]"))
+                + ", mRunningAnimator="
+                + mRunningAnimator
                 + ", mCurrentVariant="
                 + (mCurrentVariant != null ? mCurrentVariant.getId() : "null")
                 + '}';
     }
 
-    /**
-     * Shorter version of {@link #toString()}
-     */
+    /** Shorter version of {@link #toString()} */
     @NonNull
     public String toShortString() {
         return "PanelState{"
-                + "\n\tmId='" + mId + "'"
-                + "\n\tmType='" + mType + "'"
-                + "\n\tmDisplayId=" + mDisplayId
-                + "\n\tmRunningAnimator=" + mRunningAnimator
+                + "\n\tmId='"
+                + mId
+                + "'"
+                + "\n\tmType='"
+                + mType
+                + "'"
+                + "\n\tmDisplayId="
+                + mDisplayId
+                + "\n\tmRunningAnimator="
+                + mRunningAnimator
                 + "\n\tmCurrentVariant="
-                + (mCurrentVariant == null ? "null" : mCurrentVariant.toString().replaceAll("\\R",
-                "\n\t"))
+                + (mCurrentVariant == null
+                        ? "null"
+                        : mCurrentVariant.toString().replaceAll("\\R", "\n\t"))
+                + "\n\tmPanelControllerMetadata="
+                + mPanelControllerMetadata
+                + "\n\tmPendingControllerId='"
+                + mPendingControllerId
+                + "'"
                 + '}';
     }
 
@@ -350,7 +369,9 @@ public class PanelState implements Cloneable {
     public PanelState clone() {
         try {
             // shallow copy is sufficient, mVariants and mTransitions might remain the same.
-            return (PanelState) super.clone();
+            PanelState clone = (PanelState) super.clone();
+
+            return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
@@ -367,7 +388,7 @@ public class PanelState implements Cloneable {
      *
      * @param that The {@code PanelState} to compare against.
      * @return {@code true} if the identity matches and the variants match (requiring no window
-     *         transaction to update); {@code false} otherwise.
+     *     transaction to update); {@code false} otherwise.
      */
     public boolean matches(PanelState that) {
         if (that == null) return false;
@@ -377,21 +398,87 @@ public class PanelState implements Cloneable {
                 && Variant.matchesVariantList(mVariants, that.mVariants);
     }
 
+    private final List<PendingTransition> mPendingTransitions = new ArrayList<>();
+
+    /**
+     * Adds a transition to be resolved later.
+     *
+     * @param builder The transition builder.
+     * @param toVariantId The ID of the variant to transition to.
+     * @param fromVariantId The ID of the variant to transition from (optional).
+     */
+    public void addPendingTransition(
+            @NonNull Transition.Builder builder,
+            @NonNull String toVariantId,
+            @Nullable String fromVariantId) {
+        mPendingTransitions.add(new PendingTransition(builder, toVariantId, fromVariantId));
+    }
+
+    /**
+     * Resolves all pending transitions by finding their target variants.
+     *
+     * @throws IllegalStateException If a target variant cannot be found.
+     */
+    public void resolvePendingTransitions() {
+        for (PendingTransition pending : mPendingTransitions) {
+            Transition.Builder builder = pending.mBuilder;
+            Variant toVariant = getVariant(pending.mToVariantId);
+            if (toVariant == null) {
+                throw new IllegalStateException(
+                        "Failed to resolve ToVariant: "
+                                + pending.mToVariantId
+                                + " for panel: "
+                                + mId);
+            }
+            builder.setToVariant(toVariant);
+            if (pending.mFromVariantId != null) {
+                Variant fromVariant = getVariant(pending.mFromVariantId);
+                if (fromVariant == null) {
+                    throw new IllegalStateException(
+                            "Failed to resolve FromVariant: "
+                                    + pending.mFromVariantId
+                                    + " for panel: "
+                                    + mId);
+                }
+                builder.setFromVariant(fromVariant);
+            }
+            Transition transition = builder.build();
+            mTransitions.add(transition);
+        }
+        mPendingTransitions.clear();
+    }
+
+    private static class PendingTransition {
+        final Transition.Builder mBuilder;
+        final String mToVariantId;
+        final String mFromVariantId;
+
+        PendingTransition(Transition.Builder builder, String toVariantId, String fromVariantId) {
+            mBuilder = builder;
+            mToVariantId = toVariantId;
+            mFromVariantId = fromVariantId;
+        }
+    }
+
     /** Builder for {@link PanelState} objects. */
     public static class Builder {
         private String mId;
-        @PanelType
-        private int mType;
+        @PanelType private int mType;
         private Role mRole;
         private String mDefaultVariant;
         private Integer mDisplayId;
         private List<Variant> mVariants = new ArrayList<>();
         private List<Transition> mTransitions = new ArrayList<>();
         private PanelControllerMetadata mPanelControllerMetadata;
+        private String mPendingControllerId;
 
         public Builder(@NonNull String id, @PanelType int type) {
             mId = id;
             mType = type;
+        }
+
+        public String getId() {
+            return mId;
         }
 
         /** Sets role */
@@ -440,6 +527,12 @@ public class PanelState implements Cloneable {
             mPanelControllerMetadata = panelControllerMetaData;
         }
 
+        /** Sets the pending controller ID. */
+        public Builder setPendingControllerId(String pendingControllerId) {
+            mPendingControllerId = pendingControllerId;
+            return this;
+        }
+
         /** Returns the {@link PanelState} instance */
         @NonNull
         public PanelState build() {
@@ -454,6 +547,7 @@ public class PanelState implements Cloneable {
             panelState.setVariants(mVariants);
             panelState.setTransitions(mTransitions);
             panelState.setPanelControllerMetadata(mPanelControllerMetadata);
+            panelState.setPendingControllerId(mPendingControllerId);
             return panelState;
         }
     }
