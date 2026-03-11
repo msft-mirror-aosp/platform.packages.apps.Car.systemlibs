@@ -20,5 +20,5 @@
          URI, for example:
          "intent:#Intent;component=com.android.car.carlauncher/com.android.car.carlauncher.homescreen.MapActivityTos;action=android.intent.action.MAIN;end"
     -->
-    <string name="config_tosMapIntent" translatable="false">intent:#Intent;component=com.android.car.portraitlauncher/com.android.car.carlauncher.homescreen.MapTosActivity;action=android.intent.action.MAIN;end</string>
+    <string name="config_tosMapIntent" translatable="false">intent:#Intent;component=com.android.car.carlauncher/.homescreen.MapTosActivity;action=android.intent.action.MAIN;end</string>
 </resources>
