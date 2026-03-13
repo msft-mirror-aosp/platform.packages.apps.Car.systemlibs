@@ -57,9 +57,21 @@ public class PanelControllerParser {
     public static final String TASK_TOOLBAR_CONTROLLER_TAG = "TaskToolBarController";
 
     public static final String BREAKPOINTS_TAG = "BreakPoints";
+    public static final String BREAKPOINTS_ORIENTATION_TAG = "orientation";
     public static final String BREAKPOINT_TAG = "BreakPoint";
     public static final String BREAKPOINT_POINT_TAG = "point";
     public static final String BREAKPOINT_EVENT_ID_TAG = "eventId";
+
+    private static class BreakpointParsingState {
+        int mOrientation;
+    }
+
+    private static final AttributeMap<BreakpointParsingState> BREAKPOINTS_ATTRIBUTES =
+            AttributeMap.<BreakpointParsingState>builder()
+                    .addInteger(
+                            BREAKPOINTS_ORIENTATION_TAG,
+                            (state, value) -> state.mOrientation = value)
+                    .build();
 
     /** Creates a {@link PanelControllerMetadata} from an XML resource. */
     public static PanelControllerMetadata createController(@NonNull ParserEnv env, int xmlId)
@@ -104,8 +116,12 @@ public class PanelControllerParser {
 
             String name = parser.getName();
             String value;
+            BreakpointParsingState breakpointParsingState = new BreakpointParsingState();
             switch (name) {
-                case BREAKPOINTS_TAG -> builder.addBreakPoints(parseBreakPoints(env, parser));
+                case BREAKPOINTS_TAG -> {
+                    BREAKPOINTS_ATTRIBUTES.parse(env, parser, breakpointParsingState);
+                    builder.addBreakPoints(parseBreakPoints(env, parser, breakpointParsingState));
+                }
                 case CONTROLLER_NAME_TAG,
                         VIEW_TAG,
                         EVENT_ID_TAG,
@@ -144,7 +160,8 @@ public class PanelControllerParser {
     }
 
     /** Parses a list of {@link BreakPoint} from XML. */
-    private static List<BreakPoint> parseBreakPoints(ParserEnv env, XmlResourceParser parser)
+    private static List<BreakPoint> parseBreakPoints(ParserEnv env, XmlResourceParser parser,
+            BreakpointParsingState state)
             throws IOException, XmlPullParserException {
         List<BreakPoint> points = new ArrayList<>();
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -153,7 +170,7 @@ public class PanelControllerParser {
             }
             String name = parser.getName();
             if (name.equals(BREAKPOINT_TAG)) {
-                points.add(parseBreakPoint(env, parser));
+                points.add(parseBreakPoint(env, parser, state));
             } else {
                 XmlPullParserHelper.throwIfUnknownTag(parser);
             }
@@ -162,13 +179,16 @@ public class PanelControllerParser {
     }
 
     /** Parses a {@link BreakPoint} from XML. */
-    private static BreakPoint parseBreakPoint(@NonNull ParserEnv env, @NonNull XmlPullParser parser)
+    private static BreakPoint parseBreakPoint(@NonNull ParserEnv env, @NonNull XmlPullParser parser,
+            BreakpointParsingState state)
             throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, null, BREAKPOINT_TAG);
+        boolean isHorizontal = state.mOrientation == 1;
         AttributeSet attrs = Xml.asAttributeSet(parser);
         Integer point =
                 ParserUtils.getDimensionPixelSize(
-                        env.getContext(), attrs, BREAKPOINT_POINT_TAG, env.getDisplayId(), false);
+                        env.getContext(), attrs, BREAKPOINT_POINT_TAG, env.getDisplayId(),
+                        isHorizontal);
         String eventId = attrs.getAttributeValue(null, BREAKPOINT_EVENT_ID_TAG);
         parser.nextTag();
         parser.require(XmlPullParser.END_TAG, null, BREAKPOINT_TAG);
