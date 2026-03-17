@@ -19,7 +19,6 @@ package com.android.car.scalableui.loader.xml.parser
 import android.util.Log
 import android.util.Xml
 import com.android.car.scalableui.loader.xml.ParserEnv
-import com.android.car.scalableui.loader.xml.XmlChildParser
 import com.android.car.scalableui.loader.xml.XmlPullParserHelper
 import com.android.car.scalableui.loader.xml.parser.BackgroundParser.BACKGROUND_TAG
 import com.android.car.scalableui.loader.xml.parser.PanelParser.DEFAULT_VARIANT_ATTRIBUTE

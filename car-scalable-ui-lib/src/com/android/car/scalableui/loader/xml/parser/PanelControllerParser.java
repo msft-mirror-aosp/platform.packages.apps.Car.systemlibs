@@ -17,7 +17,6 @@
 package com.android.car.scalableui.loader.xml.parser;
 
 import android.content.Context;
-import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -37,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Parser for {@link PanelControllerMetadata} elements. */
-public class PanelControllerParser {
+public class PanelControllerParser implements TagParser<PanelControllerMetadata> {
     private static final String TAG = PanelControllerParser.class.getSimpleName();
 
     public static final String CONTROLLER_TAG = "Controller";
@@ -73,16 +72,15 @@ public class PanelControllerParser {
                             (state, value) -> state.mOrientation = value)
                     .build();
 
-    /** Creates a {@link PanelControllerMetadata} from an XML resource. */
-    public static PanelControllerMetadata createController(@NonNull ParserEnv env, int xmlId)
+    @Override
+    public PanelControllerMetadata parseTag(@NonNull ParserEnv env, @NonNull XmlPullParser parser)
             throws XmlPullParserException, IOException {
-        XmlResourceParser parser = env.getContext().getResources().getXml(xmlId);
         return parseController(env, parser);
     }
 
     /** Parses a {@link PanelControllerMetadata} from a XML parser. */
     private static PanelControllerMetadata parseController(
-            @NonNull ParserEnv env, @NonNull XmlResourceParser parser)
+            @NonNull ParserEnv env, @NonNull XmlPullParser parser)
             throws IOException, XmlPullParserException {
         int eventType = parser.getEventType();
         while (eventType == XmlPullParser.START_DOCUMENT
@@ -102,15 +100,7 @@ public class PanelControllerParser {
         Context androidContext = env.getContext();
 
         while (parser.next() != XmlPullParser.END_TAG) {
-            if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
-                break;
-            }
             if (parser.getEventType() != XmlPullParser.START_TAG) {
-                continue;
-            }
-
-            if (parser.getName() == null) {
-                parser.next();
                 continue;
             }
 
@@ -160,7 +150,7 @@ public class PanelControllerParser {
     }
 
     /** Parses a list of {@link BreakPoint} from XML. */
-    private static List<BreakPoint> parseBreakPoints(ParserEnv env, XmlResourceParser parser,
+    private static List<BreakPoint> parseBreakPoints(ParserEnv env, XmlPullParser parser,
             BreakpointParsingState state)
             throws IOException, XmlPullParserException {
         List<BreakPoint> points = new ArrayList<>();

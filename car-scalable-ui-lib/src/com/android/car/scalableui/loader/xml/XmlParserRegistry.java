@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.car.scalableui.loader.xml.parser.TagParser;
+import com.android.car.scalableui.loader.xml.parser.XmlChildParser;
 
 import java.util.HashMap;
 import java.util.Map;

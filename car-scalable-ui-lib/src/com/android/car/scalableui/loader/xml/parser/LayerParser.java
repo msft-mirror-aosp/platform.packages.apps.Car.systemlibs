@@ -19,7 +19,6 @@ package com.android.car.scalableui.loader.xml.parser;
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.loader.xml.ParserEnv;
-import com.android.car.scalableui.loader.xml.XmlChildParser;
 import com.android.car.scalableui.loader.xml.XmlPullParserHelper;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.Variant;
@@ -30,7 +29,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /** Parser for {@link Layer} tag. */
-public class LayerParser implements TagParser<Layer>, XmlChildParser<Variant.Builder> {
+public class LayerParser implements XmlChildParser<Variant.Builder> {
     public static final String LAYER_TAG = "Layer";
     public static final String LAYER_VALUE_ATTRIBUTE = "layer";
 
@@ -49,28 +48,21 @@ public class LayerParser implements TagParser<Layer>, XmlChildParser<Variant.Bui
                             })
                     .build();
 
-    @NonNull
-    @Override
-    public Layer parseTag(@NonNull ParserEnv env, @NonNull XmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, null, LAYER_TAG);
-
-        Layer.Builder builder = new Layer.Builder();
-        ATTRIBUTES.parse(env, parser, builder);
-
-        while (parser.next() != XmlPullParser.END_TAG) {
-            XmlPullParserHelper.throwIfUnknownTag(parser);
-        }
-        return builder.build();
-    }
-
     @Override
     public void parse(
             @NonNull ParserEnv env,
             @NonNull XmlPullParser parser,
             @NonNull Variant.Builder builder)
             throws XmlPullParserException, IOException {
-        Layer layer = parseTag(env, parser);
-        builder.setLayer(layer.getLayer());
+        parser.require(XmlPullParser.START_TAG, null, LAYER_TAG);
+
+        Layer.Builder layerBuilder = new Layer.Builder();
+        ATTRIBUTES.parse(env, parser, layerBuilder);
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.throwIfUnknownTag(parser);
+        }
+
+        builder.setLayer(layerBuilder.build().getLayer());
     }
 }

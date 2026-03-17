@@ -19,7 +19,6 @@ package com.android.car.scalableui.loader.xml.parser;
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.loader.xml.ParserEnv;
-import com.android.car.scalableui.loader.xml.XmlChildParser;
 import com.android.car.scalableui.loader.xml.XmlPullParserHelper;
 import com.android.car.scalableui.model.Alpha;
 import com.android.car.scalableui.model.Variant;
@@ -30,7 +29,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /** Parser for {@link Alpha} tag. */
-public class AlphaParser implements TagParser<Alpha>, XmlChildParser<Variant.Builder> {
+public class AlphaParser implements XmlChildParser<Variant.Builder> {
 
     public static final String ALPHA_TAG = "Alpha";
     public static final String ALPHA_VALUE_ATTRIBUTE = "alpha";
@@ -40,31 +39,22 @@ public class AlphaParser implements TagParser<Alpha>, XmlChildParser<Variant.Bui
                     .addFloat(ALPHA_VALUE_ATTRIBUTE, (builder, value) -> builder.setAlpha(value))
                     .build();
 
-    @NonNull
-    @Override
-    public Alpha parseTag(@NonNull ParserEnv env, @NonNull XmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, null, ALPHA_TAG);
-
-        Alpha.Builder builder = new Alpha.Builder();
-
-        builder.setAlpha(Alpha.DEFAULT_ALPHA);
-
-        ATTRIBUTES.parse(env, parser, builder);
-
-        while (parser.next() != XmlPullParser.END_TAG) {
-            XmlPullParserHelper.throwIfUnknownTag(parser);
-        }
-        return builder.build();
-    }
-
     @Override
     public void parse(
             @NonNull ParserEnv env,
             @NonNull XmlPullParser parser,
             @NonNull Variant.Builder builder)
             throws XmlPullParserException, IOException {
-        Alpha alpha = parseTag(env, parser);
-        builder.setAlpha(alpha.getAlpha());
+        parser.require(XmlPullParser.START_TAG, null, ALPHA_TAG);
+
+        Alpha.Builder alphaBuilder = new Alpha.Builder();
+        alphaBuilder.setAlpha(Alpha.DEFAULT_ALPHA);
+        ATTRIBUTES.parse(env, parser, alphaBuilder);
+
+        while (parser.next() != XmlPullParser.END_TAG) {
+            XmlPullParserHelper.throwIfUnknownTag(parser);
+        }
+
+        builder.setAlpha(alphaBuilder.build().getAlpha());
     }
 }

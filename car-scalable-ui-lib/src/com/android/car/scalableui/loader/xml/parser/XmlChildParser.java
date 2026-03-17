@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.car.scalableui.loader.xml;
+package com.android.car.scalableui.loader.xml.parser;
 
 import androidx.annotation.NonNull;
+
+import com.android.car.scalableui.loader.xml.ParserEnv;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

@@ -16,6 +16,8 @@
 
 package com.android.car.scalableui.loader.xml;
 
+import android.os.Build;
+
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.Flags;
@@ -26,12 +28,14 @@ import com.android.car.scalableui.loader.xml.parser.BoundsParser;
 import com.android.car.scalableui.loader.xml.parser.CornerIndividualParser;
 import com.android.car.scalableui.loader.xml.parser.CornerParser;
 import com.android.car.scalableui.loader.xml.parser.EventParser;
+import com.android.car.scalableui.loader.xml.parser.ExternalConfigsParser;
 import com.android.car.scalableui.loader.xml.parser.FocusParser;
 import com.android.car.scalableui.loader.xml.parser.GravityParser;
 import com.android.car.scalableui.loader.xml.parser.HunPanelParser;
 import com.android.car.scalableui.loader.xml.parser.InsetsParser;
 import com.android.car.scalableui.loader.xml.parser.KeyFrameVariantParser;
 import com.android.car.scalableui.loader.xml.parser.LayerParser;
+import com.android.car.scalableui.loader.xml.parser.PanelControllerParser;
 import com.android.car.scalableui.loader.xml.parser.PanelParser;
 import com.android.car.scalableui.loader.xml.parser.RestartParser;
 import com.android.car.scalableui.loader.xml.parser.SystemBarParser;
@@ -39,6 +43,7 @@ import com.android.car.scalableui.loader.xml.parser.TaskBehaviorParser;
 import com.android.car.scalableui.loader.xml.parser.TransitionParser;
 import com.android.car.scalableui.loader.xml.parser.VariantParser;
 import com.android.car.scalableui.loader.xml.parser.VisibilityParser;
+import com.android.car.scalableui.loader.xml.parser.XmlChildParser;
 import com.android.car.scalableui.model.GravityVariant;
 import com.android.car.scalableui.model.PanelState;
 import com.android.car.scalableui.model.Variant;
@@ -68,13 +73,13 @@ import com.android.car.scalableui.model.Variant;
  * builder directly.
  *
  * <p>In cases where a tag is used in multiple ways, it may be registered as both. For example,
- * {@code <SafeBounds>} is registered as:
+ * {@code <Bounds>} is registered as:
  *
  * <ul>
  *   <li>A {@link TagParser} for {@code registerParser()}: Used by {@code SystemBarParser} which
  *       needs to receive the {@code Bounds} object to perform custom validation specifically for
  *       system bars.
- *   <li>An {@link XmlChildParser} for {@code Variant.Builder}: Used when {@code <SafeBounds>} is a
+ *   <li>An {@link XmlChildParser} for {@code Variant.Builder}: Used when {@code <Bounds>} is a
  *       property of a generic {@code Variant}, where it can be applied directly to the builder.
  * </ul>
  */
@@ -82,6 +87,10 @@ public class CoreParserModule implements ParserModule {
 
     @Override
     public void registerParsers(@NonNull XmlParserRegistry registry) {
+        if (Build.IS_DEBUGGABLE) {
+            registry.registerParser(
+                    ExternalConfigsParser.EXTERNAL_CONFIGS_TAG, new ExternalConfigsParser());
+        }
         registry.registerParser(PanelParser.TASK_PANEL_TAG, new PanelParser());
         registry.registerParser(PanelParser.DECOR_PANEL_TAG, new PanelParser());
         if (Flags.enableExtPanelUpdates()) {
@@ -90,13 +99,9 @@ public class CoreParserModule implements ParserModule {
         }
         registry.registerParser(ActionParser.ACTIONS_TAG, new ActionParser());
         registry.registerParser(BoundsParser.BOUNDS_TAG, new BoundsParser());
-        registry.registerParser(
-                BoundsParser.SAFE_BOUNDS_TAG, new BoundsParser(BoundsParser.SAFE_BOUNDS_TAG));
-        registry.registerParser(
-                BoundsParser.TASK_TOOLBAR_BOUNDS_TAG,
-                new BoundsParser(BoundsParser.TASK_TOOLBAR_BOUNDS_TAG));
         registry.registerParser(BackgroundParser.BACKGROUND_TAG, new BackgroundParser());
         registry.registerParser(EventParser.EVENT_TAG, new EventParser());
+        registry.registerParser(PanelControllerParser.CONTROLLER_TAG, new PanelControllerParser());
 
         // Child Parsers
         registry.registerChildParser(

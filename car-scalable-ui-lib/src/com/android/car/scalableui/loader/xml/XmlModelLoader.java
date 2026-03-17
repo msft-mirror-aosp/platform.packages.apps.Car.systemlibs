@@ -26,6 +26,7 @@ import com.android.car.scalableui.loader.xml.parser.ResourceValueParser;
 import com.android.car.scalableui.loader.xml.parser.TagParser;
 import com.android.car.scalableui.loader.xml.parser.ValueParser;
 import com.android.car.scalableui.model.Action;
+import com.android.car.scalableui.model.ExternalConfig;
 import com.android.car.scalableui.model.PanelState;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -90,6 +91,23 @@ public class XmlModelLoader {
                 return (List<Action>) result;
             } else {
                 Log.e(TAG, "Parsed object is not a List<Action>: " + result);
+                return null;
+            }
+        } catch (XmlPullParserException | IOException e) {
+            Log.e(TAG, "Error parsing xml", e);
+            return null;
+        }
+    }
+
+    /** Creates an {@link ExternalConfig} using the given xml resource */
+    @Nullable
+    public ExternalConfig createExternalConfig(int resourceId) {
+        try (XmlResourceParser parser = mContext.getResources().getXml(resourceId)) {
+            Object result = parseXml(parser, mParserEnv);
+            if (result instanceof ExternalConfig) {
+                return (ExternalConfig) result;
+            } else {
+                Log.e(TAG, "Parsed object is not an ExternalConfig: " + result);
                 return null;
             }
         } catch (XmlPullParserException | IOException e) {

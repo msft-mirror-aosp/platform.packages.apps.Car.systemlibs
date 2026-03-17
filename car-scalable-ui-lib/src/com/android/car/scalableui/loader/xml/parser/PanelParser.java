@@ -25,7 +25,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import com.android.car.scalableui.loader.xml.ParserEnv;
-import com.android.car.scalableui.loader.xml.XmlChildParser;
 import com.android.car.scalableui.loader.xml.XmlPullParserHelper;
 import com.android.car.scalableui.model.Layer;
 import com.android.car.scalableui.model.PanelControllerMetadata;
@@ -94,22 +93,25 @@ public class PanelParser implements TagParser<PanelState> {
                     .add(
                             CONTROLLER,
                             (env, value, state) -> {
-                                int controllerResId =
-                                        env.getValueParser()
-                                                .parseResourceId(env.getContext(), value, 0);
-                                if (controllerResId != 0) {
-                                    PanelControllerMetadata meta =
-                                            PanelControllerParser.createController(
-                                                    env, controllerResId);
-                                    state.mBuilder.setPanelControllerMetadata(meta);
+                                XmlPullParser xmlParser =
+                                        env.getValueParser().parseXml(env.getContext(), value);
+
+                                if (xmlParser != null) {
+                                    TagParser<PanelControllerMetadata> parser = env.getRegistry()
+                                            .getParser(PanelControllerParser.CONTROLLER_TAG);
+                                    try {
+                                        state.mBuilder.setPanelControllerMetadata(
+                                                parser.parseTag(env, xmlParser));
+                                    } catch (XmlPullParserException | IOException e) {
+                                        throw new RuntimeException("Failed to parse controller", e);
+                                    }
                                 } else {
                                     String controllerStr =
                                             env.getValueParser()
                                                     .parseString(env.getContext(), value);
                                     if (controllerStr != null) {
-                                        String pendingId =
-                                                getIdName(env.getContext(), controllerStr);
-                                        state.mBuilder.setPendingControllerId(pendingId);
+                                        state.mBuilder.setPendingControllerId(
+                                                getIdName(env.getContext(), controllerStr));
                                     }
                                 }
                             })

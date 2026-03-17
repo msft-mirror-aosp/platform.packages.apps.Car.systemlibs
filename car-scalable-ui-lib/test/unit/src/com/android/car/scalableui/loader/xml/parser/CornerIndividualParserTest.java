@@ -31,6 +31,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.car.scalableui.loader.xml.ParserEnv;
 import com.android.car.scalableui.model.Corner;
+import com.android.car.scalableui.model.Variant;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +80,10 @@ public class CornerIndividualParserTest {
         parser.setInput(new StringReader(xml));
         parser.nextTag();
 
-        Corner corner = mParser.parseTag(mContext, parser);
+        Variant.Builder variantBuilder = new Variant.Builder("test_id", "test_idname");
+        mParser.parse(mContext, parser, variantBuilder);
+        Variant variant = variantBuilder.build();
+        Corner corner = variant.getCornerRadius();
 
         assertThat(corner.getTopLeftRadius()).isEqualTo(5);
         assertThat(corner.getTopRightRadius()).isEqualTo(10); // Inherited from radius
