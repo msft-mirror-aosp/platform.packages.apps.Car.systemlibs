@@ -23,6 +23,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.car.scalableui.Flags
 import com.android.car.scalableui.loader.xml.parser.PanelParser
 import com.android.car.scalableui.loader.xml.parser.ResourceValueParser
+import com.android.car.scalableui.model.PanelType
 import com.google.common.truth.Truth.assertThat
 import java.io.StringReader
 import org.junit.Test
@@ -189,5 +190,35 @@ class PanelParserTest {
         val variant = panelState.getVariant("var")
         assertThat(variant).isNotNull()
         assertThat(variant!!.safeBounds).isEqualTo(android.graphics.Rect(10, 20, 30, 40))
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    fun parseDecorPanel_parsesSuccessfully() {
+        val xml = """
+            <DecorPanel id="decor_panel_id">
+            </DecorPanel>
+        """.trimIndent()
+
+        val factory = XmlPullParserFactory.newInstance()
+        val parser = factory.newPullParser()
+        parser.setInput(StringReader(xml))
+
+        // Advance to START_TAG
+        var eventType = parser.eventType
+        while (eventType != XmlPullParser.START_TAG) {
+            eventType = parser.next()
+        }
+
+        val valueParser = ResourceValueParser()
+        val registry = XmlParserRegistry()
+
+        val parserContext = ParserEnv(context, valueParser, registry)
+        val panelParser = PanelParser()
+        val panelState = panelParser.parseTag(parserContext, parser)
+
+        assertThat(panelState).isNotNull()
+        assertThat(panelState.id).isEqualTo("decor_panel_id")
+        assertThat(panelState.type).isEqualTo(PanelType.DECOR)
     }
 }
