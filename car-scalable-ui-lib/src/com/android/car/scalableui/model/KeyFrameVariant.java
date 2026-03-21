@@ -16,6 +16,7 @@
 package com.android.car.scalableui.model;
 
 import android.animation.FloatEvaluator;
+import android.animation.IntEvaluator;
 import android.animation.RectEvaluator;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -44,6 +45,7 @@ public class KeyFrameVariant extends Variant {
     private float mFraction;
     private final RectEvaluator mRectEvaluator = new RectEvaluator();
     private final FloatEvaluator mFloatEvaluator = new FloatEvaluator();
+    private final IntEvaluator mIntEvaluator = new IntEvaluator();
 
     /** Represents a single keyframe in a {@link KeyFrameVariant}. */
     public static class KeyFrame {
@@ -191,6 +193,27 @@ public class KeyFrameVariant extends Variant {
         return getLayer(mFraction);
     }
 
+    /**
+     * Returns the corner radius for the current fraction.
+     *
+     * @return The corner radius of the variant.
+     */
+    @Override
+    public Corner getCornerRadius() {
+        return getCornerRadius(mFraction);
+    }
+
+    /**
+     * Returns the safe bounds for the current fraction.
+     *
+     * @return The safe bounds of the variant.
+     */
+    @Override
+    @NonNull
+    public Rect getSafeBounds() {
+        return getSafeBounds(mFraction);
+    }
+
     @Override
     public void updateFromEvent(@Nullable Event event) {
         if (event instanceof KeyFrameEvent keyFrameEvent) {
@@ -277,6 +300,21 @@ public class KeyFrameVariant extends Variant {
     }
 
     /**
+     * Returns the interpolated safe bounds for the given fraction.
+     *
+     * @param fraction The fraction value (between 0 and 1).
+     * @return The interpolated safe bounds.
+     */
+    @NonNull
+    private Rect getSafeBounds(float fraction) {
+        if (mKeyFrames.isEmpty()) return new Rect();
+        Function<KeyFrame, Rect> rectFunction =
+                (KeyFrame keyFrame) -> keyFrame.mVariant.getSafeBounds();
+        Rect rect = getFrameRect(rectFunction, fraction);
+        return new Rect(rect.left, rect.top, rect.right, rect.bottom);
+    }
+
+    /**
      * Returns the interpolated insets for the given fraction.
      *
      * @param fraction The fraction value (between 0 and 1).
@@ -289,6 +327,38 @@ public class KeyFrameVariant extends Variant {
                 (KeyFrame keyFrame) -> keyFrame.mVariant.getInsets().toRect();
         Rect rect = getFrameRect(rectFunction, fraction);
         return Insets.of(rect);
+    }
+
+
+    /**
+     * Returns the interpolated corner radius for the given fraction.
+     *
+     * @param fraction The fraction value (between 0 and 1).
+     * @return The interpolated corner radius.
+     */
+    @NonNull
+    private Corner getCornerRadius(float fraction) {
+        if (mKeyFrames.isEmpty()) return Corner.DEFAULT_CORNER;
+        KeyFrame keyFrame1 = Objects.requireNonNull(before(fraction));
+        KeyFrame keyFrame2 = Objects.requireNonNull(after(fraction));
+        float fractionInBetween =
+                getKeyFrameFraction(
+                        keyFrame1.mFramePosition, keyFrame2.mFramePosition, fraction);
+
+        Corner corner1 = keyFrame1.mVariant.getCornerRadius();
+        Corner corner2 = keyFrame2.mVariant.getCornerRadius();
+
+        int topLeftCornerRadius = mIntEvaluator.evaluate(fractionInBetween,
+                corner1.getTopLeftRadius(), corner2.getTopLeftRadius());
+        int topRightCornerRadius = mIntEvaluator.evaluate(fractionInBetween,
+                corner1.getTopRightRadius(), corner2.getTopRightRadius());
+        int bottomLeftCornerRadius = mIntEvaluator.evaluate(fractionInBetween,
+                corner1.getBottomLeftRadius(), corner2.getBottomLeftRadius());
+        int bottomRightCornerRadius = mIntEvaluator.evaluate(fractionInBetween,
+                corner1.getBottomRightRadius(), corner2.getBottomRightRadius());
+
+        return new Corner(topLeftCornerRadius, topRightCornerRadius, bottomLeftCornerRadius,
+                bottomRightCornerRadius);
     }
 
     /**
@@ -351,7 +421,7 @@ public class KeyFrameVariant extends Variant {
      * @return The interpolated alpha.
      */
     private float getAlpha(float fraction) {
-        if (mKeyFrames.isEmpty()) return super.getAlpha();
+        if (mKeyFrames.isEmpty()) return Alpha.DEFAULT_ALPHA;
         KeyFrame keyFrame1 = before(fraction);
         float alpha1 = (Objects.requireNonNull(keyFrame1).mVariant.getAlpha());
         KeyFrame keyFrame2 = after(fraction);
@@ -393,41 +463,7 @@ public class KeyFrameVariant extends Variant {
         @Override
         @NonNull
         public KeyFrameVariant build() {
-            KeyFrameVariant variant;
-            if (mParent != null) {
-                variant = new KeyFrameVariant(mId, mParent, mIdName);
-            } else {
-                variant = new KeyFrameVariant(mId, mIdName);
-            }
-
-            if (mAlpha != null) {
-                variant.setAlpha(mAlpha);
-            }
-            if (mIsVisible != null) {
-                variant.setVisibility(mIsVisible);
-            }
-            if (mLayer != null) {
-                variant.setLayer(mLayer);
-            }
-            if (mCanFocusOnTransition != null) {
-                variant.setCanFocusOnTransition(mCanFocusOnTransition);
-            }
-            if (mBounds != null) {
-                variant.setBounds(new Rect(mBounds));
-            }
-            if (mCornerRadius != null) {
-                variant.setCornerRadius(mCornerRadius);
-            }
-            if (mSafeBounds != null) {
-                variant.setSafeBounds(new Rect(mSafeBounds));
-            } else if (mBounds != null) {
-                variant.setSafeBounds(new Rect(mBounds));
-            }
-
-            if (mInsets != null) {
-                variant.setInsets(
-                        Insets.of(mInsets.left, mInsets.top, mInsets.right, mInsets.bottom));
-            }
+            KeyFrameVariant variant = new KeyFrameVariant(mId, mIdName);
 
             mKeyFrames.sort(Comparator.comparingInt(o -> o.mFramePosition));
             for (KeyFrame keyFrame : mKeyFrames) {
