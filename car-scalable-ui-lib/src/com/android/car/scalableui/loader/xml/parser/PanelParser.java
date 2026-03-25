@@ -19,6 +19,7 @@ package com.android.car.scalableui.loader.xml.parser;
 import static com.android.car.scalableui.loader.xml.parser.ParserUtils.getIdName;
 
 import android.content.Context;
+import android.content.res.XmlResourceParser;
 import android.view.Display;
 import android.view.View;
 
@@ -104,6 +105,10 @@ public class PanelParser implements TagParser<PanelState> {
                                                 parser.parseTag(env, xmlParser));
                                     } catch (XmlPullParserException | IOException e) {
                                         throw new RuntimeException("Failed to parse controller", e);
+                                    } finally {
+                                        if (xmlParser instanceof XmlResourceParser) {
+                                            ((XmlResourceParser) xmlParser).close();
+                                        }
                                     }
                                 } else {
                                     String controllerStr =

@@ -17,17 +17,22 @@
 package com.android.car.scalableui.loader.xml
 
 import android.content.Context
+import android.content.res.XmlResourceParser
 import android.platform.test.annotations.RequiresFlagsEnabled
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.car.scalableui.Flags
 import com.android.car.scalableui.loader.xml.parser.PanelParser
 import com.android.car.scalableui.loader.xml.parser.ResourceValueParser
+import com.android.car.scalableui.loader.xml.parser.ValueParser
 import com.android.car.scalableui.model.PanelType
 import com.google.common.truth.Truth.assertThat
 import java.io.StringReader
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 
@@ -220,5 +225,55 @@ class PanelParserTest {
         assertThat(panelState).isNotNull()
         assertThat(panelState.id).isEqualTo("decor_panel_id")
         assertThat(panelState.type).isEqualTo(PanelType.DECOR)
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENABLE_EXT_PANEL_UPDATES)
+    fun parseTaskPanel_withXmlController_closesParser() {
+        val xml = """
+            <TaskPanel id="panel_id" controller="@xml/my_controller">
+            </TaskPanel>
+        """.trimIndent()
+
+        val factory = XmlPullParserFactory.newInstance()
+        val parser = factory.newPullParser()
+        parser.setInput(StringReader(xml))
+
+        // Advance to START_TAG
+        var eventType = parser.eventType
+        while (eventType != XmlPullParser.START_TAG) {
+            eventType = parser.next()
+        }
+
+        val mockValueParser = mock(ValueParser::class.java)
+        val mockXmlParser = mock(XmlResourceParser::class.java)
+
+        `when`(mockValueParser.parseString(context, "panel_id")).thenReturn("panel_id")
+        `when`(
+            mockValueParser.parseString(context, "@xml/my_controller")
+        ).thenReturn("@xml/my_controller")
+        `when`(
+            mockValueParser.parseInteger(context, null, android.view.Display.DEFAULT_DISPLAY)
+        ).thenReturn(android.view.Display.DEFAULT_DISPLAY)
+        `when`(mockValueParser.parseXml(context, "@xml/my_controller")).thenReturn(mockXmlParser)
+
+        // PanelControllerParser will fail to find the <Controller> tag, which tests the finally block
+        `when`(mockXmlParser.eventType).thenReturn(XmlPullParser.START_DOCUMENT)
+        `when`(mockXmlParser.next()).thenReturn(XmlPullParser.END_DOCUMENT)
+        `when`(mockXmlParser.name).thenReturn("InvalidTag")
+
+        val registry = XmlParserRegistry()
+        com.android.car.scalableui.loader.xml.CoreParserModule().registerParsers(registry)
+
+        val parserContext = ParserEnv(context, mockValueParser, registry)
+        val panelParser = PanelParser()
+
+        try {
+            panelParser.parseTag(parserContext, parser)
+        } catch (e: Exception) {
+            // Expected to fail parsing controller metadata since it's an empty mock document
+        }
+
+        verify(mockXmlParser).close()
     }
 }
