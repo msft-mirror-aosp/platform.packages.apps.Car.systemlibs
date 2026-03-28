@@ -34,6 +34,8 @@ class EventParser : TagParser<Event> {
         private const val PANEL_ID_ATTRIBUTE = "panelId"
         private const val COMPONENT_NAME_ATTRIBUTE = "componentName"
         private const val PACKAGE_NAME_ATTRIBUTE = "packageName"
+        // Attribute to specify the endVariant for the animation completion event.
+        private const val END_VARIANT_ATTRIBUTE = "endVariant"
         private const val TOKENS_ATTRIBUTE = "tokens"
 
         private val ATTRIBUTES = AttributeMap.builder<Event.Builder>()
@@ -47,6 +49,7 @@ class EventParser : TagParser<Event> {
                 COMPONENT_NAME_ATTRIBUTE
             ) { builder, value -> builder.setComponentName(value) }
             .addString(PACKAGE_NAME_ATTRIBUTE) { builder, value -> builder.setPackageName(value) }
+            .addString(END_VARIANT_ATTRIBUTE) { builder, value -> builder.setToVariantId(value) }
             .addString(TOKENS_ATTRIBUTE) { builder, value -> builder.addTokensFromString(value) }
             .build()
     }
