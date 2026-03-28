@@ -172,11 +172,15 @@ public final class PanelControllerMetadata {
          */
         public Builder addConfiguration(@NonNull String key, @NonNull String value) {
             if (mConfigurations.containsKey(key)) {
-                ArrayList<String> list = mConfigurations.getStringArrayList(key);
-                if (list == null) {
-                    String oldValue = mConfigurations.getString(key);
+                Object existingValue = mConfigurations.get(key);
+                ArrayList<String> list;
+                if (existingValue instanceof ArrayList) {
+                    list = (ArrayList<String>) existingValue;
+                } else {
                     list = new ArrayList<>();
-                    list.add(oldValue);
+                    if (existingValue instanceof String) {
+                        list.add((String) existingValue);
+                    }
                 }
                 list.add(value);
                 mConfigurations.putStringArrayList(key, list);
